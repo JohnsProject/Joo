@@ -1,0 +1,17 @@
+=================== Joo SDK help
+To use the joo sdk you need write the joo command followed by other commands
+that will tell the joo sdk what to do. The Allowed commands are:
+
+-compile <file path>  Compiles the joo code at the given path.
+-create <file path>  Creates a file with the joo template code at the given path.
+-help  Shows this help message.
+-doc  Shows the joo documentation.
+
+Usage of commands is like "joo -compile <file path>"
+It's also allowed to run joo code at a path by using the command
+
+joo <file path>
+
+If the file ends with '.joo' a '.cjoo' file is created and then executed.
+If the file ends with '.cjoo' the bytecode is executed.
+===================

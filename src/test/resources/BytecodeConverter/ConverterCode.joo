@@ -1,0 +1,7 @@
+int 1
+A 10
+function
+
+function A
+A += 10
+endFunction

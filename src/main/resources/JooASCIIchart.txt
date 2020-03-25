@@ -1,0 +1,137 @@
+========= The basics
+1  - 32  variable and function names
+33 - 61  special characters
+62 - 68  parameter names
+69 - 82  array names
+83 - 127 special characters and array indices
+1 - 127 native functions
+
+========= A more detailed version
+0	Should not be used
+1   Native functions and Variables and functions start
+2
+3
+4
+5
+6
+7
+8
+9	
+10	
+11
+12
+13	
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32	Variables and functions end
+33	JooCompiler and VirtualMachine not equals
+34	
+35	JooCompiler comment
+36	JooVirtualMachine function
+37	JooVirtualMachine call
+38	JooVirtualMachine else
+39	JooVirtualMachine if
+40	JooVirtualMachine bigger
+41	JooVirtualMachine repeat
+42	JooVirtualMachine multiply
+43	JooVirtualMachine add
+44	
+45	JooVirtualMachine subtract
+46	Used by fixed data type
+47	JooVirtualMachine divide
+48	0
+49	1
+50	2
+51	3
+52	4
+53	5
+54	6
+55	7
+56	8
+57	9
+58	JooCompiler and VirtualMachine parameters
+59	JooVirtualMachine line break
+60	JooVirtualMachine smaller
+61	JooCompiler and VirtualMachine equals
+62	Parameter names start
+63	
+64	
+65	
+66	
+67	
+68	Parameter names end
+69	Array names start
+70	
+71	
+72	
+73	
+74	
+75	
+76	
+77	
+78	
+79	
+80	
+81	
+82	Array names end
+83  (and array indices start)
+84	
+85	
+86	
+87	
+88	
+89	
+90	
+91	
+92	
+93	
+94	
+95	
+96	
+97	
+98	
+99	
+100	
+101	
+102	
+103	
+104	
+105	
+106	
+107	
+108	
+109	
+110	
+111	
+112	
+113	
+114	
+115	
+116	
+117	
+118	
+119	JooVirtualMachine array char
+120	JooVirtualMachine array bool
+121	JooVirtualMachine array fixed
+122	JooVirtualMachine array int			JooVirtualMachine negative
+123	JooVirtualMachine char				JooVirtualMachine positive
+124	JooVirtualMachine bool				JooVirtualMachine invert
+125	JooVirtualMachine fixed				JooVirtualMachine delay
+126	JooVirtualMachine int				JooVirtualMachine printLine
+127 JooVirtualMachine function			JooVirtualMachine print (native functions and array indices end)

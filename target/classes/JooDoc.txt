@@ -1,0 +1,132 @@
+=================== What is joo?
+Joo is a programming language that is designed for high performance
+and really small ram usage. Joo code gets compiled into a really small
+bytecode that is then executed by the joo virtual machine.
+
+=================== Joo programming
+========= The basics
+The joo template code looks like:
+"
+function Start
+# this function is called by the joo virtual machine #
+
+endFuntion
+"	
+As you can see it has a Start function. This function is called by the
+joo virtual machine and should always be the first function in your code.
+That's because the joo virtual machine calls the first function at start.
+
+========= Data types
+Joo supports 4 data types int, fixed, bool and char. There is no floating
+point support as it's usually very slow in microcontrollers or older platforms.
+The declaration of custom variables looks like this:
+"
+int myInt = 10
+fixed myFixed = 20.5
+bool myBool = true/false
+char myChar = 'a'
+"
+You can't declare negative numbers because it would mean that every number 
+declaration would need a sign character in front of it, so compiled code would
+get bigger, but no need to worry as there is a native function that inverts the
+sign of a number, you will learn more about it later.
+
+========= Operators & Comparators & Ifs
+Joo also supports data type operations and comparisons.
+
+The supported operators:
++=   Adds the value behind the operator to the value in front of it. 
+-=   Subtracts the value behind the operator from the value in front of it. 
+*=   Multiplies the value in front of the operator from the value behind it.
+/=   Divides the value in front of the operator from the value behind it.
+=    Sets the value in front of the operator equals the value behind it.
+
+The supported comparators:
+==   Is the value in front of the operator equals the value behind it?
+!=   Is the value in front of the operator not equals the value behind it?
+<=   Is the value in front of the operator smaller or equals the value behind it?
+>=   Is the value in front of the operator bigger or equals the value behind it?
+<    Is the value in front of the operator smaller than the value behind it?
+>    Is the value in front of the operator bigger than the value behind it?
+
+All comparators and operators must have a variable in front of them,
+behind them a number or another variable can be used. The comparators
+can only be used in a if block. The if blocks in joo look like this:
+"
+int myInt = 10
+
+if myInt == 10
+# write code to be executed if comparison is true here #
+endIf
+"
+
+========= Custom Functions
+You can only write code inside functions so of course you can declare your own.
+The declaration and usage of functions looks like this:
+"
+call MyFunctionWithoutParameters
+call MyFunctionWithParameters: myInt: myFixed
+call MyLoopingFunction
+
+function MyFunctionWithoutParameters
+# write your code here #
+endFunction
+
+function MyFunctionWithParameters: _parameter1: _parameter2
+# write your code here #
+endFunction
+
+function MyLoopingFunction
+# write your loop code here #
+
+# if block used to end the loop if a comparison is true #
+if <your comparison>
+endFunction
+endIf
+repeatFunction
+"
+Only variables can be passed as parameters in a function call.
+Parameter names shouldn't be equals to any variable name.
+
+========= Native Functions
+Joo also has some built-in functions a.k.a native functions that are supposed to
+make developers life easier. Here is a list of native functions:
+
+FunctionName: parameters (Description)
+Print: value (Writes the given value into the console)
+PrintLine: value (Writes the given value into a new line of the console)
+Invert: value (Inverts the sign of a number)
+Positive: value (Sets the number equals it's positive value)
+Negative: value (Sets the number equals it's negative value)
+
+=================== Joo limitations
+Of course the performance and compression rate of the joo bytecode
+gives the programming language some limitations. The known limitations are:
+
+31 variables can be declared.
+31 functions can be declared.
+6 parameters per function can be declared.
+14 arrays can be declared.
+45 is the max size of one array.
+100 is the max sum of the of sizes of all declared arrays.
+
+Most of the limitations came from the fact that joo uses ASCII encoding
+to be really platform independent so all character used had to be in the
+range 0 - 127. There are also limitations because of the ram usage,
+actually the joo virtual machine is designed to use less than 2Kb of ram.
+
+=================== Joo code conventions
+1. The first function in the code should always be named Start. Unless it's the
+first function in a file to be included.
+
+2. The first word of variable and parameter names should start with a lowercase letter,
+the following ones with a uppercase letter and all other letters should be lowercase.
+
+3. All words in a function name should start with uppercase letters and all other
+letters should be lowercase.
+
+4. All parameter names should start with a underscore to avoid conflict with variable names.
+
+5. Don't abbreviate names too much, write clean and human readable code!
+
+6. Have fun!

@@ -1,0 +1,59 @@
+
+int intTest0
+int intTest1 = 10
+
+fixed fixedTest0
+fixed fixedTest1 = 10.15
+
+int[10] intTest
+fixed[5] fixedTest
+
+function Start
+
+call FunctionTest: intTest0: intTest
+
+intTest0 += 100
+intTest0 -= intTest1
+
+fixedTest0 *= 25.54
+fixedTest0 /= fixedTest1
+
+boolTest0 = false
+boolTest1 = true
+
+charTest0 = 'A'
+charTest1 = 'B'
+
+if intTest0 == 100
+intTest[2] += 100
+else
+intTest[3] -= intTest0
+fixedTest[7] *= intTest[9]
+endIf
+
+if intTest0 > intTest1
+endIf
+
+if intTest[2] < intTest1
+endIf
+
+if intTest[2] != intTest[9]
+endIf
+
+bool boolTest0
+bool boolTest1 = true
+
+char charTest0
+char charTest1 = 'A'
+
+bool[15] boolTest
+char[13] charTest
+
+endFunction
+
+function FunctionTest: _paramTest0: _paramTest1
+
+_paramTest0 += 100
+_paramTest1[5] = _paramTest0
+
+endFunction
