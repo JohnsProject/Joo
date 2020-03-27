@@ -38,27 +38,27 @@ public class JppCompilerTest {
 		final char paramTest0Name = 0 + JppVirtualMachine.PARAMETERS_START;
 		final char paramTest1Name = 1 + JppVirtualMachine.PARAMETERS_START;
 		
-		assertEquals(jooLines[0], "" + JppVirtualMachine.TYPE_FUNCTION + (char)2);
-		assertEquals(jooLines[1], "" + JppVirtualMachine.TYPE_INT + (char)2);
-		assertEquals(jooLines[2], "" + intTest0Name);
-		assertEquals(jooLines[3], "" + intTest1Name + toVirtualMachineNumber("10"));
-		assertEquals(jooLines[4], "" + JppVirtualMachine.TYPE_FIXED + (char)2);
-		assertEquals(jooLines[5], "" + fixedTest0Name);
-		assertEquals(jooLines[6], "" + fixedTest1Name + toVirtualMachineNumber("" + Math.round(10.15f * 255)));
-		assertEquals(jooLines[7], "" + JppVirtualMachine.TYPE_BOOL + (char)2);
-		assertEquals(jooLines[8], "" + boolTest1Name + toVirtualMachineNumber("1"));
-		assertEquals(jooLines[9], "" + boolTest0Name);
-		assertEquals(jooLines[10], "" + JppVirtualMachine.TYPE_CHAR + (char)2);
-		assertEquals(jooLines[11], "" + charTest1Name + 'A');
-		assertEquals(jooLines[12], "" + charTest0Name);
-		assertEquals(jooLines[13], "" + JppVirtualMachine.TYPE_ARRAY_INT + (char)1);
-		assertEquals(jooLines[14], "" + intTestName + (char)10);
-		assertEquals(jooLines[15], "" + JppVirtualMachine.TYPE_ARRAY_FIXED + (char)1);
-		assertEquals(jooLines[16], "" + fixedTestName + (char)5);
-		assertEquals(jooLines[17], "" + JppVirtualMachine.TYPE_ARRAY_BOOL + (char)1);
-		assertEquals(jooLines[18], "" + boolTestName + (char)15);
-		assertEquals(jooLines[19], "" + JppVirtualMachine.TYPE_ARRAY_CHAR + (char)1);
-		assertEquals(jooLines[20], "" + charTestName + (char)13);
+		assertEquals(jooLines[0], "" + JppVirtualMachine.TYPE_INT + (char)2);
+		assertEquals(jooLines[1], "" + intTest0Name);
+		assertEquals(jooLines[2], "" + intTest1Name + toVirtualMachineNumber("10"));
+		assertEquals(jooLines[3], "" + JppVirtualMachine.TYPE_FIXED + (char)2);
+		assertEquals(jooLines[4], "" + fixedTest0Name);
+		assertEquals(jooLines[5], "" + fixedTest1Name + toVirtualMachineNumber("" + Math.round(10.15f * 255)));
+		assertEquals(jooLines[6], "" + JppVirtualMachine.TYPE_BOOL + (char)2);
+		assertEquals(jooLines[7], "" + boolTest1Name + toVirtualMachineNumber("1"));
+		assertEquals(jooLines[8], "" + boolTest0Name);
+		assertEquals(jooLines[9], "" + JppVirtualMachine.TYPE_CHAR + (char)2);
+		assertEquals(jooLines[10], "" + charTest1Name + 'A');
+		assertEquals(jooLines[11], "" + charTest0Name);
+		assertEquals(jooLines[12], "" + JppVirtualMachine.TYPE_ARRAY_INT + (char)1);
+		assertEquals(jooLines[13], "" + intTestName + (char)10);
+		assertEquals(jooLines[14], "" + JppVirtualMachine.TYPE_ARRAY_FIXED + (char)1);
+		assertEquals(jooLines[15], "" + fixedTestName + (char)5);
+		assertEquals(jooLines[16], "" + JppVirtualMachine.TYPE_ARRAY_BOOL + (char)1);
+		assertEquals(jooLines[17], "" + boolTestName + (char)15);
+		assertEquals(jooLines[18], "" + JppVirtualMachine.TYPE_ARRAY_CHAR + (char)1);
+		assertEquals(jooLines[19], "" + charTestName + (char)13);
+		assertEquals(jooLines[20], "" + JppVirtualMachine.TYPE_FUNCTION + (char)2);
 		assertEquals(jooLines[21], "" + JppVirtualMachine.KEYWORD_FUNCTION + startName);
 		assertEquals(jooLines[22], "" + JppVirtualMachine.KEYWORD_FUNCTION_CALL + functionTestName
 											+ JppVirtualMachine.KEYWORD_PARAMETER + intTest0Name 
@@ -294,27 +294,27 @@ public class JppCompilerTest {
 		final char boolTestName = 11;
 		final char charTestName = 12;
 
-		assertEquals(jooLines[0], "" + JppVirtualMachine.TYPE_FUNCTION + (char)2);
-		assertEquals(jooLines[1], "" + JppVirtualMachine.TYPE_INT + (char)2);
-		assertEquals(jooLines[2], "" + intTest0Name);
-		assertEquals(jooLines[3], "" + intTest1Name + toVirtualMachineNumber("10"));
-		assertEquals(jooLines[4], "" + JppVirtualMachine.TYPE_FIXED + (char)2);
-		assertEquals(jooLines[5], "" + fixedTest0Name);
-		assertEquals(jooLines[6], "" + fixedTest1Name + toVirtualMachineNumber("" + Math.round(10.15f * 255)));
-		assertEquals(jooLines[7], "" + JppVirtualMachine.TYPE_BOOL + (char)2);
-		assertEquals(jooLines[8], "" + boolTest1Name + toVirtualMachineNumber("1"));
-		assertEquals(jooLines[9], "" + boolTest0Name);
-		assertEquals(jooLines[10], "" + JppVirtualMachine.TYPE_CHAR + (char)2);
-		assertEquals(jooLines[11], "" + charTest1Name + 'A');
-		assertEquals(jooLines[12], "" + charTest0Name);
-		assertEquals(jooLines[13], "" + JppVirtualMachine.TYPE_ARRAY_INT + (char)1);
-		assertEquals(jooLines[14], "" + intTestName + (char)10);
-		assertEquals(jooLines[15], "" + JppVirtualMachine.TYPE_ARRAY_FIXED + (char)1);
-		assertEquals(jooLines[16], "" + fixedTestName + (char)5);
-		assertEquals(jooLines[17], "" + JppVirtualMachine.TYPE_ARRAY_BOOL + (char)1);
-		assertEquals(jooLines[18], "" + boolTestName + (char)15);
-		assertEquals(jooLines[19], "" + JppVirtualMachine.TYPE_ARRAY_CHAR + (char)1);
-		assertEquals(jooLines[20], "" + charTestName + (char)13);
+		assertEquals(jooLines[0], "" + JppVirtualMachine.TYPE_INT + (char)2);
+		assertEquals(jooLines[1], "" + intTest0Name);
+		assertEquals(jooLines[2], "" + intTest1Name + toVirtualMachineNumber("10"));
+		assertEquals(jooLines[3], "" + JppVirtualMachine.TYPE_FIXED + (char)2);
+		assertEquals(jooLines[4], "" + fixedTest0Name);
+		assertEquals(jooLines[5], "" + fixedTest1Name + toVirtualMachineNumber("" + Math.round(10.15f * 255)));
+		assertEquals(jooLines[6], "" + JppVirtualMachine.TYPE_BOOL + (char)2);
+		assertEquals(jooLines[7], "" + boolTest1Name + toVirtualMachineNumber("1"));
+		assertEquals(jooLines[8], "" + boolTest0Name);
+		assertEquals(jooLines[9], "" + JppVirtualMachine.TYPE_CHAR + (char)2);
+		assertEquals(jooLines[10], "" + charTest1Name + 'A');
+		assertEquals(jooLines[11], "" + charTest0Name);
+		assertEquals(jooLines[12], "" + JppVirtualMachine.TYPE_ARRAY_INT + (char)1);
+		assertEquals(jooLines[13], "" + intTestName + (char)10);
+		assertEquals(jooLines[14], "" + JppVirtualMachine.TYPE_ARRAY_FIXED + (char)1);
+		assertEquals(jooLines[15], "" + fixedTestName + (char)5);
+		assertEquals(jooLines[16], "" + JppVirtualMachine.TYPE_ARRAY_BOOL + (char)1);
+		assertEquals(jooLines[17], "" + boolTestName + (char)15);
+		assertEquals(jooLines[18], "" + JppVirtualMachine.TYPE_ARRAY_CHAR + (char)1);
+		assertEquals(jooLines[19], "" + charTestName + (char)13);
+		assertEquals(jooLines[20], "" + JppVirtualMachine.TYPE_FUNCTION + (char)2);
 	}
 	
 	@Test

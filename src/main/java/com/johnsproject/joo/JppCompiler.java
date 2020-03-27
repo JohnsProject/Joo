@@ -619,9 +619,6 @@ public class JppCompiler {
 	 * @return joo code string that contains variables and array declarations. 
 	 */
 	String writeVariablesAndFunctions(String jooCode, final HashMap<String, Variable>[] variables, final HashMap<String, Function> functions) {
-		if(functions.size() > 0) {
-			jooCode += "" + JppVirtualMachine.TYPE_FUNCTION + (char)functions.size() + JppVirtualMachine.LINE_BREAK;
-		}
 		for (int i = 0; i < variables.length; i++) {
 			if(variables[i].size() > 0) {
 				jooCode += "" + VM_TYPES[i] + (char)variables[i].size() + JppVirtualMachine.LINE_BREAK;
@@ -633,6 +630,9 @@ public class JppCompiler {
 					jooCode += "" + variable.getName() + value + JppVirtualMachine.LINE_BREAK;
 				}
 			}
+		}
+		if(functions.size() > 0) {
+			jooCode += "" + JppVirtualMachine.TYPE_FUNCTION + (char)functions.size() + JppVirtualMachine.LINE_BREAK;
 		}
 		return jooCode;
 	}
