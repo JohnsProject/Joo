@@ -1,7 +1,9 @@
 package com.johnsproject.joo;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * The JppCompiler is a try to create a better version of joo that has cleaner 
@@ -51,10 +53,10 @@ public class JppCompiler {
 	public static final String LINE_BREAK = "\n";
 	
 	public static final String[] COMPILER_COMPARATORS = new String[] {
-			COMPARATOR_SMALLER,
-			COMPARATOR_BIGGER,
 			COMPARATOR_SMALLER_EQUALS,
 			COMPARATOR_BIGGER_EQUALS,
+			COMPARATOR_SMALLER,
+			COMPARATOR_BIGGER,
 			COMPARATOR_EQUALS,
 			COMPARATOR_NOT_EQUALS,
 	};
@@ -67,11 +69,22 @@ public class JppCompiler {
 			OPERATOR_SET_EQUALS,
 	};
 	
+	public static final String[] COMPILER_TYPES = new String[] {
+			TYPE_INT,
+			TYPE_FIXED,
+			TYPE_BOOL,
+			TYPE_CHAR,
+			TYPE_INT + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END,
+			TYPE_FIXED + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END,
+			TYPE_BOOL + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END,
+			TYPE_CHAR + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END,
+	};
+	
 	public static final char[] VM_COMPARATORS = new char[] {
-			JppVirtualMachine.COMPARATOR_SMALLER,
-			JppVirtualMachine.COMPARATOR_BIGGER,
 			JppVirtualMachine.COMPARATOR_SMALLER_EQUALS,
 			JppVirtualMachine.COMPARATOR_BIGGER_EQUALS,
+			JppVirtualMachine.COMPARATOR_SMALLER,
+			JppVirtualMachine.COMPARATOR_BIGGER,
 			JppVirtualMachine.COMPARATOR_EQUALS,
 			JppVirtualMachine.COMPARATOR_NOT_EQUALS,
 	};
@@ -138,10 +151,10 @@ public class JppCompiler {
 	static class Function {
 		
 		private final char name;
-		private final String[] parameters;
-		private ArrayList<Operation> operations;
+		private Map<String, String> parameters;
+		private List<Operation> operations;
 		
-		public Function(final char name, final String[] parameters) {
+		public Function(final char name, final Map<String, String> parameters) {
 			this.name = name;
 			this.parameters = parameters;
 			this.operations = new ArrayList<>();
@@ -151,7 +164,7 @@ public class JppCompiler {
 			return name;
 		}
 
-		public String[] getParameters() {
+		public Map<String, String> getParameters() {
 			return parameters;
 		}
 
@@ -159,7 +172,7 @@ public class JppCompiler {
 			operations.add(operation);
 		}
 		
-		public ArrayList<Operation> getOperations() {
+		public List<Operation> getOperations() {
 			return operations;
 		}
 	}
@@ -295,8 +308,8 @@ public class JppCompiler {
 		// starts at 1 because 0 character is null character
 		name = JppVirtualMachine.COMPONENTS_START;
 		final String[] jooLines = getJooLines(jooCode);		
-		final HashMap<String, Variable>[] variables = parseVariables(jooLines);
-		final HashMap<String, Function> functions = parseFunctions(jooLines);
+		final Map<String, Variable>[] variables = parseVariables(jooLines);
+		final Map<String, Function> functions = parseFunctions(jooLines, variables);
 		String compiledJooCode = "";
 		compiledJooCode = writeVariablesAndFunctions(compiledJooCode, variables, functions);
 		compiledJooCode = writeFunctionsAndOperations(compiledJooCode, variables, functions);
@@ -320,48 +333,58 @@ public class JppCompiler {
 	 * line is set to empty string to avoid conflict with other search methods.
 	 * 
 	 * @param jooLines
+	 * @param variables
 	 * @return map of functions that contains the function names as keys and the function objects as values.
 	 */
-	HashMap<String, Function> parseFunctions(String[] jooLines) {
-		HashMap<String, Function> variables = new HashMap<>();
+	Map<String, Function> parseFunctions(String[] jooLines, final Map<String, Variable>[] variables) {
+		Map<String, Function> functions = new LinkedHashMap<>();
 		Function currentFunction = null;
 		for (int i = 0; i < jooLines.length; i++) {
 			String jooLine = jooLines[i];
 			// whitespace ensures the function keyword isn't part of a bigger word
 			if(jooLine.contains(KEYWORD_FUNCTION + " ")) {
-				currentFunction = parseFunctionDeclaration(jooLine, variables);	
+				currentFunction = parseFunctionDeclaration(jooLine, functions);	
 				jooLines[i] = "";
 			}
-			else if (jooLine.equals(KEYWORD_FUNCTION_END)) {
+			else if (jooLine.replace(" ", "").equals(KEYWORD_FUNCTION_END)) {
 				currentFunction = null;	
 				jooLines[i] = "";
 			}
 			if(currentFunction != null) {
-				Operation operation = parseOperation(jooLine);
+				Operation operation = parseOperation(jooLine, variables, currentFunction.getParameters());
 				if(operation != null) {
 					currentFunction.addOperation(operation);
 				}
 			}
 		}
-		return variables;
+		return functions;
 	}
 		
-	private Function parseFunctionDeclaration(String jooLine, HashMap<String, Function> variables) {
-		// remove whitespaces, names shouldn't have whitespaces
-		jooLine = jooLine.replace(" ", "");
+	private Function parseFunctionDeclaration(String jooLine, Map<String, Function> functions) {
 		String functionName = "";
-		String[] parameterNames = new String[6];
+		Map<String, String> parameters = new LinkedHashMap<>();
 		if(jooLine.contains(KEYWORD_PARAMETER)) {
 			final String[] functionData = jooLine.replace(KEYWORD_FUNCTION, "").split(KEYWORD_PARAMETER);
-			functionName = functionData[0];
-			for (int j = 1; j < functionData.length; j++) {
-				parameterNames[j - 1] = functionData[j];
+			// remove whitespaces, names shouldn't have whitespaces
+			functionName = functionData[0].replace(" ", "");
+			for (int i = 1; i < functionData.length; i++) {
+				String functionParameterData = functionData[i];
+				String parameterType = "";
+				String parameterName = "";
+				for (int j = 0; j < COMPILER_TYPES.length; j++) {
+					// whitespace ensures the variable type isn't part of a bigger word
+					if(functionParameterData.contains(COMPILER_TYPES[j] + " ")) {
+						parameterType = "" + VM_TYPES[j];
+						parameterName = functionParameterData.replace(COMPILER_TYPES[j], "").replace(" ", "");
+						parameters.put(parameterName, parameterType);
+					}
+				}
 			}
 		} else {
-			functionName = jooLine.replaceFirst(KEYWORD_FUNCTION, "");
+			functionName = jooLine.replace(" ", "").replaceFirst(KEYWORD_FUNCTION, "");
 		}
-		Function result = new Function(name++, parameterNames);
-		variables.put(functionName, result);
+		Function result = new Function(name++, parameters);
+		functions.put(functionName, result);
 		return result;	
 	}
 	
@@ -375,8 +398,8 @@ public class JppCompiler {
 	 * @return map of variables that contains the variable names as keys and the variable objects as values.
 	 */
 	@SuppressWarnings("unchecked")
-	HashMap<String, Variable>[] parseVariables(String[] jooLines){
-		return new HashMap[] {
+	Map<String, Variable>[] parseVariables(String[] jooLines){
+		return new Map[] {
 				parseVariables(jooLines, TYPE_INT),
 				parseVariables(jooLines, TYPE_FIXED),
 				parseVariables(jooLines, TYPE_BOOL),
@@ -397,12 +420,13 @@ public class JppCompiler {
 	 * @param variableType
 	 * @return map of variables that contains the variable names as keys and the variable objects as values.
 	 */
-	private HashMap<String, Variable> parseVariables(String[] jooLines, final String variableType) {
-		HashMap<String, Variable> variables = new HashMap<>();
+	private Map<String, Variable> parseVariables(String[] jooLines, final String variableType) {
+		Map<String, Variable> variables = new LinkedHashMap<>();
 		for (int i = 0; i < jooLines.length; i++) {
 			String jooLine = jooLines[i];
 			// whitespace ensures the variable type isn't part of a bigger word
-			if(jooLine.contains(variableType + " ")) {
+			// function declaration also contain type declaration but should not be parsed here
+			if(jooLine.contains(variableType + " ") && !jooLine.contains(KEYWORD_FUNCTION)) {
 				// remove whitespaces, name and value shouldn't have whitespaces
 				jooLine = jooLine.replace(" ", "");
 				String variableName = "";
@@ -439,12 +463,12 @@ public class JppCompiler {
 	 * @return map of arrays that contains the arrays names as keys and the variable objects as values. 
 	 * The value field of the Variable objects contains the size of the array.
 	 */
-	private HashMap<String, Variable> parseArrays(String[] jooLines, final String arrayType) {
-		HashMap<String, Variable> variables = new HashMap<>();
+	private Map<String, Variable> parseArrays(String[] jooLines, final String arrayType) {
+		Map<String, Variable> variables = new LinkedHashMap<>();
 		for (int i = 0; i < jooLines.length; i++) {
 			// remove whitespaces, name and value shouldn't have whitespaces
 			final String jooLine = jooLines[i].replace(" ", "");
-			if(jooLine.contains(arrayType + KEYWORD_ARRAY_START)) {
+			if(jooLine.contains(arrayType + KEYWORD_ARRAY_START) && !jooLine.contains(KEYWORD_FUNCTION)) {
 				final String[] variableData = jooLine.replace(arrayType + KEYWORD_ARRAY_START, "").split(KEYWORD_ARRAY_END);
 				// name++ because names used in joo virtual machine are unique characters	
 				variables.put(variableData[1], new Variable(name++, "" + (char)Integer.parseInt(variableData[0])));			
@@ -461,9 +485,11 @@ public class JppCompiler {
 	 * 
 	 * 
 	 * @param jooLine
+	 * @param variables
+	 * @param parameters
 	 * @return Operation object if operation can be parsed, null if it's a comment or unknown operation.
 	 */
-	private Operation parseOperation(String jooLine) {		
+	private Operation parseOperation(String jooLine, final Map<String, Variable>[] variables, final Map<String, String> parameters) {		
 		if(jooLine.contains(KEYWORD_COMMENT)) {
 			return null;
 		}
@@ -474,7 +500,7 @@ public class JppCompiler {
 		}
 		else if(jooLine.contains(KEYWORD_IF + " ")) {
 			jooLine = jooLine.replace(" ", "").replaceFirst(KEYWORD_IF, "");
-			parseBinaryOperation(jooLine, COMPILER_COMPARATORS, VM_COMPARATORS, operation);
+			parseBinaryOperation(jooLine, variables, parameters, COMPILER_COMPARATORS, VM_COMPARATORS, operation);
 			operation.isCondition(true);
 		}
 		else if(jooLine.contains(KEYWORD_ELSE)) {
@@ -490,7 +516,7 @@ public class JppCompiler {
 			operation.setOperator(JppVirtualMachine.KEYWORD_FUNCTION);
 		} else { // if all if's failed it means the operation is a variable operation
 			jooLine = jooLine.replace(" ", "");
-			parseBinaryOperation(jooLine, COMPILER_OPERATORS, VM_OPERATORS, operation);
+			parseBinaryOperation(jooLine, variables, parameters, COMPILER_OPERATORS, VM_OPERATORS, operation);
 		}
 		// if operator is null the operation could not be parsed
 		if(operation.getOperator() == 0) {
@@ -519,11 +545,14 @@ public class JppCompiler {
 	 * and fills the given operation object with the parsed data.
 	 * 
 	 * @param jooLine
+	 * @param variables
+	 * @param parameters
 	 * @param compilerOperators
 	 * @param vmOperators
 	 * @param operation
 	 */
-	private void parseBinaryOperation(String jooLine, String[] compilerOperators, char[] vmOperators, Operation operation) {
+	private void parseBinaryOperation(String jooLine, final Map<String, Variable>[] variables, final Map<String, String> parameters,
+																				String[] compilerOperators, char[] vmOperators, Operation operation) {
 		String[] operationData = parseBinaryOperationVariablesAndOperator(jooLine, compilerOperators, vmOperators, operation);
 		if(operationData != null) {
 			if(operationData[0].contains(KEYWORD_ARRAY_START)) {
@@ -539,7 +568,7 @@ public class JppCompiler {
 				operation.setVariable1ArrayIndex(Integer.parseInt(variableData[1]));
 			} else {
 				// part behind the operator may contain a value instead of variable
-				parseBinaryOperationValue(operationData, operation);
+				parseBinaryOperationValue(operationData, variables, parameters, operation);
 			}
 		}
 	}
@@ -578,29 +607,42 @@ public class JppCompiler {
 	 * This method parses the variable or value after the operator and sets it in the Operation object.
 	 * 
 	 * @param operationData
+	 * @param variables
+	 * @param parameters
 	 * @param operation
 	 */
-	private void parseBinaryOperationValue(final String[] operationData, Operation operation) {
+	private void parseBinaryOperationValue(final String[] operationData, final Map<String, Variable>[] variables,
+																			final Map<String, String> parameters, Operation operation) {
 		if(operationData[1].contains(KEYWORD_CHAR)) {
 			operation.setValue("" + operationData[1].toCharArray()[1]);
 			operation.setValueType(TYPE_CHAR);
 		} else {
 			try {
-				operation.setValue("" + Integer.parseInt(operationData[1]));
-				operation.setValueType(TYPE_INT);
-			}
-			catch(NumberFormatException notInt) {
-				try {
+				String variableName = operationData[0];
+				if(variableName.contains(KEYWORD_ARRAY_START)){
+					variableName = variableName.split("\\" + KEYWORD_ARRAY_START)[0];
+				}
+				boolean isIntParameter = false;
+				if(parameters.containsKey(variableName)) {
+					isIntParameter = parameters.get(variableName).equals("" + JppVirtualMachine.TYPE_INT)
+									|| parameters.get(variableName).equals("" + JppVirtualMachine.TYPE_ARRAY_INT);
+				}
+				// if variable before operator is int
+				if(variables[0].containsKey(variableName) || variables[4].containsKey(variableName) || isIntParameter) {
+					operation.setValue("" + Integer.parseInt(operationData[1]));
+					operation.setValueType(TYPE_INT);
+				}
+				else {
 					operation.setValue("" + Math.round(Float.parseFloat(operationData[1]) * 255));
 					operation.setValueType(TYPE_FIXED);
 				}
-				catch(NumberFormatException notFloat) {
-					if(operationData[1].equals(KEYWORD_TRUE) || operationData[1].equals(KEYWORD_FALSE)) {
-						operation.setValue("" + (operationData[1].equals(KEYWORD_FALSE) ? 0 : 1));
-						operation.setValueType(TYPE_BOOL);
-					} else {
-						operation.setVariable1Name(operationData[1]);
-					}
+			}
+			catch(NumberFormatException notNumber) {
+				if(operationData[1].equals(KEYWORD_TRUE) || operationData[1].equals(KEYWORD_FALSE)) {
+					operation.setValue("" + (operationData[1].equals(KEYWORD_FALSE) ? 0 : 1));
+					operation.setValueType(TYPE_BOOL);
+				} else {
+					operation.setVariable1Name(operationData[1]);
 				}
 			}
 		}
@@ -618,7 +660,7 @@ public class JppCompiler {
 	 * @param functions
 	 * @return joo code string that contains variables and array declarations. 
 	 */
-	String writeVariablesAndFunctions(String jooCode, final HashMap<String, Variable>[] variables, final HashMap<String, Function> functions) {
+	String writeVariablesAndFunctions(String jooCode, final Map<String, Variable>[] variables, final Map<String, Function> functions) {
 		for (int i = 0; i < variables.length; i++) {
 			if(variables[i].size() > 0) {
 				jooCode += "" + VM_TYPES[i] + (char)variables[i].size() + JppVirtualMachine.LINE_BREAK;
@@ -649,7 +691,7 @@ public class JppCompiler {
 	 * @param functions
 	 * @return
 	 */
-	String writeFunctionsAndOperations(String jooCode, final HashMap<String, Variable>[] variables, final HashMap<String, Function> functions) {
+	String writeFunctionsAndOperations(String jooCode, final Map<String, Variable>[] variables, final Map<String, Function> functions) {
 		for (Function function : functions.values()) {
 			// doesn't need the parameters in the function declaration, the parameters are already listed in function call
 			jooCode += "" + JppVirtualMachine.KEYWORD_FUNCTION + function.getName() + JppVirtualMachine.LINE_BREAK;
@@ -657,7 +699,7 @@ public class JppCompiler {
 				if(operation.isCondition()) {
 					jooCode += "" + JppVirtualMachine.KEYWORD_IF;
 				}
-				jooCode = writeBinaryOperation(jooCode, function.getParameters(), variables, operation);
+				jooCode = writeBinaryOperation(jooCode, function.getParameters().keySet().toArray(new String[0]), variables, operation);
 				if(operation.getOperator() == JppVirtualMachine.KEYWORD_FUNCTION_CALL) {
 					if(functions.containsKey(operation.getVariable1Name())) {
 						jooCode += "" + functions.get(operation.getVariable1Name()).getName();
@@ -670,7 +712,7 @@ public class JppCompiler {
 		return jooCode;
 	}
 
-	private String writeBinaryOperation(String jooCode, final String[] functionParameters, final HashMap<String, Variable>[] variables, Operation operation) {
+	private String writeBinaryOperation(String jooCode, final String[] functionParameters, final Map<String, Variable>[] variables, Operation operation) {
 		jooCode += getVirtualMachineVariableName(operation.getVariable0Name(), functionParameters, variables);
 		if(operation.getVariable0ArrayIndex() >= 0) {
 			// +1 because 0 is null character
@@ -693,7 +735,7 @@ public class JppCompiler {
 		return jooCode;
 	}
 	
-	private String getVirtualMachineVariableName(String variableName, final String[] functionParameters, final HashMap<String, Variable>[] variables) {
+	private String getVirtualMachineVariableName(String variableName, final String[] functionParameters, final Map<String, Variable>[] variables) {
 		for (int i = 0; i < variables.length; i++) {
 			if(variables[i].containsKey(variableName)) {
 				return "" + variables[i].get(variableName).getName();
@@ -718,7 +760,7 @@ public class JppCompiler {
 	 * @param operation
 	 * @return
 	 */
-	private String writeOperationParameters(String jooCode, final HashMap<String, Variable>[] variables, Operation operation) {
+	private String writeOperationParameters(String jooCode, final Map<String, Variable>[] variables, Operation operation) {
 		for (String parameter : operation.getParameters()) {
 			if(parameter != null) {
 				String parameterName = "";

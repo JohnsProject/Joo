@@ -3,57 +3,125 @@ int intTest0
 int intTest1 = 10
 
 fixed fixedTest0
-fixed fixedTest1 = 10.15
+fixed fixedTest1 = 100.5
 
 int[10] intTest
 fixed[5] fixedTest
 
-function Start
+int ifTest
 
-call FunctionTest: intTest0: intTest
+function Start
 
 intTest0 += 100
 intTest0 -= intTest1
+intTest0 *= 2
+intTest0 /= 10
+intTest1 = 20
 
-fixedTest0 *= 25.54
-fixedTest0 /= fixedTest1
+fixedTest0 += fixedTest1
+fixedTest0 -= 0.5
+fixedTest0 *= 2.5
+fixedTest0 /= 5
+fixedTest1 = 50
 
-boolTest0 = false
-boolTest1 = true
+boolTest0 = true
+boolTest1 = false
+boolTest2 = boolTest1
 
 charTest0 = 'A'
 charTest1 = 'B'
+charTest2 = charTest1
 
-if intTest0 == 100
-intTest[2] += 100
+intTest[0] = 30
+intTest[1] += 15
+intTest[0] -= intTest1
+intTest[1] /= 5
+intTest[0] *= intTest[1]
+
+fixedTest[0] = 60.5
+fixedTest[1] += 15
+fixedTest[0] -= fixedTest1
+fixedTest[1] /= 5
+fixedTest[0] *= fixedTest[1]
+
+boolTest[9] = boolTest0
+boolTest[10] = true
+boolTest[11] = boolTest[10]
+
+charTest[9] = charTest0
+charTest[10] = 'C'
+charTest[11] = charTest[10]
+
+if intTest0 == 18
+ifTest += 1
 else
-intTest[3] -= intTest0
-fixedTest[7] *= intTest[9]
+ifTest += 2
 endIf
 
-if intTest0 > intTest1
+if intTest0 != intTest1
+ifTest += 1
+else
+ifTest += 2
 endIf
 
-if intTest[2] < intTest1
+intTest[2] = 100
+if intTest0 < intTest[2]
+ifTest += 1
+else
+ifTest += 2
 endIf
 
-if intTest[2] != intTest[9]
+if intTest[2] > intTest0
+ifTest += 1
+else
+ifTest += 2
 endIf
+
+if intTest0 <= intTest[2]
+ifTest += 1
+else
+ifTest += 2
+endIf
+
+if intTest[2] >= intTest0
+ifTest += 1
+else
+ifTest += 2
+endIf
+
+intTest[3] = intTest[2]
+if intTest[2] >= intTest[3]
+ifTest += 1
+else
+ifTest += 2
+endIf
+
+if intTest[2] <= intTest[3]
+ifTest += 1
+else
+ifTest += 2
+endIf
+
+call FunctionTest: intTest0: intTest
 
 bool boolTest0
 bool boolTest1 = true
+bool boolTest2 = false
 
 char charTest0
 char charTest1 = 'A'
+char charTest2 = 'C'
 
 bool[15] boolTest
 char[13] charTest
 
 endFunction
 
-function FunctionTest: _paramTest0: _paramTest1
+function FunctionTest: int _paramTest0: int[] _paramTest1
 
 _paramTest0 += 100
 _paramTest1[5] = _paramTest0
-
-endFunction
+_paramTest1[4] = _paramTest1[5]
+_paramTest0 = _paramTest1[4]
+_paramTest0 = intTest1
+endFunction 
