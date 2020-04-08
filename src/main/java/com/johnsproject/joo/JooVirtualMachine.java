@@ -133,11 +133,11 @@ public class JooVirtualMachine {
 		return failedIfs;
 	}
 	
-	public char[] getJooCode() {
+	public char[] getCode() {
 		return jooCode;
 	}
 	
-	public short getJooCodeSize() {
+	public short getCodeSize() {
 		return jooCodeSize;
 	}
 

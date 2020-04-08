@@ -76,7 +76,7 @@ public class JooVirtualMachineTest {
 				"" + KEYWORD_FUNCTION + LINE_BREAK
 		);
 		char[] jooCode = rawJooCode.toCharArray();
-		char[] vmCode = jooInterpreter.getJooCode();
+		char[] vmCode = jooInterpreter.getCode();
 		jooInterpreter.setJooCodeSize((short) jooCode.length);
 		for (int i = (short) 0; i < jooCode.length; i++) {
 			vmCode[i] = jooCode[i];
@@ -336,7 +336,7 @@ public class JooVirtualMachineTest {
 				"" + KEYWORD_FUNCTION + LINE_BREAK
 		);
 		char[] jooCode = rawJooCode.toCharArray();
-		char[] vmCode = jooInterpreter.getJooCode();
+		char[] vmCode = jooInterpreter.getCode();
 		jooInterpreter.setJooCodeSize((short) jooCode.length);
 		for (int i = (short) 0; i < jooCode.length; i++) {
 			vmCode[i] = jooCode[i];
@@ -391,7 +391,7 @@ public class JooVirtualMachineTest {
 				"" + KEYWORD_FUNCTION + LINE_BREAK
 		);
 		char[] jooCode = rawJooCode.toCharArray();
-		char[] vmCode = jooInterpreter.getJooCode();
+		char[] vmCode = jooInterpreter.getCode();
 		jooInterpreter.setJooCodeSize((short) jooCode.length);
 		for (int i = (short) 0; i < jooCode.length; i++) {
 			vmCode[i] = jooCode[i];

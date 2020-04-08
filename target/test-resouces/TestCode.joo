@@ -54,6 +54,15 @@ charTest[11] = charTest[10]
 
 if intTest0 == 18
 ifTest += 1
+
+if intTest0 != 18
+ifTest += 1
+else
+ifTest += 2
+endIf
+
+ifTest += 1
+
 else
 ifTest += 2
 endIf

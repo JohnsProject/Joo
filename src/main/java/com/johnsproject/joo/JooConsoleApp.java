@@ -72,7 +72,7 @@ public class JooConsoleApp {
 		System.out.print("Starting vm... ");
 		final JooVirtualMachine jooVM = new JooVirtualMachine();
 		final char[] jooCode = compiledCode.toCharArray();
-		final char[] vmCode = jooVM.getJooCode();
+		final char[] vmCode = jooVM.getCode();
 		jooVM.setJooCodeSize((short) jooCode.length);
 		for (int i = 0; i < jooCode.length; i++) {
 			vmCode[i] = jooCode[i];

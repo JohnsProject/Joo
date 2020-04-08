@@ -298,18 +298,18 @@ public class JppCompiler {
 	}
 	
 	/**
-	 * This method compiles the human readable joo code in the jooCode string
+	 * This method compiles the human readable joo code in the code string
 	 * to joo virtual machine readable joo code.
 	 * 
-	 * @param jooCode human readable joo code.
+	 * @param code human readable joo code.
 	 * @return joo virtual machine readable joo code.
 	 */
-	String compile(final String jooCode) {
+	String compile(final String code) {
 		// starts at 1 because 0 character is null character
 		name = JppVirtualMachine.COMPONENTS_START;
-		final String[] jooLines = getJooLines(jooCode);		
-		final Map<String, Variable>[] variables = parseVariables(jooLines);
-		final Map<String, Function> functions = parseFunctions(jooLines, variables);
+		final String[] codeLines = getJooLines(code);		
+		final Map<String, Variable>[] variables = parseVariables(codeLines);
+		final Map<String, Function> functions = parseFunctions(codeLines, variables);
 		String compiledJooCode = "";
 		compiledJooCode = writeVariablesAndFunctions(compiledJooCode, variables, functions);
 		compiledJooCode = writeFunctionsAndOperations(compiledJooCode, variables, functions);
@@ -317,14 +317,14 @@ public class JppCompiler {
 	}
 	
 	/**
-	 * This method splits up the jooCode string to a string array of joo code lines. 
+	 * This method splits up the code string to a string array of joo code lines. 
 	 * It's a new method be cause it's also used by unit tests.
 	 * 
-	 * @param jooCode
+	 * @param code
 	 * @return string array of joo code lines. 
 	 */
-	String[] getJooLines(final String jooCode) {
-		return jooCode.replace("\r", "").split(LINE_BREAK);
+	String[] getJooLines(final String code) {
+		return code.replace("\r", "").split(LINE_BREAK);
 	}
 	
 	/**
@@ -332,26 +332,26 @@ public class JppCompiler {
 	 * If a line with a declaration is found the functions is added to the map and the code 
 	 * line is set to empty string to avoid conflict with other search methods.
 	 * 
-	 * @param jooLines
+	 * @param codeLines
 	 * @param variables
 	 * @return map of functions that contains the function names as keys and the function objects as values.
 	 */
-	Map<String, Function> parseFunctions(String[] jooLines, final Map<String, Variable>[] variables) {
+	Map<String, Function> parseFunctions(String[] codeLines, final Map<String, Variable>[] variables) {
 		Map<String, Function> functions = new LinkedHashMap<>();
 		Function currentFunction = null;
-		for (int i = 0; i < jooLines.length; i++) {
-			String jooLine = jooLines[i];
+		for (int i = 0; i < codeLines.length; i++) {
+			String codeLine = codeLines[i];
 			// whitespace ensures the function keyword isn't part of a bigger word
-			if(jooLine.contains(KEYWORD_FUNCTION + " ")) {
-				currentFunction = parseFunctionDeclaration(jooLine, functions);	
-				jooLines[i] = "";
+			if(codeLine.contains(KEYWORD_FUNCTION + " ")) {
+				currentFunction = parseFunctionDeclaration(codeLine, functions);	
+				codeLines[i] = "";
 			}
-			else if (jooLine.replace(" ", "").equals(KEYWORD_FUNCTION_END)) {
+			else if (codeLine.replace(" ", "").equals(KEYWORD_FUNCTION_END)) {
 				currentFunction = null;	
-				jooLines[i] = "";
+				codeLines[i] = "";
 			}
 			if(currentFunction != null) {
-				Operation operation = parseOperation(jooLine, variables, currentFunction.getParameters());
+				Operation operation = parseOperation(codeLine, variables, currentFunction.getParameters());
 				if(operation != null) {
 					currentFunction.addOperation(operation);
 				}
@@ -360,11 +360,11 @@ public class JppCompiler {
 		return functions;
 	}
 		
-	private Function parseFunctionDeclaration(String jooLine, Map<String, Function> functions) {
+	private Function parseFunctionDeclaration(String codeLine, Map<String, Function> functions) {
 		String functionName = "";
 		Map<String, String> parameters = new LinkedHashMap<>();
-		if(jooLine.contains(KEYWORD_PARAMETER)) {
-			final String[] functionData = jooLine.replace(KEYWORD_FUNCTION, "").split(KEYWORD_PARAMETER);
+		if(codeLine.contains(KEYWORD_PARAMETER)) {
+			final String[] functionData = codeLine.replace(KEYWORD_FUNCTION, "").split(KEYWORD_PARAMETER);
 			// remove whitespaces, names shouldn't have whitespaces
 			functionName = functionData[0].replace(" ", "");
 			for (int i = 1; i < functionData.length; i++) {
@@ -381,7 +381,7 @@ public class JppCompiler {
 				}
 			}
 		} else {
-			functionName = jooLine.replace(" ", "").replaceFirst(KEYWORD_FUNCTION, "");
+			functionName = codeLine.replace(" ", "").replaceFirst(KEYWORD_FUNCTION, "");
 		}
 		Function result = new Function(name++, parameters);
 		functions.put(functionName, result);
@@ -393,21 +393,21 @@ public class JppCompiler {
 	 * If a line with a declaration is found the variable is added to the map and the code 
 	 * line is set to empty string to avoid conflict with other search methods.
 	 * 
-	 * @param jooLines
+	 * @param codeLines
 	 * @param variableType
 	 * @return map of variables that contains the variable names as keys and the variable objects as values.
 	 */
 	@SuppressWarnings("unchecked")
-	Map<String, Variable>[] parseVariables(String[] jooLines){
+	Map<String, Variable>[] parseVariables(String[] codeLines){
 		return new Map[] {
-				parseVariables(jooLines, TYPE_INT),
-				parseVariables(jooLines, TYPE_FIXED),
-				parseVariables(jooLines, TYPE_BOOL),
-				parseVariables(jooLines, TYPE_CHAR),
-				parseArrays(jooLines, TYPE_INT),
-				parseArrays(jooLines, TYPE_FIXED),
-				parseArrays(jooLines, TYPE_BOOL),
-				parseArrays(jooLines, TYPE_CHAR),
+				parseVariables(codeLines, TYPE_INT),
+				parseVariables(codeLines, TYPE_FIXED),
+				parseVariables(codeLines, TYPE_BOOL),
+				parseVariables(codeLines, TYPE_CHAR),
+				parseArrays(codeLines, TYPE_INT),
+				parseArrays(codeLines, TYPE_FIXED),
+				parseArrays(codeLines, TYPE_BOOL),
+				parseArrays(codeLines, TYPE_CHAR),
 		};
 	}
 	
@@ -416,23 +416,23 @@ public class JppCompiler {
 	 * If a line with a declaration is found the variable is added to the map and the code 
 	 * line is set to empty string to avoid conflict with other search methods.
 	 * 
-	 * @param jooLines
+	 * @param codeLines
 	 * @param variableType
 	 * @return map of variables that contains the variable names as keys and the variable objects as values.
 	 */
-	private Map<String, Variable> parseVariables(String[] jooLines, final String variableType) {
+	private Map<String, Variable> parseVariables(String[] codeLines, final String variableType) {
 		Map<String, Variable> variables = new LinkedHashMap<>();
-		for (int i = 0; i < jooLines.length; i++) {
-			String jooLine = jooLines[i];
+		for (int i = 0; i < codeLines.length; i++) {
+			String codeLine = codeLines[i];
 			// whitespace ensures the variable type isn't part of a bigger word
 			// function declaration also contain type declaration but should not be parsed here
-			if(jooLine.contains(variableType + " ") && !jooLine.contains(KEYWORD_FUNCTION)) {
+			if(codeLine.contains(variableType + " ") && !codeLine.contains(KEYWORD_FUNCTION)) {
 				// remove whitespaces, name and value shouldn't have whitespaces
-				jooLine = jooLine.replace(" ", "");
+				codeLine = codeLine.replace(" ", "");
 				String variableName = "";
 				String variableValue = "";
-				if(jooLine.contains(OPERATOR_SET_EQUALS)) {
-					final String[] variableData = jooLine.replaceFirst(variableType, "").split(OPERATOR_SET_EQUALS);
+				if(codeLine.contains(OPERATOR_SET_EQUALS)) {
+					final String[] variableData = codeLine.replaceFirst(variableType, "").split(OPERATOR_SET_EQUALS);
 					variableName = variableData[0];
 					if(variableType.equals(TYPE_INT))
 						variableValue = variableData[1];
@@ -443,11 +443,11 @@ public class JppCompiler {
 					else if(variableType.equals(TYPE_CHAR))
 						variableValue = "" + variableData[1].toCharArray()[1];
 				} else {
-					variableName = jooLine.replaceFirst(variableType, "");
+					variableName = codeLine.replaceFirst(variableType, "");
 				}	
 				// name++ because names used in joo virtual machine are unique characters	
 				variables.put(variableName, new Variable(name++, variableValue));
-				jooLines[i] = "";
+				codeLines[i] = "";
 			}
 		}
 		return variables;
@@ -458,21 +458,21 @@ public class JppCompiler {
 	 * If a line with a declaration is found the array is added to the map and the code 
 	 * line is set to empty string to avoid conflict with other search methods.
 	 * 
-	 * @param jooLines
+	 * @param codeLines
 	 * @param arrayType
 	 * @return map of arrays that contains the arrays names as keys and the variable objects as values. 
 	 * The value field of the Variable objects contains the size of the array.
 	 */
-	private Map<String, Variable> parseArrays(String[] jooLines, final String arrayType) {
+	private Map<String, Variable> parseArrays(String[] codeLines, final String arrayType) {
 		Map<String, Variable> variables = new LinkedHashMap<>();
-		for (int i = 0; i < jooLines.length; i++) {
+		for (int i = 0; i < codeLines.length; i++) {
 			// remove whitespaces, name and value shouldn't have whitespaces
-			final String jooLine = jooLines[i].replace(" ", "");
-			if(jooLine.contains(arrayType + KEYWORD_ARRAY_START) && !jooLine.contains(KEYWORD_FUNCTION)) {
-				final String[] variableData = jooLine.replace(arrayType + KEYWORD_ARRAY_START, "").split(KEYWORD_ARRAY_END);
+			final String codeLine = codeLines[i].replace(" ", "");
+			if(codeLine.contains(arrayType + KEYWORD_ARRAY_START) && !codeLine.contains(KEYWORD_FUNCTION)) {
+				final String[] variableData = codeLine.replace(arrayType + KEYWORD_ARRAY_START, "").split(KEYWORD_ARRAY_END);
 				// name++ because names used in joo virtual machine are unique characters	
 				variables.put(variableData[1], new Variable(name++, "" + (char)Integer.parseInt(variableData[0])));			
-				jooLines[i] = "";
+				codeLines[i] = "";
 			}
 		}
 		return variables;
@@ -484,39 +484,39 @@ public class JppCompiler {
 	 * is then returned, null is returned if it's a comment or unknown operation.
 	 * 
 	 * 
-	 * @param jooLine
+	 * @param codeLine
 	 * @param variables
 	 * @param parameters
 	 * @return Operation object if operation can be parsed, null if it's a comment or unknown operation.
 	 */
-	private Operation parseOperation(String jooLine, final Map<String, Variable>[] variables, final Map<String, String> parameters) {		
-		if(jooLine.contains(KEYWORD_COMMENT)) {
+	private Operation parseOperation(String codeLine, final Map<String, Variable>[] variables, final Map<String, String> parameters) {		
+		if(codeLine.contains(KEYWORD_COMMENT)) {
 			return null;
 		}
 		Operation operation = new Operation();
 		// whitespace ensures the keyword isn't part of a bigger word
-		if(jooLine.contains(KEYWORD_FUNCTION_CALL + " ")) {
-			parseFunctionCall(jooLine, operation);
+		if(codeLine.contains(KEYWORD_FUNCTION_CALL + " ")) {
+			parseFunctionCall(codeLine, operation);
 		}
-		else if(jooLine.contains(KEYWORD_IF + " ")) {
-			jooLine = jooLine.replace(" ", "").replaceFirst(KEYWORD_IF, "");
-			parseBinaryOperation(jooLine, variables, parameters, COMPILER_COMPARATORS, VM_COMPARATORS, operation);
+		else if(codeLine.contains(KEYWORD_IF + " ")) {
+			codeLine = codeLine.replace(" ", "").replaceFirst(KEYWORD_IF, "");
+			parseBinaryOperation(codeLine, variables, parameters, COMPILER_COMPARATORS, VM_COMPARATORS, operation);
 			operation.isCondition(true);
 		}
-		else if(jooLine.contains(KEYWORD_ELSE)) {
+		else if(codeLine.contains(KEYWORD_ELSE)) {
 			operation.setOperator(JppVirtualMachine.KEYWORD_ELSE);
 		}
-		else if(jooLine.contains(KEYWORD_IF_END)) {
+		else if(codeLine.contains(KEYWORD_IF_END)) {
 			operation.setOperator(JppVirtualMachine.KEYWORD_IF);
 		}
-		else if(jooLine.contains(KEYWORD_FUNCTION_REPEAT)) {
+		else if(codeLine.contains(KEYWORD_FUNCTION_REPEAT)) {
 			operation.setOperator(JppVirtualMachine.KEYWORD_FUNCTION_REPEAT);
 		}
-		else if(jooLine.contains(KEYWORD_FUNCTION_END)) {
+		else if(codeLine.contains(KEYWORD_FUNCTION_END)) {
 			operation.setOperator(JppVirtualMachine.KEYWORD_FUNCTION);
 		} else { // if all if's failed it means the operation is a variable operation
-			jooLine = jooLine.replace(" ", "");
-			parseBinaryOperation(jooLine, variables, parameters, COMPILER_OPERATORS, VM_OPERATORS, operation);
+			codeLine = codeLine.replace(" ", "");
+			parseBinaryOperation(codeLine, variables, parameters, COMPILER_OPERATORS, VM_OPERATORS, operation);
 		}
 		// if operator is null the operation could not be parsed
 		if(operation.getOperator() == 0) {
@@ -525,17 +525,17 @@ public class JppCompiler {
 		return operation;
 	}
 	
-	private void parseFunctionCall(String jooLine, Operation operation) {
-		jooLine = jooLine.replace(" ", "").replaceFirst(KEYWORD_FUNCTION_CALL, "");
-		if(jooLine.contains(KEYWORD_PARAMETER)) {
-			String[] functionCallData = jooLine.split(KEYWORD_PARAMETER);
+	private void parseFunctionCall(String codeLine, Operation operation) {
+		codeLine = codeLine.replace(" ", "").replaceFirst(KEYWORD_FUNCTION_CALL, "");
+		if(codeLine.contains(KEYWORD_PARAMETER)) {
+			String[] functionCallData = codeLine.split(KEYWORD_PARAMETER);
 			operation.setVariable1Name(functionCallData[0]);
 			// parsing in case of array with index as parameter will be done later
 			for (int i = 1; i < functionCallData.length; i++) {
 				operation.getParameters()[i-1] = functionCallData[i];
 			}
 		} else {
-			operation.setVariable1Name(jooLine);
+			operation.setVariable1Name(codeLine);
 		}
 		operation.setOperator(JppVirtualMachine.KEYWORD_FUNCTION_CALL);
 	}
@@ -544,16 +544,16 @@ public class JppCompiler {
 	 * This method parses a binary operation (operation like a + b) with the possible operators
 	 * and fills the given operation object with the parsed data.
 	 * 
-	 * @param jooLine
+	 * @param codeLine
 	 * @param variables
 	 * @param parameters
 	 * @param compilerOperators
 	 * @param vmOperators
 	 * @param operation
 	 */
-	private void parseBinaryOperation(String jooLine, final Map<String, Variable>[] variables, final Map<String, String> parameters,
+	private void parseBinaryOperation(String codeLine, final Map<String, Variable>[] variables, final Map<String, String> parameters,
 																				String[] compilerOperators, char[] vmOperators, Operation operation) {
-		String[] operationData = parseBinaryOperationVariablesAndOperator(jooLine, compilerOperators, vmOperators, operation);
+		String[] operationData = parseBinaryOperationVariablesAndOperator(codeLine, compilerOperators, vmOperators, operation);
 		if(operationData != null) {
 			if(operationData[0].contains(KEYWORD_ARRAY_START)) {
 				String[] variableData = operationData[0].replace(KEYWORD_ARRAY_END, "").split("\\" + KEYWORD_ARRAY_START);
@@ -577,16 +577,16 @@ public class JppCompiler {
 	 * This method parses the operator used in the operation and and returns the variables before and 
 	 * after the operator. It also sets the operator in the Operation object.
 	 * 
-	 * @param jooLine
+	 * @param codeLine
 	 * @param compilerOperators
 	 * @param vmOperators
 	 * @param operation
 	 * @return variables before and after the operator.
 	 */
-	private String[] parseBinaryOperationVariablesAndOperator(String jooLine, String[] compilerOperators, char[] vmOperators, Operation operation) {
+	private String[] parseBinaryOperationVariablesAndOperator(String codeLine, String[] compilerOperators, char[] vmOperators, Operation operation) {
 		String[] operationData = null;
 		for (int i = 0; i < compilerOperators.length; i++) {
-			if(jooLine.contains(compilerOperators[i])) {
+			if(codeLine.contains(compilerOperators[i])) {
 				operation.setOperator(vmOperators[i]);
 				// some characters like '+' need a backslash in front of it
 				String possibleOperator = compilerOperators[i];
@@ -596,7 +596,7 @@ public class JppCompiler {
 				if(possibleOperator.equals(OPERATOR_MULTIPLY)) {
 					possibleOperator = "\\" + OPERATOR_MULTIPLY;
 				}
-				operationData = jooLine.split(possibleOperator);
+				operationData = codeLine.split(possibleOperator);
 				break;
 			}
 		}
@@ -655,28 +655,28 @@ public class JppCompiler {
 	 * The joo virtual machine can't understand code written by this method only, use the {@link #compile(String) compile} method 
 	 * to generate joo virtual machine readable code.
 	 * 
-	 * @param jooCode
+	 * @param code
 	 * @param variables
 	 * @param functions
 	 * @return joo code string that contains variables and array declarations. 
 	 */
-	String writeVariablesAndFunctions(String jooCode, final Map<String, Variable>[] variables, final Map<String, Function> functions) {
+	String writeVariablesAndFunctions(String code, final Map<String, Variable>[] variables, final Map<String, Function> functions) {
 		for (int i = 0; i < variables.length; i++) {
 			if(variables[i].size() > 0) {
-				jooCode += "" + VM_TYPES[i] + (char)variables[i].size() + JppVirtualMachine.LINE_BREAK;
+				code += "" + VM_TYPES[i] + (char)variables[i].size() + JppVirtualMachine.LINE_BREAK;
 				for (Variable variable : variables[i].values()) {
 					String value = variable.getValue();
 					if(i < 3) { // if value is number
 						value = toVirtualMachineNumber(variable.getValue());
 					}
-					jooCode += "" + variable.getName() + value + JppVirtualMachine.LINE_BREAK;
+					code += "" + variable.getName() + value + JppVirtualMachine.LINE_BREAK;
 				}
 			}
 		}
 		if(functions.size() > 0) {
-			jooCode += "" + JppVirtualMachine.TYPE_FUNCTION + (char)functions.size() + JppVirtualMachine.LINE_BREAK;
+			code += "" + JppVirtualMachine.TYPE_FUNCTION + (char)functions.size() + JppVirtualMachine.LINE_BREAK;
 		}
-		return jooCode;
+		return code;
 	}
 	
 	/**
@@ -686,53 +686,53 @@ public class JppCompiler {
 	 * The joo virtual machine can't understand code written by this method only, use the {@link #compile(String) compile} method 
 	 * to generate joo virtual machine readable code.
 	 * 
-	 * @param jooCode
+	 * @param code
 	 * @param variables
 	 * @param functions
 	 * @return
 	 */
-	String writeFunctionsAndOperations(String jooCode, final Map<String, Variable>[] variables, final Map<String, Function> functions) {
+	String writeFunctionsAndOperations(String code, final Map<String, Variable>[] variables, final Map<String, Function> functions) {
 		for (Function function : functions.values()) {
 			// doesn't need the parameters in the function declaration, the parameters are already listed in function call
-			jooCode += "" + JppVirtualMachine.KEYWORD_FUNCTION + function.getName() + JppVirtualMachine.LINE_BREAK;
+			code += "" + JppVirtualMachine.KEYWORD_FUNCTION + function.getName() + JppVirtualMachine.LINE_BREAK;
 			for (Operation operation : function.getOperations()) {
 				if(operation.isCondition()) {
-					jooCode += "" + JppVirtualMachine.KEYWORD_IF;
+					code += "" + JppVirtualMachine.KEYWORD_IF;
 				}
-				jooCode = writeBinaryOperation(jooCode, function.getParameters().keySet().toArray(new String[0]), variables, operation);
+				code = writeBinaryOperation(code, function.getParameters().keySet().toArray(new String[0]), variables, operation);
 				if(operation.getOperator() == JppVirtualMachine.KEYWORD_FUNCTION_CALL) {
 					if(functions.containsKey(operation.getVariable1Name())) {
-						jooCode += "" + functions.get(operation.getVariable1Name()).getName();
+						code += "" + functions.get(operation.getVariable1Name()).getName();
 					}
 				}
-				jooCode = writeOperationParameters(jooCode, variables, operation);
-				jooCode += "" + JppVirtualMachine.LINE_BREAK;
+				code = writeOperationParameters(code, variables, operation);
+				code += "" + JppVirtualMachine.LINE_BREAK;
 			}
 		}
-		return jooCode;
+		return code;
 	}
 
-	private String writeBinaryOperation(String jooCode, final String[] functionParameters, final Map<String, Variable>[] variables, Operation operation) {
-		jooCode += getVirtualMachineVariableName(operation.getVariable0Name(), functionParameters, variables);
+	private String writeBinaryOperation(String code, final String[] functionParameters, final Map<String, Variable>[] variables, Operation operation) {
+		code += getVirtualMachineVariableName(operation.getVariable0Name(), functionParameters, variables);
 		if(operation.getVariable0ArrayIndex() >= 0) {
 			// +1 because 0 is null character
-			jooCode += "" + (char)(operation.getVariable0ArrayIndex() + JppVirtualMachine.ARRAY_INDICES_START);
+			code += "" + (char)(operation.getVariable0ArrayIndex() + JppVirtualMachine.ARRAY_INDICES_START);
 		}
-		jooCode += "" + operation.getOperator();
-		jooCode += getVirtualMachineVariableName(operation.getVariable1Name(), functionParameters, variables);
+		code += "" + operation.getOperator();
+		code += getVirtualMachineVariableName(operation.getVariable1Name(), functionParameters, variables);
 		if(operation.getVariable1ArrayIndex() >= 0) {
-			jooCode += "" + (char)(operation.getVariable1ArrayIndex() + JppVirtualMachine.ARRAY_INDICES_START);
+			code += "" + (char)(operation.getVariable1ArrayIndex() + JppVirtualMachine.ARRAY_INDICES_START);
 		}
 		if(!operation.getValueType().isEmpty()) {
 			if(operation.getValueType().equals(TYPE_CHAR)) {
 				// put type char character in front of it so the virtual machine knows
 				// the character is not a variable name
-				jooCode += JppVirtualMachine.TYPE_CHAR +  operation.getValue();
+				code += JppVirtualMachine.TYPE_CHAR +  operation.getValue();
 			} else {				
-				jooCode += toVirtualMachineNumber(operation.getValue());
+				code += toVirtualMachineNumber(operation.getValue());
 			}
 		}
-		return jooCode;
+		return code;
 	}
 	
 	private String getVirtualMachineVariableName(String variableName, final String[] functionParameters, final Map<String, Variable>[] variables) {
@@ -755,12 +755,12 @@ public class JppCompiler {
 	 * This method writes the operation parameters into the joo code string if the operation
 	 * is a function call.
 	 * 
-	 * @param jooCode
+	 * @param code
 	 * @param variables
 	 * @param operation
 	 * @return
 	 */
-	private String writeOperationParameters(String jooCode, final Map<String, Variable>[] variables, Operation operation) {
+	private String writeOperationParameters(String code, final Map<String, Variable>[] variables, Operation operation) {
 		for (String parameter : operation.getParameters()) {
 			if(parameter != null) {
 				String parameterName = "";
@@ -780,10 +780,10 @@ public class JppCompiler {
 						break;
 					}
 				}
-				jooCode += "" + JppVirtualMachine.KEYWORD_PARAMETER + newParameterName + parameterIndex;
+				code += "" + JppVirtualMachine.KEYWORD_PARAMETER + newParameterName + parameterIndex;
 			}
 		}
-		return jooCode;
+		return code;
 	}
 	
 	private String toVirtualMachineNumber(String value) {

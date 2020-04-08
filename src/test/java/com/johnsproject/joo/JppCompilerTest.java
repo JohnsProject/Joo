@@ -101,6 +101,12 @@ public class JppCompilerTest {
 		assertEquals(jooLines[line++], "" + charTestName + (char)12 + JppVirtualMachine.OPERATOR_SET_EQUALS + charTestName + (char)11);
 		assertEquals(jooLines[line++], "" + JppVirtualMachine.KEYWORD_IF + intTest0Name + JppVirtualMachine.COMPARATOR_EQUALS + toVirtualMachineNumber("18"));
 		assertEquals(jooLines[line++], "" + ifTestName + JppVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
+		assertEquals(jooLines[line++], "" + JppVirtualMachine.KEYWORD_IF + intTest0Name + JppVirtualMachine.COMPARATOR_NOT_EQUALS + toVirtualMachineNumber("18"));
+		assertEquals(jooLines[line++], "" + ifTestName + JppVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
+		assertEquals(jooLines[line++], "" + JppVirtualMachine.KEYWORD_ELSE);
+		assertEquals(jooLines[line++], "" + ifTestName + JppVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("2"));
+		assertEquals(jooLines[line++], "" + JppVirtualMachine.KEYWORD_IF);
+		assertEquals(jooLines[line++], "" + ifTestName + JppVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
 		assertEquals(jooLines[line++], "" + JppVirtualMachine.KEYWORD_ELSE);
 		assertEquals(jooLines[line++], "" + ifTestName + JppVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("2"));
 		assertEquals(jooLines[line++], "" + JppVirtualMachine.KEYWORD_IF);
@@ -428,6 +434,37 @@ public class JppCompilerTest {
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.COMPARATOR_EQUALS);
 		assertEquals(currentOperation.getValue(), "18");
 		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		
+		currentOperation = start.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.getVariable0Name(), "ifTest");
+		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentOperation.getValue(), "1");
+		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		
+		currentOperation = start.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.isCondition(), true);
+		assertEquals(currentOperation.getVariable0Name(), "intTest0");
+		assertEquals(currentOperation.getOperator(), JppVirtualMachine.COMPARATOR_NOT_EQUALS);
+		assertEquals(currentOperation.getValue(), "18");
+		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		
+		currentOperation = start.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.getVariable0Name(), "ifTest");
+		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentOperation.getValue(), "1");
+		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		
+		currentOperation = start.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.getOperator(), JppVirtualMachine.KEYWORD_ELSE);
+
+		currentOperation = start.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.getVariable0Name(), "ifTest");
+		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentOperation.getValue(), "2");
+		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		
+		currentOperation = start.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.getOperator(), JppVirtualMachine.KEYWORD_IF);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "ifTest");
@@ -812,6 +849,12 @@ public class JppCompilerTest {
 		assertEquals(jooLines[line++], "" + charTestName + (char)11 + JppVirtualMachine.OPERATOR_SET_EQUALS + JppVirtualMachine.TYPE_CHAR + 'C');
 		assertEquals(jooLines[line++], "" + charTestName + (char)12 + JppVirtualMachine.OPERATOR_SET_EQUALS + charTestName + (char)11);
 		assertEquals(jooLines[line++], "" + JppVirtualMachine.KEYWORD_IF + intTest0Name + JppVirtualMachine.COMPARATOR_EQUALS + toVirtualMachineNumber("18"));
+		assertEquals(jooLines[line++], "" + ifTestName + JppVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
+		assertEquals(jooLines[line++], "" + JppVirtualMachine.KEYWORD_IF + intTest0Name + JppVirtualMachine.COMPARATOR_NOT_EQUALS + toVirtualMachineNumber("18"));
+		assertEquals(jooLines[line++], "" + ifTestName + JppVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
+		assertEquals(jooLines[line++], "" + JppVirtualMachine.KEYWORD_ELSE);
+		assertEquals(jooLines[line++], "" + ifTestName + JppVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("2"));
+		assertEquals(jooLines[line++], "" + JppVirtualMachine.KEYWORD_IF);
 		assertEquals(jooLines[line++], "" + ifTestName + JppVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
 		assertEquals(jooLines[line++], "" + JppVirtualMachine.KEYWORD_ELSE);
 		assertEquals(jooLines[line++], "" + ifTestName + JppVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("2"));
