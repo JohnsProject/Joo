@@ -52,6 +52,8 @@ public class JppCompiler {
 	
 	public static final String LINE_BREAK = "\n";
 	
+	public static final int FIXED_POINT = 255;
+	
 	public static final String[] COMPILER_COMPARATORS = new String[] {
 			COMPARATOR_SMALLER_EQUALS,
 			COMPARATOR_BIGGER_EQUALS,
@@ -437,7 +439,7 @@ public class JppCompiler {
 					if(variableType.equals(TYPE_INT))
 						variableValue = variableData[1];
 					else if(variableType.equals(TYPE_FIXED))
-						variableValue = "" + Math.round(Float.parseFloat(variableData[1]) * 255);
+						variableValue = "" + Math.round(Float.parseFloat(variableData[1]) * FIXED_POINT);
 					else if(variableType.equals(TYPE_BOOL))
 						variableValue = "" + (variableData[1].equals(KEYWORD_FALSE) ? 0 : 1);
 					else if(variableType.equals(TYPE_CHAR))
@@ -633,7 +635,7 @@ public class JppCompiler {
 					operation.setValueType(TYPE_INT);
 				}
 				else {
-					operation.setValue("" + Math.round(Float.parseFloat(operationData[1]) * 255));
+					operation.setValue("" + Math.round(Float.parseFloat(operationData[1]) * FIXED_POINT));
 					operation.setValueType(TYPE_FIXED);
 				}
 			}

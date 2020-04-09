@@ -133,4 +133,11 @@ _paramTest1[5] = _paramTest0
 _paramTest1[4] = _paramTest1[5]
 _paramTest0 = _paramTest1[4]
 _paramTest0 = intTest1
+
+if _paramTest0 < _paramTest1[5]
+ifTest += 1
+else
+ifTest += 2
+endIf
+
 endFunction 

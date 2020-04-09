@@ -46,9 +46,9 @@ public class JppVirtualMachine {
 	public static final char NUMBER_1 = 92;
 	public static final char NUMBER_0 = 91;
 	
-	public static final byte PARAMETERS_START = 85;
+	public static final byte PARAMETERS_START = 66;
 	public static final byte COMPONENTS_START = 1;
-	public static final byte ARRAY_INDICES_START = 1;
+	public static final byte ARRAY_INDICES_START = 72;
 	public static final byte TYPES_START = 119;
 	
 	public static final char FIXED_POINT = 8;	
@@ -137,7 +137,7 @@ public class JppVirtualMachine {
 	boolean parseFunctionDeclaration(int codeIndex) {
 		if(code[codeIndex] == KEYWORD_FUNCTION) {
 			// - 1 because the compiler adds 1 to avoid names with character 0
-			int componentIndex = (int)code[codeIndex + 1] - 1;
+			int componentIndex = (int)code[codeIndex + 1] - COMPONENTS_START;
 			// jooCodeIndex + 3 because (KEYWORD_FUNCTION + name + lineBreak)
 			components[componentIndex] = codeIndex + 3;
 			return true;
@@ -146,8 +146,8 @@ public class JppVirtualMachine {
 	}	
 	
 	boolean parseVariableDeclaration(int codeIndex) {
-		int componentIndex = (int)code[codeIndex] - 1;
-		char componentType = parseComponentType(componentIndex);
+		int componentIndex = (int)code[codeIndex] - COMPONENTS_START;
+		char componentType = interpretComponentType(componentIndex);
 		if(code[codeIndex + 1] != LINE_BREAK) {
 			// if variable is char or array there is no number behind the variable name
 			// as the array sizes are expressed as a char to make code smaller
@@ -168,43 +168,53 @@ public class JppVirtualMachine {
 		return false;
 	}
 	
+	int parseNumber(int codeIndex) {
+		if((code[codeIndex] >= NUMBER_0) && (code[codeIndex] <= NUMBER_9)) {
+			int result = 0;
+			int index = 100000;
+			for (int i = codeIndex; code[i] != LINE_BREAK; i++) {
+				index /= 10;
+				result += (code[i] - NUMBER_0) * index;
+			}
+			return result / index;
+		}
+		return -1;
+	}
+	
 	void interpretFunction(char functionIndex) {
+		boolean if0 = ifs[0];
+		boolean if1 = ifs[1];
+		boolean if2 = ifs[2];
+		boolean if3 = ifs[3];
+		boolean if4 = ifs[4];
+		boolean if5 = ifs[5];
 		int startCodeIndex = components[functionIndex];
 		int codeIndex = startCodeIndex;
 		byte allIfs = -1;
 		boolean canInterpretCode = true;
 		for (int i = codeIndex; i < codeSize; i++) {
-			if(code[i] == LINE_BREAK) {
+			if((code[i] == LINE_BREAK) && (i + 1 < codeSize)) {
 				codeIndex = i + 1;
 			} 
 			else if (i != startCodeIndex) {
 				continue;
 			}
+			else if(code[codeIndex] == KEYWORD_FUNCTION) {
+				break;
+			}
 			switch (code[codeIndex]) {
 			case KEYWORD_IF:
-				if(code[codeIndex + 1] == LINE_BREAK) {
-					if(allIfs > 0) {
-						canInterpretCode = ifs[--allIfs];						
-					} else {
-						canInterpretCode = true;	
-					}
-				} else {
-					allIfs++;
-					canInterpretCode = interpretVariableOperation(codeIndex + 1);
-					ifs[allIfs] = canInterpretCode;
-				}				
+				allIfs = interpretIfOperation(codeIndex, allIfs);
+				canInterpretCode = ifs[allIfs];
 				break;
 			case KEYWORD_ELSE:
-				if((allIfs > 0) && ifs[allIfs - 1]) {
-					canInterpretCode = !ifs[allIfs];
-				} else { // if there is only 1 if
-					canInterpretCode = !ifs[allIfs];
-				}
+				canInterpretCode = interpretElseOperation(allIfs, canInterpretCode);
 				break;
 			case KEYWORD_FUNCTION_CALL:
-				
+				if(canInterpretCode) {
+					interpretFunctionCall(codeIndex);
+				}
 				break;
-			// this function ends where another function starts
 			case KEYWORD_FUNCTION:				
 				return;
 			default:
@@ -214,23 +224,85 @@ public class JppVirtualMachine {
 				break;
 			}
 		}
+		ifs[0] = if0;
+		ifs[1] = if1;
+		ifs[2] = if2;
+		ifs[3] = if3;
+		ifs[4] = if4;
+		ifs[5] = if5;
+	}
+	
+	byte interpretIfOperation(int codeIndex, byte allIfs) {
+		if(code[codeIndex + 1] == LINE_BREAK) {
+			if(allIfs > 0) {
+				allIfs--;						
+			} else {
+				ifs[allIfs] = true;	
+			}
+		} else {
+			allIfs++;
+			ifs[allIfs] = interpretVariableOperation(codeIndex + 1);
+		}
+		return allIfs;
+	}
+	
+	boolean interpretElseOperation(byte allIfs, boolean canInterpretCode) {
+		if((allIfs > 0) && ifs[allIfs - 1]) {
+			return !canInterpretCode;
+		} else { // if there is only 1 if
+			return !canInterpretCode;
+		}
+	}
+	
+	void interpretFunctionCall(int codeIndex) {
+		codeIndex++;
+		int parameter0 = parameters[0];
+		int parameter1 = parameters[1];
+		int parameter2 = parameters[2];
+		int parameter3 = parameters[3];
+		int parameter4 = parameters[4];
+		int parameter5 = parameters[5];
+		byte currentParameter = 0;
+		for (int i = codeIndex; code[i] != LINE_BREAK; i++) {
+			if(code[i] == KEYWORD_PARAMETER) {
+				int parameterIndex = code[i + 1] - COMPONENTS_START;
+				char arrayIndex = code[i + 2];
+				if((arrayIndex != KEYWORD_PARAMETER) && (arrayIndex != LINE_BREAK)) {
+					// don't subtract ARRAY_INDICES_START because its used to know if it's an array index
+					parameterIndex = components[parameterIndex] + arrayIndex;
+				}
+				parameters[currentParameter++] = parameterIndex;
+			} else {
+				continue;
+			}
+		}
+		interpretFunction((char) (code[codeIndex] - COMPONENTS_START));
+		parameters[0] = parameter0;
+		parameters[1] = parameter1;
+		parameters[2] = parameter2;
+		parameters[3] = parameter3;
+		parameters[4] = parameter4;
+		parameters[5] = parameter5;
 	}
 	
 	boolean interpretVariableOperation(int codeIndex) {
-		int variable0Index = code[codeIndex] - 1;
-		int variable0ArrayIndex = code[codeIndex + 1] - 1;
-		char variable0Type = parseComponentType(variable0Index);
+		int variable0Index = code[codeIndex] - COMPONENTS_START;
+		if(variable0Index >= PARAMETERS_START - COMPONENTS_START) {
+			variable0Index = parameters[(variable0Index - PARAMETERS_START) + COMPONENTS_START];
+		}
+		char variable0Type = interpretComponentType(variable0Index);
 		// if is array
 		if(variable0Type <= TYPE_ARRAY_INT) {
 			// if variable0 is an array there is a array index behind variable0Index
 			codeIndex++;
 		}
 		char operator = code[codeIndex + 1];
-		int variable1Value = parseOperationValue(codeIndex);
+		int variable1Value = interpretOperationValue(codeIndex);
 		// if is not array
 		if(variable0Type > TYPE_ARRAY_INT) {
 			return interpretVariableOperation(variable0Type, variable0Index, operator, variable1Value, components);
 		} else {
+			int variable0ArrayIndex = code[codeIndex] - ARRAY_INDICES_START;
 			// get index in arrays array
 			variable0Index = components[variable0Index] + variable0ArrayIndex;
 			// convert array type to primitive type
@@ -239,21 +311,24 @@ public class JppVirtualMachine {
 		}
 	}
 	
-	int parseOperationValue(int codeIndex) {
-		int variable1Index = code[codeIndex + 2] - 1;
-		int variable1ArrayIndex = code[codeIndex + 3] - 1;
-		char variable1Type = parseComponentType(variable1Index);
+	int interpretOperationValue(int codeIndex) {
 		int variable1Value = parseNumber(codeIndex + 2);
 		// if is not number get variable value
 		if(variable1Value == -1) {
+			int variable1Index = code[codeIndex + 2] - COMPONENTS_START;
 			// if TYPE_CHAR after the operator then it's a char value
 			if((variable1Index + 1) == TYPE_CHAR) {
-				variable1Value = variable1ArrayIndex;
+				variable1Value = code[codeIndex + 3];
 			} else {
+				if(variable1Index >= PARAMETERS_START - COMPONENTS_START) {
+					variable1Index = parameters[(variable1Index - PARAMETERS_START) + COMPONENTS_START];
+				}
+				char variable1Type = interpretComponentType(variable1Index);
 				// if is not array
 				if(variable1Type > TYPE_ARRAY_INT) {
 					variable1Value = components[variable1Index];
 				} else {
+					int variable1ArrayIndex = code[codeIndex + 3] - ARRAY_INDICES_START;
 					variable1Value = arrays[components[variable1Index] + variable1ArrayIndex];
 				}
 			}
@@ -304,7 +379,7 @@ public class JppVirtualMachine {
 		return false;
 	}
 	
-	char parseComponentType(int componentIndex) {
+	char interpretComponentType(int componentIndex) {
 		if(componentIndex < componentIndexes[TYPE_FIXED - TYPES_START]) {
 			return TYPE_INT;
 		}
@@ -331,18 +406,5 @@ public class JppVirtualMachine {
 		} else {
 			return TYPE_FUNCTION;
 		}
-	}
-	
-	int parseNumber(int codeIndex) {
-		if((code[codeIndex] >= NUMBER_0) && (code[codeIndex] <= NUMBER_9)) {
-			int result = 0;
-			int index = 100000;
-			for (int i = codeIndex; code[i] != LINE_BREAK; i++) {
-				index /= 10;
-				result += (code[i] - NUMBER_0) * index;
-			}
-			return result / index;
-		}
-		return -1;
 	}
 }
