@@ -1,3 +1,26 @@
+/*
+MIT License
+
+Copyright (c) 2019 John´s Project
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+ */
 package com.johnsproject.joo;
 
 import com.johnsproject.joo.util.FileUtil;
@@ -64,42 +87,43 @@ public class JooConsoleApp {
 	
 	public static JooVirtualMachine runCode(String path, boolean startThread) {
 		String compiledCode = "";
-		if(path.contains(JooCompiler.CODE_ENDING)) {
-			compiledCode = compileCode(path).getBytecode();
-		} else if(path.contains(JooCompiler.BYTECODE_ENDING)) {
-			compiledCode = FileUtil.read(path);
-		}
-		System.out.print("Starting vm... ");
-		final JooVirtualMachine jooVM = new JooVirtualMachine();
-		final char[] jooCode = compiledCode.toCharArray();
-		final char[] vmCode = jooVM.getCode();
-		jooVM.setJooCodeSize((short) jooCode.length);
-		for (int i = 0; i < jooCode.length; i++) {
-			vmCode[i] = jooCode[i];
-		}
-		System.out.println("succesfully started!");
-		jooVM.initialize();
-		if(startThread) {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					jooVM.start();
-				}
-			}).start();
-		}
-		return jooVM;
+//		if(path.contains(JooCompiler.CODE_ENDING)) {
+//			compiledCode = compileCode(path).getBytecode();
+//		} else if(path.contains(JooCompiler.BYTECODE_ENDING)) {
+//			compiledCode = FileUtil.read(path);
+//		}
+//		System.out.print("Starting vm... ");
+//		final JooVirtualMachine jooVM = new JooVirtualMachine();
+//		final char[] jooCode = compiledCode.toCharArray();
+//		final char[] vmCode = jooVM.getCode();
+//		jooVM.setJooCodeSize((short) jooCode.length);
+//		for (int i = 0; i < jooCode.length; i++) {
+//			vmCode[i] = jooCode[i];
+//		}
+//		System.out.println("succesfully started!");
+//		jooVM.initialize();
+//		if(startThread) {
+//			new Thread(new Runnable() {
+//				@Override
+//				public void run() {
+//					jooVM.start();
+//				}
+//			}).start();
+//		}
+//		return jooVM;
+		return new JooVirtualMachine();
 	}
 	
 	public static JooCompiler compileCode(String path) {
 		final JooCompiler compiler = new JooCompiler();
-		System.out.print("Compiling code... ");
-		final String compiledCode = compiler.compileProject(path);
-		System.out.println("succesfully compiled!");
-		System.out.println("Variables:\t" + compiler.getVariableCount() + " / " + (VARIABLES_END - VARIABLES_START));
-		System.out.println("Functions:\t" + compiler.getFunctionCount() + " / " + (FUNCTIONS_END - FUNCTIONS_START));
-		System.out.println("Arrays:\t\t" + compiler.getArrayCount() + " / " + (ARRAYS_END - ARRAYS_START));
-		System.out.println("Arrays size:\t" + compiler.getArraysSize() + " / 100");
-		System.out.println("Code size:\t" + compiledCode.length() + " / 1024 bytes");
+//		System.out.print("Compiling code... ");
+//		final String compiledCode = compiler.compileProject(path);
+//		System.out.println("succesfully compiled!");
+//		System.out.println("Variables:\t" + compiler.getVariableCount() + " / " + (VARIABLES_END - VARIABLES_START));
+//		System.out.println("Functions:\t" + compiler.getFunctionCount() + " / " + (FUNCTIONS_END - FUNCTIONS_START));
+//		System.out.println("Arrays:\t\t" + compiler.getArrayCount() + " / " + (ARRAYS_END - ARRAYS_START));
+//		System.out.println("Arrays size:\t" + compiler.getArraysSize() + " / 100");
+//		System.out.println("Code size:\t" + compiledCode.length() + " / 1024 bytes");
 		return compiler;
 	}
 }

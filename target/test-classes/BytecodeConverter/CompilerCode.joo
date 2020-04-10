@@ -1,7 +1,0 @@
-
-int test = 10
-
-function Start
-test += 10
-
-endFunction
