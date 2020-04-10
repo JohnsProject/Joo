@@ -67,17 +67,17 @@ public class JooConsoleApp {
 	}
 	
 	public static void showHelp() {
-		String fileContent = FileUtil.readResource(PATH_HELP);
+		String fileContent = FileUtil.read(PATH_HELP);
 		System.out.println(fileContent);
 	}
 	
 	public static void showDoc() {
-		String fileContent = FileUtil.readResource(PATH_DOC);
+		String fileContent = FileUtil.read(PATH_DOC);
 		System.out.println(fileContent);
 	}
 	
 	public static void createTemplate(String path) {
-		String fileContent = FileUtil.readResource(PATH_TEMPLATE);
+		String fileContent = FileUtil.read(PATH_TEMPLATE);
 		FileUtil.write(path, fileContent);
 	} 
 	

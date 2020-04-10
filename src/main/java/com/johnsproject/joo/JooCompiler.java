@@ -23,8 +23,13 @@ SOFTWARE.
  */
 package com.johnsproject.joo;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+
+import com.johnsproject.joo.util.FileUtil;
 
 public class JooCompiler {
 
@@ -68,22 +73,7 @@ public class JooCompiler {
 	
 	public static final int FIXED_POINT = 255;
 	
-	public static final String[] COMPILER_COMPARATORS = new String[] {
-			COMPARATOR_SMALLER_EQUALS,
-			COMPARATOR_BIGGER_EQUALS,
-			COMPARATOR_SMALLER,
-			COMPARATOR_BIGGER,
-			COMPARATOR_EQUALS,
-			COMPARATOR_NOT_EQUALS,
-	};
-	
-	public static final String[] COMPILER_OPERATORS = new String[] {
-			OPERATOR_ADD,
-			OPERATOR_SUBTRACT,
-			OPERATOR_MULTIPLY,
-			OPERATOR_DIVIDE,
-			OPERATOR_SET_EQUALS,
-	};
+	public static final String PATH_COMPILER_CONFIG = "JooCompilerConfig.jcc";
 	
 	public static final String[] COMPILER_TYPES = new String[] {
 			TYPE_INT,
@@ -94,23 +84,6 @@ public class JooCompiler {
 			TYPE_FIXED + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END,
 			TYPE_BOOL + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END,
 			TYPE_CHAR + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END,
-	};
-	
-	public static final char[] VM_COMPARATORS = new char[] {
-			JooVirtualMachine.COMPARATOR_SMALLER_EQUALS,
-			JooVirtualMachine.COMPARATOR_BIGGER_EQUALS,
-			JooVirtualMachine.COMPARATOR_SMALLER,
-			JooVirtualMachine.COMPARATOR_BIGGER,
-			JooVirtualMachine.COMPARATOR_EQUALS,
-			JooVirtualMachine.COMPARATOR_NOT_EQUALS,
-	};
-	
-	public static final char[] VM_OPERATORS = new char[] {
-			JooVirtualMachine.OPERATOR_ADD,
-			JooVirtualMachine.OPERATOR_SUBTRACT,
-			JooVirtualMachine.OPERATOR_MULTIPLY,
-			JooVirtualMachine.OPERATOR_DIVIDE,
-			JooVirtualMachine.OPERATOR_SET_EQUALS,
 	};
 	
 	public static final char[] VM_TYPES = new char[] {
@@ -127,7 +100,6 @@ public class JooCompiler {
 	private char name;
 	
 	public JooCompiler() {
-		// starts at 1 because 0 character is null character
 		name = JooVirtualMachine.COMPONENTS_START;
 	}
 	
@@ -135,29 +107,75 @@ public class JooCompiler {
 	 * This method compiles the human readable joo code in the code string
 	 * to joo virtual machine readable joo code.
 	 * 
-	 * @param code human readable joo code.
+	 * @param path human readable joo code path.
 	 * @return joo virtual machine readable joo code.
 	 */
-	String compile(final String code) {
-		// starts at 1 because 0 character is null character
+	String compile(final String path) {
 		name = JooVirtualMachine.COMPONENTS_START;
-		final String[] codeLines = getJooLines(code);		
+		String directoryPath = getDirectoryPath(path);
+		String jooCode = FileUtil.read(path);
+		List<String> operators = new ArrayList<>();
+		List<String> nativeFunctions = new ArrayList<>();
+		parseConfig(directoryPath, operators, nativeFunctions);
+		final String[] codeLines = getLines(jooCode);		
 		final Map<String, Variable>[] variables = parseVariables(codeLines);
-		final Map<String, Function> functions = parseFunctions(codeLines, variables);
+		final Map<String, Function> functions = parseFunctions(codeLines, operators, variables);
 		String compiledJooCode = "";
 		compiledJooCode = writeVariablesAndFunctions(compiledJooCode, variables, functions);
-		compiledJooCode = writeFunctionsAndOperations(compiledJooCode, variables, functions);
+		compiledJooCode = writeFunctionsAndOperations(compiledJooCode, variables, functions, nativeFunctions);
 		return compiledJooCode;
 	}
 	
+	private String getDirectoryPath(String path) {
+		String[] pathPieces = path.split("\\" + File.separator);
+		String codeDirectoryPath = "";
+		for (int i = 0; i < pathPieces.length - 1; i++) {
+			codeDirectoryPath += pathPieces[i] + File.separator;
+		}
+		return codeDirectoryPath;
+	}
+	
+	void parseConfig(String directoryPath, List<String> operators, List<String> nativeFunctions) {
+		directoryPath += PATH_COMPILER_CONFIG;
+		final String config;
+		if(FileUtil.fileExists(directoryPath)) {
+			config = FileUtil.read(directoryPath);
+		} else {
+			config = FileUtil.read(PATH_COMPILER_CONFIG);
+		}
+		final String[] configLines = getLines(config);
+		int currentType = -1;
+		for (int i = 0; i < configLines.length; i++) {
+			if(configLines[i].contains(KEYWORD_COMMENT) || configLines[i].isEmpty()) {
+				continue;
+			}
+			else if(configLines[i].equals("@OPERATORS")) {
+				currentType = 0;
+				continue;
+			}
+			else if(configLines[i].equals("@FUNCTIONS")) {
+				currentType = 1;
+				continue;
+			}
+			switch (currentType) {
+			case 0:
+				operators.add(configLines[i]);
+				break;
+			case 1:
+				nativeFunctions.add(configLines[i]);
+				break;
+			}
+		}
+	}
+	
 	/**
-	 * This method splits up the code string to a string array of joo code lines. 
+	 * This method splits up the code string to a string array of code lines. 
 	 * It's a new method be cause it's also used by unit tests.
 	 * 
 	 * @param code
-	 * @return string array of joo code lines. 
+	 * @return string array of code lines. 
 	 */
-	String[] getJooLines(final String code) {
+	String[] getLines(final String code) {
 		return code.replace("\r", "").split(LINE_BREAK);
 	}
 	
@@ -167,10 +185,11 @@ public class JooCompiler {
 	 * line is set to empty string to avoid conflict with other search methods.
 	 * 
 	 * @param codeLines
+	 * @param operators
 	 * @param variables
 	 * @return map of functions that contains the function names as keys and the function objects as values.
 	 */
-	Map<String, Function> parseFunctions(String[] codeLines, final Map<String, Variable>[] variables) {
+	Map<String, Function> parseFunctions(String[] codeLines, final List<String> operators, final Map<String, Variable>[] variables) {
 		Map<String, Function> functions = new LinkedHashMap<>();
 		Function currentFunction = null;
 		for (int i = 0; i < codeLines.length; i++) {
@@ -185,7 +204,7 @@ public class JooCompiler {
 				codeLines[i] = "";
 			}
 			if(currentFunction != null) {
-				Operation operation = parseOperation(codeLine, variables, currentFunction.getParameters());
+				Operation operation = parseOperation(codeLine, operators, variables, currentFunction.getParameters());
 				if(operation != null) {
 					currentFunction.addOperation(operation);
 				}
@@ -319,11 +338,12 @@ public class JooCompiler {
 	 * 
 	 * 
 	 * @param codeLine
+	 * @param operators
 	 * @param variables
 	 * @param parameters
 	 * @return Operation object if operation can be parsed, null if it's a comment or unknown operation.
 	 */
-	private Operation parseOperation(String codeLine, final Map<String, Variable>[] variables, final Map<String, String> parameters) {		
+	private Operation parseOperation(String codeLine, final List<String> operators, final Map<String, Variable>[] variables, final Map<String, String> parameters) {		
 		if(codeLine.contains(KEYWORD_COMMENT)) {
 			return null;
 		}
@@ -334,7 +354,7 @@ public class JooCompiler {
 		}
 		else if(codeLine.contains(KEYWORD_IF + " ")) {
 			codeLine = codeLine.replace(" ", "").replaceFirst(KEYWORD_IF, "");
-			parseBinaryOperation(codeLine, variables, parameters, COMPILER_COMPARATORS, VM_COMPARATORS, operation);
+			parseBinaryOperation(codeLine, variables, parameters, operators, operation);
 			operation.isCondition(true);
 		}
 		else if(codeLine.contains(KEYWORD_ELSE)) {
@@ -350,7 +370,7 @@ public class JooCompiler {
 			operation.setOperator(JooVirtualMachine.KEYWORD_FUNCTION);
 		} else { // if all if's failed it means the operation is a variable operation
 			codeLine = codeLine.replace(" ", "");
-			parseBinaryOperation(codeLine, variables, parameters, COMPILER_OPERATORS, VM_OPERATORS, operation);
+			parseBinaryOperation(codeLine, variables, parameters, operators, operation);
 		}
 		// if operator is null the operation could not be parsed
 		if(operation.getOperator() == 0) {
@@ -381,13 +401,12 @@ public class JooCompiler {
 	 * @param codeLine
 	 * @param variables
 	 * @param parameters
-	 * @param compilerOperators
-	 * @param vmOperators
+	 * @param operators
 	 * @param operation
 	 */
 	private void parseBinaryOperation(String codeLine, final Map<String, Variable>[] variables, final Map<String, String> parameters,
-																				String[] compilerOperators, char[] vmOperators, Operation operation) {
-		String[] operationData = parseBinaryOperationVariablesAndOperator(codeLine, compilerOperators, vmOperators, operation);
+																				List<String> operators, Operation operation) {
+		String[] operationData = parseBinaryOperationVariablesAndOperator(codeLine, operators, operation);
 		if(operationData != null) {
 			if(operationData[0].contains(KEYWORD_ARRAY_START)) {
 				String[] variableData = operationData[0].replace(KEYWORD_ARRAY_END, "").split("\\" + KEYWORD_ARRAY_START);
@@ -412,18 +431,17 @@ public class JooCompiler {
 	 * after the operator. It also sets the operator in the Operation object.
 	 * 
 	 * @param codeLine
-	 * @param compilerOperators
-	 * @param vmOperators
+	 * @param operators
 	 * @param operation
 	 * @return variables before and after the operator.
 	 */
-	private String[] parseBinaryOperationVariablesAndOperator(String codeLine, String[] compilerOperators, char[] vmOperators, Operation operation) {
+	private String[] parseBinaryOperationVariablesAndOperator(String codeLine, List<String> operators, Operation operation) {
 		String[] operationData = null;
-		for (int i = 0; i < compilerOperators.length; i++) {
-			if(codeLine.contains(compilerOperators[i])) {
-				operation.setOperator(vmOperators[i]);
+		for (int i = 0; i < operators.size(); i++) {
+			if(codeLine.contains(operators.get(i))) {
+				operation.setOperator((char) (i + JooVirtualMachine.OPERATORS_START));
 				// some characters like '+' need a backslash in front of it
-				String possibleOperator = compilerOperators[i];
+				String possibleOperator = operators.get(i);
 				if(possibleOperator.equals(OPERATOR_ADD)) {
 					possibleOperator = "\\" + OPERATOR_ADD;
 				}
@@ -523,9 +541,10 @@ public class JooCompiler {
 	 * @param code
 	 * @param variables
 	 * @param functions
+	 * @param nativeFunctions
 	 * @return
 	 */
-	String writeFunctionsAndOperations(String code, final Map<String, Variable>[] variables, final Map<String, Function> functions) {
+	String writeFunctionsAndOperations(String code, final Map<String, Variable>[] variables, final Map<String, Function> functions, List<String> nativeFunctions) {
 		for (Function function : functions.values()) {
 			// doesn't need the parameters in the function declaration, the parameters are already listed in function call
 			code += "" + JooVirtualMachine.KEYWORD_FUNCTION + function.getName() + JooVirtualMachine.LINE_BREAK;
@@ -537,6 +556,12 @@ public class JooCompiler {
 				if(operation.getOperator() == JooVirtualMachine.KEYWORD_FUNCTION_CALL) {
 					if(functions.containsKey(operation.getVariable1Name())) {
 						code += "" + functions.get(operation.getVariable1Name()).getName();
+					} else {
+						for (int i = 0; i < nativeFunctions.size(); i++) {
+							if(nativeFunctions.get(i).equals(operation.getVariable1Name())) {
+								code += "" + (char)(i + JooVirtualMachine.NATIVE_FUNCTIONS_START);
+							}
+						}
 					}
 				}
 				code = writeOperationParameters(code, variables, operation);

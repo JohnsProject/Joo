@@ -1,3 +1,5 @@
+# This is a example code used to test the joo
+# programming language
 
 int intTest0
 int intTest1 = 10
@@ -127,6 +129,11 @@ char[13] charTest
 endFunction
 
 function FunctionTest: int _paramTest0: int[] _paramTest1
+
+fixedTest1 += 25
+if fixedTest1 <= 80
+repeatFunction
+endIf
 
 _paramTest0 += 100
 _paramTest1[5] = _paramTest0

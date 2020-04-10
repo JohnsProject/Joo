@@ -1,5 +1,7 @@
 package com.johnsproject.joo;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -13,9 +15,8 @@ public class JooCompilerTest {
 
 	@Test
 	public void compileTest() throws Exception {
-		final String jooCode = FileUtil.readResource("TestCode.joo");
 		final JooCompiler jooCompiler = new JooCompiler();
-		final String compiledJooCode = jooCompiler.compile(jooCode);
+		final String compiledJooCode = jooCompiler.compile("TestCode.joo");
 		final String[] jooLines = compiledJooCode.split("" + JooVirtualMachine.LINE_BREAK);
 		
 		final char intTest0Name = 0 + JooVirtualMachine.COMPONENTS_START;
@@ -151,6 +152,10 @@ public class JooCompilerTest {
 				+ JooVirtualMachine.KEYWORD_PARAMETER + intTest0Name 
 				+ JooVirtualMachine.KEYWORD_PARAMETER + intTestName);
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION + functionTestName);
+		assertEquals(jooLines[line++], "" + fixedTest1Name + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("" + Math.round(25f * 255)));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + fixedTest1Name + JooVirtualMachine.COMPARATOR_SMALLER_EQUALS + toVirtualMachineNumber("" + Math.round(80f * 255)));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION_REPEAT);
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
 		assertEquals(jooLines[line++], "" + paramTest0Name + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("100"));
 		assertEquals(jooLines[line++], "" + paramTest1Name + toIndex(5) + JooVirtualMachine.OPERATOR_SET_EQUALS + paramTest0Name);
 		assertEquals(jooLines[line++], "" + paramTest1Name + toIndex(4) + JooVirtualMachine.OPERATOR_SET_EQUALS + paramTest1Name + toIndex(5));
@@ -166,9 +171,9 @@ public class JooCompilerTest {
 	
 	@Test
 	public void parseVariablesTest() throws Exception {
-		final String jooCode = FileUtil.readResource("TestCode.joo");
+		final String jooCode = FileUtil.read("TestCode.joo");
 		final JooCompiler jooCompiler = new JooCompiler();
-		final String[] jooLines = jooCompiler.getJooLines(jooCode);
+		final String[] jooLines = jooCompiler.getLines(jooCode);
 		final Map<String, Variable>[] variables = jooCompiler.parseVariables(jooLines);
 		
 		int type = 0;
@@ -213,11 +218,14 @@ public class JooCompilerTest {
 	
 	@Test
 	public void parseFunctionsTest() throws Exception {
-		final String jooCode = FileUtil.readResource("TestCode.joo");
+		final String jooCode = FileUtil.read("TestCode.joo");
 		final JooCompiler jooCompiler = new JooCompiler();
-		final String[] jooLines = jooCompiler.getJooLines(jooCode);
+		List<String> operators = new ArrayList<>();
+		List<String> nativeFunctions = new ArrayList<>();
+		jooCompiler.parseConfig("", operators, nativeFunctions);
+		final String[] jooLines = jooCompiler.getLines(jooCode);
 		final Map<String, Variable>[] variables = jooCompiler.parseVariables(jooLines);
-		final Map<String, Function> functions = jooCompiler.parseFunctions(jooLines, variables);
+		final Map<String, Function> functions = jooCompiler.parseFunctions(jooLines, operators, variables);
 		
 		final Function start = functions.get("Start");
 		final Function functionTest = functions.get("FunctionTest");
@@ -688,6 +696,26 @@ public class JooCompilerTest {
 		
 		
 		currentOperationIndex = 0;
+		
+		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.getVariable0Name(), "fixedTest1");
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentOperation.getValue(), "" + Math.round(25 * 255));
+		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
+		
+		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.isCondition(), true);
+		assertEquals(currentOperation.getVariable0Name(), "fixedTest1");
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER_EQUALS);
+		assertEquals(currentOperation.getValue(),  "" + Math.round(80 * 255));
+		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
+		
+		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_FUNCTION_REPEAT);
+		
+		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_IF);
+		
 		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "_paramTest0");
 		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
@@ -753,11 +781,14 @@ public class JooCompilerTest {
 	
 	@Test
 	public void writeVariablesAndFunctionsTest() throws Exception {
-		final String jooCode = FileUtil.readResource("TestCode.joo");
+		final String jooCode = FileUtil.read("TestCode.joo");
 		final JooCompiler jooCompiler = new JooCompiler();
-		String[] jooLines = jooCompiler.getJooLines(jooCode);
+		List<String> operators = new ArrayList<>();
+		List<String> nativeFunctions = new ArrayList<>();
+		jooCompiler.parseConfig("", operators, nativeFunctions);
+		String[] jooLines = jooCompiler.getLines(jooCode);
 		final Map<String, Variable>[] variables = jooCompiler.parseVariables(jooLines);
-		final Map<String, Function> functions = jooCompiler.parseFunctions(jooLines, variables);
+		final Map<String, Function> functions = jooCompiler.parseFunctions(jooLines, operators, variables);
 		String compiledJooCode = "";
 		compiledJooCode = jooCompiler.writeVariablesAndFunctions(compiledJooCode, variables, functions);
 		jooLines = compiledJooCode.split("" + JooVirtualMachine.LINE_BREAK);
@@ -808,13 +839,16 @@ public class JooCompilerTest {
 	
 	@Test
 	public void writeFunctionsAndOperationsTest() throws Exception {
-		final String jooCode = FileUtil.readResource("TestCode.joo");
+		final String jooCode = FileUtil.read("TestCode.joo");
 		final JooCompiler jooCompiler = new JooCompiler();
-		String[] jooLines = jooCompiler.getJooLines(jooCode);
+		List<String> operators = new ArrayList<>();
+		List<String> nativeFunctions = new ArrayList<>();
+		jooCompiler.parseConfig("", operators, nativeFunctions);
+		String[] jooLines = jooCompiler.getLines(jooCode);
 		final Map<String, Variable>[] variables = jooCompiler.parseVariables(jooLines);
-		final Map<String, Function> functions = jooCompiler.parseFunctions(jooLines, variables);
+		final Map<String, Function> functions = jooCompiler.parseFunctions(jooLines, operators, variables);
 		String compiledJooCode = "";
-		compiledJooCode = jooCompiler.writeFunctionsAndOperations(compiledJooCode, variables, functions);
+		compiledJooCode = jooCompiler.writeFunctionsAndOperations(compiledJooCode, variables, functions, nativeFunctions);
 		jooLines = compiledJooCode.split("" + JooVirtualMachine.LINE_BREAK);
 		
 		final char intTest0Name = 0 + JooVirtualMachine.COMPONENTS_START;
@@ -938,6 +972,10 @@ public class JooCompilerTest {
 				+ JooVirtualMachine.KEYWORD_PARAMETER + intTest0Name 
 				+ JooVirtualMachine.KEYWORD_PARAMETER + intTestName);
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION + functionTestName);
+		assertEquals(jooLines[line++], "" + fixedTest1Name + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("" + Math.round(25f * 255)));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + fixedTest1Name + JooVirtualMachine.COMPARATOR_SMALLER_EQUALS + toVirtualMachineNumber("" + Math.round(80f * 255)));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION_REPEAT);
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
 		assertEquals(jooLines[line++], "" + paramTest0Name + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("100"));
 		assertEquals(jooLines[line++], "" + paramTest1Name + toIndex(5) + JooVirtualMachine.OPERATOR_SET_EQUALS + paramTest0Name);
 		assertEquals(jooLines[line++], "" + paramTest1Name + toIndex(4) + JooVirtualMachine.OPERATOR_SET_EQUALS + paramTest1Name + toIndex(5));

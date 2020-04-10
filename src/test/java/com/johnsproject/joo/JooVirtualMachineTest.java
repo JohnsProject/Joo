@@ -11,9 +11,8 @@ public class JooVirtualMachineTest {
 	
 	@Test
 	public void initializeTest() throws Exception {
-		final String jooCode = FileUtil.readResource("TestCode.joo");
 		final JooCompiler jooCompiler = new JooCompiler();
-		final String compiledJooCode = jooCompiler.compile(jooCode);
+		final String compiledJooCode = jooCompiler.compile("TestCode.joo");
 		final JooVirtualMachine jooVM = new JooVirtualMachine();
 		jooVM.initialize(compiledJooCode.toCharArray());
 		
@@ -58,9 +57,8 @@ public class JooVirtualMachineTest {
 	
 	@Test
 	public void startTest() throws Exception {
-		final String jooCode = FileUtil.readResource("TestCode.joo");
 		final JooCompiler jooCompiler = new JooCompiler();
-		final String compiledJooCode = jooCompiler.compile(jooCode);
+		final String compiledJooCode = jooCompiler.compile("TestCode.joo");
 		final JooVirtualMachine jooVM = new JooVirtualMachine();
 		jooVM.initialize(compiledJooCode.toCharArray());
 		jooVM.start();
@@ -79,7 +77,7 @@ public class JooVirtualMachineTest {
 		assertEquals(jooVM.getComponents()[intIndex + 1], 6);
 		assertEquals(jooVM.getComponents()[intIndex + 2], 13);
 		assertEquals(jooVM.getComponents()[fixedIndex + 0], 12759);
-		assertEquals(jooVM.getComponents()[fixedIndex + 1], 12750);
+		assertEquals(jooVM.getComponents()[fixedIndex + 1], 25500);
 		assertEquals(jooVM.getComponents()[boolIndex + 0], 1);
 		assertEquals(jooVM.getComponents()[boolIndex + 1], 0);
 		assertEquals(jooVM.getComponents()[boolIndex + 2], 0);

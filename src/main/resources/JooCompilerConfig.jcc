@@ -1,3 +1,17 @@
+@OPERATORS
+<=
+>=
+<
+>
+==
+!=
++=
+-=
+*=
+/=
+=
+
+@FUNCTIONS
 Print
 PrintLine
 Copy

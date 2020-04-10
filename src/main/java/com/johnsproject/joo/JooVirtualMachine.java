@@ -42,19 +42,6 @@ public class JooVirtualMachine {
 	public static final char KEYWORD_FUNCTION_CALL = 115;
 	public static final char KEYWORD_FUNCTION_REPEAT = 114;
 	public static final char KEYWORD_PARAMETER = 113;
-
-	public static final char COMPARATOR_SMALLER = 112;
-	public static final char COMPARATOR_BIGGER = 111;
-	public static final char COMPARATOR_SMALLER_EQUALS = 110;
-	public static final char COMPARATOR_BIGGER_EQUALS = 109;
-	public static final char COMPARATOR_EQUALS = 108;
-	public static final char COMPARATOR_NOT_EQUALS = 107;
-	
-	public static final char OPERATOR_ADD = 106;
-	public static final char OPERATOR_SUBTRACT = 105;
-	public static final char OPERATOR_MULTIPLY = 104;
-	public static final char OPERATOR_DIVIDE = 103;
-	public static final char OPERATOR_SET_EQUALS = 102;
 	
 	public static final char LINE_BREAK = 101;
 	
@@ -73,8 +60,26 @@ public class JooVirtualMachine {
 	public static final byte COMPONENTS_START = 1;
 	public static final byte ARRAY_INDEXES_START = 72;
 	public static final byte TYPES_START = 119;
+	public static final byte OPERATORS_START = 1;
+	public static final byte NATIVE_FUNCTIONS_START = 1;
 	
 	public static final char FIXED_POINT = 8;	
+
+	// operators need to be in the same order as in JooCompilerConfig.jcc
+	public static final char COMPARATOR_SMALLER_EQUALS = 0 + OPERATORS_START;
+	public static final char COMPARATOR_BIGGER_EQUALS = 1 + OPERATORS_START;
+	public static final char COMPARATOR_SMALLER = 2 + OPERATORS_START;
+	public static final char COMPARATOR_BIGGER = 3 + OPERATORS_START;
+	public static final char COMPARATOR_EQUALS = 4 + OPERATORS_START;
+	public static final char COMPARATOR_NOT_EQUALS = 5 + OPERATORS_START;
+	
+	public static final char OPERATOR_ADD = 6 + OPERATORS_START;
+	public static final char OPERATOR_SUBTRACT = 7 + OPERATORS_START;
+	public static final char OPERATOR_MULTIPLY = 8 + OPERATORS_START;
+	public static final char OPERATOR_DIVIDE = 9 + OPERATORS_START;
+	public static final char OPERATOR_SET_EQUALS = 10 + OPERATORS_START;
+	
+	public static final char FUNCTION_PRINT = 0 + NATIVE_FUNCTIONS_START;
 
 	private int codeSize = 0;
 	private byte[] componentIndexes = new byte[9];
@@ -233,13 +238,19 @@ public class JooVirtualMachine {
 			case KEYWORD_ELSE:
 				canInterpretCode = interpretElseOperation(allIfs, canInterpretCode);
 				break;
+			case KEYWORD_FUNCTION:				
+				return;
 			case KEYWORD_FUNCTION_CALL:
 				if(canInterpretCode) {
 					interpretFunctionCall(codeIndex);
 				}
 				break;
-			case KEYWORD_FUNCTION:				
-				return;
+			case KEYWORD_FUNCTION_REPEAT:
+				if(canInterpretCode) {
+					interpretFunction(functionIndex);
+					return;
+				}
+				break;
 			default:
 				if(canInterpretCode) {
 					interpretVariableOperation(codeIndex);

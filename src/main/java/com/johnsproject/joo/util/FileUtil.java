@@ -32,14 +32,65 @@ public final class FileUtil {
 			e.printStackTrace();
 		}
     }
-    
+	
+	/**
+	 * Checks if the file at the given path is exists or not.
+	 * 
+	 * @param path
+	 * @return
+	 */
+	public static boolean fileExists(String path) {
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+	    InputStream inputStream = classLoader.getResourceAsStream(path);
+	    if(inputStream == null) {
+	    	return new File(path).isFile();
+	    }
+	    return true;
+	}
+	
+	/**
+	 * Checks if the file at the given path is inside the resources folder or not.
+	 * 
+	 * @param path
+	 * @return
+	 */
+	public static boolean isResource(String path) {
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+	    InputStream inputStream = classLoader.getResourceAsStream(path);
+	    if(inputStream == null) {
+	    	return false;
+	    }
+	    return true;
+	}
+	
 	/**
 	 * Reads the string inside the file at the given path.
+	 * First tries to read the file from resources folder, if file is not present
+	 * tries to read the file from file system.
 	 * 
 	 * @param path
 	 * @return
 	 */
 	public static String read(String path) {
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+	    InputStream inputStream = classLoader.getResourceAsStream(path);
+	    if(inputStream == null) {
+	    	return readFromFile(path);
+	    }
+		StringBuilder stringBuilder = new StringBuilder();
+	    try {
+		    InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+		    BufferedReader reader = new BufferedReader(streamReader);
+			for (String line; (line = reader.readLine()) != null;) {
+				stringBuilder.append(line + "\n");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return stringBuilder.toString();
+	}
+	
+	private static String readFromFile(String path) {
     	StringBuilder stringBuilder = new StringBuilder();
     	try {
     		File file = new File(path);
@@ -58,26 +109,4 @@ public final class FileUtil {
 		}
     	return stringBuilder.toString();
     }
-	
-	/**
-	 * Reads the string inside file the has the given path in the resources folder.
-	 * 
-	 * @param path
-	 * @return
-	 */
-	public static String readResource(String path) {
-		StringBuilder stringBuilder = new StringBuilder();
-	    try {
-			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		    InputStream inputStream = classLoader.getResourceAsStream(path);
-		    InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-		    BufferedReader reader = new BufferedReader(streamReader);
-			for (String line; (line = reader.readLine()) != null;) {
-				stringBuilder.append(line + "\n");
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return stringBuilder.toString();
-	}
 }
