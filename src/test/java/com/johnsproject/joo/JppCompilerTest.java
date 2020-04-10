@@ -71,7 +71,7 @@ public class JppCompilerTest {
 		assertEquals(jooLines[line++], "" + intTest0Name + JppVirtualMachine.OPERATOR_SUBTRACT + intTest1Name);
 		assertEquals(jooLines[line++], "" + intTest0Name + JppVirtualMachine.OPERATOR_MULTIPLY + toVirtualMachineNumber("2"));
 		assertEquals(jooLines[line++], "" + intTest0Name + JppVirtualMachine.OPERATOR_DIVIDE + toVirtualMachineNumber("10"));
-		assertEquals(jooLines[line++], "" + intTest1Name + JppVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("20"));
+		assertEquals(jooLines[line++], "" + intTest1Name + JppVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("6"));
 		assertEquals(jooLines[line++], "" + fixedTest0Name + JppVirtualMachine.OPERATOR_ADD + fixedTest1Name);
 		assertEquals(jooLines[line++], "" + fixedTest0Name + JppVirtualMachine.OPERATOR_SUBTRACT + toVirtualMachineNumber("" + Math.round(0.5f * 255)));
 		assertEquals(jooLines[line++], "" + fixedTest0Name + JppVirtualMachine.OPERATOR_MULTIPLY + toVirtualMachineNumber("" + Math.round(2.5f * 255)));
@@ -154,8 +154,9 @@ public class JppCompilerTest {
 		assertEquals(jooLines[line++], "" + paramTest0Name + JppVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("100"));
 		assertEquals(jooLines[line++], "" + paramTest1Name + toIndex(5) + JppVirtualMachine.OPERATOR_SET_EQUALS + paramTest0Name);
 		assertEquals(jooLines[line++], "" + paramTest1Name + toIndex(4) + JppVirtualMachine.OPERATOR_SET_EQUALS + paramTest1Name + toIndex(5));
-		assertEquals(jooLines[line++], "" + paramTest0Name + JppVirtualMachine.OPERATOR_SET_EQUALS + paramTest1Name + toIndex(4));
-		assertEquals(jooLines[line++], "" + paramTest0Name + JppVirtualMachine.OPERATOR_SET_EQUALS + intTest1Name);
+		assertEquals(jooLines[line++], "" + paramTest0Name + JppVirtualMachine.OPERATOR_ADD + paramTest1Name + toIndex(4));
+		assertEquals(jooLines[line++], "" + paramTest1Name + intTest1Name + JppVirtualMachine.OPERATOR_SET_EQUALS + intTest1Name);
+		assertEquals(jooLines[line++], "" + paramTest0Name + JppVirtualMachine.OPERATOR_SUBTRACT + paramTest1Name + intTest1Name);
 		assertEquals(jooLines[line++], "" + JppVirtualMachine.KEYWORD_IF + paramTest0Name + JppVirtualMachine.COMPARATOR_SMALLER + paramTest1Name + toIndex(5));
 		assertEquals(jooLines[line++], "" + ifTestName + JppVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
 		assertEquals(jooLines[line++], "" + JppVirtualMachine.KEYWORD_ELSE);
@@ -259,7 +260,7 @@ public class JppCompilerTest {
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "intTest1");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SET_EQUALS);
-		assertEquals(currentOperation.getValue(), "20");
+		assertEquals(currentOperation.getValue(), "6");
 		assertEquals(currentOperation.getValueType(), TYPE_INT);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
@@ -327,111 +328,111 @@ public class JppCompilerTest {
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 0);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "0");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SET_EQUALS);
 		assertEquals(currentOperation.getValue(), "30");
 		assertEquals(currentOperation.getValueType(), TYPE_INT);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 1);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "1");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_ADD);
 		assertEquals(currentOperation.getValue(), "15");
 		assertEquals(currentOperation.getValueType(), TYPE_INT);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 0);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "0");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SUBTRACT);
 		assertEquals(currentOperation.getVariable1Name(), "intTest1");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 1);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "1");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_DIVIDE);
 		assertEquals(currentOperation.getValue(), "5");
 		assertEquals(currentOperation.getValueType(), TYPE_INT);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 0);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "0");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_MULTIPLY);
 		assertEquals(currentOperation.getVariable1Name(), "intTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), 1);
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "1");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 0);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "0");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SET_EQUALS);
 		assertEquals(currentOperation.getValue(),  "" + Math.round(60.5 * 255));
 		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 1);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "1");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_ADD);
 		assertEquals(currentOperation.getValue(),  "" + Math.round(15 * 255));
 		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 0);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "0");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SUBTRACT);
 		assertEquals(currentOperation.getVariable1Name(), "fixedTest1");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 1);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "1");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_DIVIDE);
 		assertEquals(currentOperation.getValue(),  "" + Math.round(5 * 255));
 		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 0);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "0");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_MULTIPLY);
 		assertEquals(currentOperation.getVariable1Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), 1);
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "1");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "boolTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 9);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "9");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SET_EQUALS);
 		assertEquals(currentOperation.getVariable1Name(), "boolTest0");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "boolTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 10);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "10");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SET_EQUALS);
 		assertEquals(currentOperation.getValue(), "1");
 		assertEquals(currentOperation.getValueType(), TYPE_BOOL);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "boolTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 11);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "11");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SET_EQUALS);
 		assertEquals(currentOperation.getVariable1Name(), "boolTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), 10);
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "10");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "charTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 9);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "9");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SET_EQUALS);
 		assertEquals(currentOperation.getVariable1Name(), "charTest0");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "charTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 10);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "10");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SET_EQUALS);
 		assertEquals(currentOperation.getValue(), "C");
 		assertEquals(currentOperation.getValueType(), TYPE_CHAR);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "charTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 11);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "11");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SET_EQUALS);
 		assertEquals(currentOperation.getVariable1Name(), "charTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), 10);
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "10");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.isCondition(), true);
@@ -515,7 +516,7 @@ public class JppCompilerTest {
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 2);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "2");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SET_EQUALS);
 		assertEquals(currentOperation.getValue(), "100");
 		assertEquals(currentOperation.getValueType(), TYPE_INT);
@@ -525,7 +526,7 @@ public class JppCompilerTest {
 		assertEquals(currentOperation.getVariable0Name(), "intTest0");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.COMPARATOR_SMALLER);
 		assertEquals(currentOperation.getVariable1Name(), "intTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), 2);
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "2");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "ifTest");
@@ -548,7 +549,7 @@ public class JppCompilerTest {
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.isCondition(), true);
 		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 2);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "2");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.COMPARATOR_BIGGER);
 		assertEquals(currentOperation.getVariable1Name(), "intTest0");
 		
@@ -575,7 +576,7 @@ public class JppCompilerTest {
 		assertEquals(currentOperation.getVariable0Name(), "intTest0");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.COMPARATOR_SMALLER_EQUALS);
 		assertEquals(currentOperation.getVariable1Name(), "intTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), 2);
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "2");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "ifTest");
@@ -598,7 +599,7 @@ public class JppCompilerTest {
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.isCondition(), true);
 		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 2);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "2");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.COMPARATOR_BIGGER_EQUALS);
 		assertEquals(currentOperation.getVariable1Name(), "intTest0");
 		
@@ -622,18 +623,18 @@ public class JppCompilerTest {
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 3);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "3");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SET_EQUALS);
 		assertEquals(currentOperation.getVariable1Name(), "intTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), 2);
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "2");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.isCondition(), true);
 		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 2);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "2");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.COMPARATOR_BIGGER_EQUALS);
 		assertEquals(currentOperation.getVariable1Name(), "intTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), 3);
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "3");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "ifTest");
@@ -656,10 +657,10 @@ public class JppCompilerTest {
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.isCondition(), true);
 		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 2);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "2");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.COMPARATOR_SMALLER_EQUALS);
 		assertEquals(currentOperation.getVariable1Name(), "intTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), 3);
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "3");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "ifTest");
@@ -695,34 +696,41 @@ public class JppCompilerTest {
 		
 		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "_paramTest1");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 5);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "5");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SET_EQUALS);
 		assertEquals(currentOperation.getVariable1Name(), "_paramTest0");
 		
 		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "_paramTest1");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), 4);
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "4");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SET_EQUALS);
 		assertEquals(currentOperation.getVariable1Name(), "_paramTest1");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), 5);
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "5");
 		
 		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "_paramTest0");
-		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_ADD);
 		assertEquals(currentOperation.getVariable1Name(), "_paramTest1");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), 4);
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "4");
 		
 		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "_paramTest0");
+		assertEquals(currentOperation.getVariable0Name(), "_paramTest1");
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "intTest1");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SET_EQUALS);
 		assertEquals(currentOperation.getVariable1Name(), "intTest1");
+		
+		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.getVariable0Name(), "_paramTest0");
+		assertEquals(currentOperation.getOperator(), JppVirtualMachine.OPERATOR_SUBTRACT);
+		assertEquals(currentOperation.getVariable1Name(), "_paramTest1");
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "intTest1");
 		
 		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.isCondition(), true);
 		assertEquals(currentOperation.getVariable0Name(), "_paramTest0");
 		assertEquals(currentOperation.getOperator(), JppVirtualMachine.COMPARATOR_SMALLER);
 		assertEquals(currentOperation.getVariable1Name(), "_paramTest1");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), 5);
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "5");
 		
 		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "ifTest");
@@ -850,7 +858,7 @@ public class JppCompilerTest {
 		assertEquals(jooLines[line++], "" + intTest0Name + JppVirtualMachine.OPERATOR_SUBTRACT + intTest1Name);
 		assertEquals(jooLines[line++], "" + intTest0Name + JppVirtualMachine.OPERATOR_MULTIPLY + toVirtualMachineNumber("2"));
 		assertEquals(jooLines[line++], "" + intTest0Name + JppVirtualMachine.OPERATOR_DIVIDE + toVirtualMachineNumber("10"));
-		assertEquals(jooLines[line++], "" + intTest1Name + JppVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("20"));
+		assertEquals(jooLines[line++], "" + intTest1Name + JppVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("6"));
 		assertEquals(jooLines[line++], "" + fixedTest0Name + JppVirtualMachine.OPERATOR_ADD + fixedTest1Name);
 		assertEquals(jooLines[line++], "" + fixedTest0Name + JppVirtualMachine.OPERATOR_SUBTRACT + toVirtualMachineNumber("" + Math.round(0.5f * 255)));
 		assertEquals(jooLines[line++], "" + fixedTest0Name + JppVirtualMachine.OPERATOR_MULTIPLY + toVirtualMachineNumber("" + Math.round(2.5f * 255)));
@@ -933,8 +941,9 @@ public class JppCompilerTest {
 		assertEquals(jooLines[line++], "" + paramTest0Name + JppVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("100"));
 		assertEquals(jooLines[line++], "" + paramTest1Name + toIndex(5) + JppVirtualMachine.OPERATOR_SET_EQUALS + paramTest0Name);
 		assertEquals(jooLines[line++], "" + paramTest1Name + toIndex(4) + JppVirtualMachine.OPERATOR_SET_EQUALS + paramTest1Name + toIndex(5));
-		assertEquals(jooLines[line++], "" + paramTest0Name + JppVirtualMachine.OPERATOR_SET_EQUALS + paramTest1Name + toIndex(4));
-		assertEquals(jooLines[line++], "" + paramTest0Name + JppVirtualMachine.OPERATOR_SET_EQUALS + intTest1Name);
+		assertEquals(jooLines[line++], "" + paramTest0Name + JppVirtualMachine.OPERATOR_ADD + paramTest1Name + toIndex(4));
+		assertEquals(jooLines[line++], "" + paramTest1Name + intTest1Name + JppVirtualMachine.OPERATOR_SET_EQUALS + intTest1Name);
+		assertEquals(jooLines[line++], "" + paramTest0Name + JppVirtualMachine.OPERATOR_SUBTRACT + paramTest1Name + intTest1Name);
 		assertEquals(jooLines[line++], "" + JppVirtualMachine.KEYWORD_IF + paramTest0Name + JppVirtualMachine.COMPARATOR_SMALLER + paramTest1Name + toIndex(5));
 		assertEquals(jooLines[line++], "" + ifTestName + JppVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
 		assertEquals(jooLines[line++], "" + JppVirtualMachine.KEYWORD_ELSE);
@@ -943,7 +952,7 @@ public class JppCompilerTest {
 	}
 	
 	private char toIndex(int i) {
-		return (char) (i + JppVirtualMachine.ARRAY_INDICES_START);
+		return (char) (i + JppVirtualMachine.ARRAY_INDEXES_START);
 	}
 	
 	private String toVirtualMachineNumber(String value) {

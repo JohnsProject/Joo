@@ -48,7 +48,7 @@ public class JppVirtualMachine {
 	
 	public static final byte PARAMETERS_START = 66;
 	public static final byte COMPONENTS_START = 1;
-	public static final byte ARRAY_INDICES_START = 72;
+	public static final byte ARRAY_INDEXES_START = 72;
 	public static final byte TYPES_START = 119;
 	
 	public static final char FIXED_POINT = 8;	
@@ -286,10 +286,7 @@ public class JppVirtualMachine {
 	}
 	
 	boolean interpretVariableOperation(int codeIndex) {
-		int variable0Index = code[codeIndex] - COMPONENTS_START;
-		if(variable0Index >= PARAMETERS_START - COMPONENTS_START) {
-			variable0Index = parameters[(variable0Index - PARAMETERS_START) + COMPONENTS_START];
-		}
+		int variable0Index = interpretVariableIndex(code[codeIndex]);		
 		char variable0Type = interpretComponentType(variable0Index);
 		// if is array
 		if(variable0Type <= TYPE_ARRAY_INT) {
@@ -302,7 +299,7 @@ public class JppVirtualMachine {
 		if(variable0Type > TYPE_ARRAY_INT) {
 			return interpretVariableOperation(variable0Type, variable0Index, operator, variable1Value, components);
 		} else {
-			int variable0ArrayIndex = code[codeIndex] - ARRAY_INDICES_START;
+			int variable0ArrayIndex = interpretArrayIndex(code[codeIndex]);
 			// get index in arrays array
 			variable0Index = components[variable0Index] + variable0ArrayIndex;
 			// convert array type to primitive type
@@ -315,25 +312,44 @@ public class JppVirtualMachine {
 		int variable1Value = parseNumber(codeIndex + 2);
 		// if is not number get variable value
 		if(variable1Value == -1) {
-			int variable1Index = code[codeIndex + 2] - COMPONENTS_START;
+			int variable1Index = interpretVariableIndex(code[codeIndex + 2]);
 			// if TYPE_CHAR after the operator then it's a char value
 			if((variable1Index + 1) == TYPE_CHAR) {
 				variable1Value = code[codeIndex + 3];
 			} else {
-				if(variable1Index >= PARAMETERS_START - COMPONENTS_START) {
-					variable1Index = parameters[(variable1Index - PARAMETERS_START) + COMPONENTS_START];
-				}
 				char variable1Type = interpretComponentType(variable1Index);
 				// if is not array
 				if(variable1Type > TYPE_ARRAY_INT) {
 					variable1Value = components[variable1Index];
 				} else {
-					int variable1ArrayIndex = code[codeIndex + 3] - ARRAY_INDICES_START;
+					int variable1ArrayIndex = interpretArrayIndex(code[codeIndex + 3]);
 					variable1Value = arrays[components[variable1Index] + variable1ArrayIndex];
 				}
 			}
 		}
 		return variable1Value;
+	}
+	
+	int interpretVariableIndex(int variableIndex) {
+		variableIndex -= COMPONENTS_START;
+		if((variableIndex >= PARAMETERS_START - COMPONENTS_START) && (variableIndex < ARRAY_INDEXES_START)) {
+			variableIndex = parameters[(variableIndex - PARAMETERS_START) + COMPONENTS_START];
+		}
+		return variableIndex;
+	}
+	
+	int interpretArrayIndex(int variableArrayIndex) {
+		// if is number index
+		if(variableArrayIndex >= ARRAY_INDEXES_START) {
+			variableArrayIndex -= ARRAY_INDEXES_START;
+		}
+		// if is parameter index
+		else if(variableArrayIndex >= PARAMETERS_START) {
+			variableArrayIndex = parameters[variableArrayIndex - PARAMETERS_START];
+		} else { // if is variable index
+			variableArrayIndex = components[variableArrayIndex - COMPONENTS_START];
+		}
+		return variableArrayIndex;
 	}
 	
 	boolean interpretVariableOperation(char variable0Type, int variable0Index, char operator, int variable1Value, int[] values) {

@@ -53,7 +53,7 @@ public class JppVirtualMachineTest {
 		assertEquals(jppVM.getComponents()[boolArrayIndex + 0], 15);
 		assertEquals(jppVM.getComponents()[charArrayIndex + 0], 30);
 		assertEquals(jppVM.getComponents()[functionIndex + 0], 75);
-		assertEquals(jppVM.getComponents()[functionIndex + 1], 443);
+		assertEquals(jppVM.getComponents()[functionIndex + 1], 442);
 	}
 	
 	@Test
@@ -75,9 +75,9 @@ public class JppVirtualMachineTest {
 		int charArrayIndex = jppVM.getComponentIndexes()[TYPE_ARRAY_CHAR - TYPES_START];
 		int functionIndex = jppVM.getComponentIndexes()[TYPE_FUNCTION - TYPES_START];
 		
-		assertEquals(jppVM.getComponents()[intIndex + 0], 20);
-		assertEquals(jppVM.getComponents()[intIndex + 1], 20);
-		assertEquals(jppVM.getComponents()[intIndex + 2], 12);
+		assertEquals(jppVM.getComponents()[intIndex + 0], 230);
+		assertEquals(jppVM.getComponents()[intIndex + 1], 6);
+		assertEquals(jppVM.getComponents()[intIndex + 2], 13);
 		assertEquals(jppVM.getComponents()[fixedIndex + 0], 12759);
 		assertEquals(jppVM.getComponents()[fixedIndex + 1], 12750);
 		assertEquals(jppVM.getComponents()[boolIndex + 0], 1);
@@ -91,13 +91,14 @@ public class JppVirtualMachineTest {
 		assertEquals(jppVM.getComponents()[boolArrayIndex + 0], 15);
 		assertEquals(jppVM.getComponents()[charArrayIndex + 0], 30);
 		assertEquals(jppVM.getComponents()[functionIndex + 0], 75);
-		assertEquals(jppVM.getComponents()[functionIndex + 1], 443);
-		assertEquals(jppVM.getArrays()[jppVM.getComponents()[intArrayIndex + 0] + 0], 30);
+		assertEquals(jppVM.getComponents()[functionIndex + 1], 442);
+		assertEquals(jppVM.getArrays()[jppVM.getComponents()[intArrayIndex + 0] + 0], 72);
 		assertEquals(jppVM.getArrays()[jppVM.getComponents()[intArrayIndex + 0] + 1], 3);
 		assertEquals(jppVM.getArrays()[jppVM.getComponents()[intArrayIndex + 0] + 2], 100);
 		assertEquals(jppVM.getArrays()[jppVM.getComponents()[intArrayIndex + 0] + 3], 100);
 		assertEquals(jppVM.getArrays()[jppVM.getComponents()[intArrayIndex + 0] + 4], 118);
 		assertEquals(jppVM.getArrays()[jppVM.getComponents()[intArrayIndex + 0] + 5], 118);
+		assertEquals(jppVM.getArrays()[jppVM.getComponents()[intArrayIndex + 0] + 6], 6);
 		assertEquals(jppVM.getArrays()[jppVM.getComponents()[fixedArrayIndex + 0] + 0], 8034);
 		assertEquals(jppVM.getArrays()[jppVM.getComponents()[fixedArrayIndex + 0] + 1], 768);
 		assertEquals(jppVM.getArrays()[jppVM.getComponents()[boolArrayIndex + 0] + 9], 1);

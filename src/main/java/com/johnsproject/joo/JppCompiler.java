@@ -199,12 +199,12 @@ public class JppCompiler {
 		private boolean condition;
 		
 		private String variable0Name;
-		private int variable0ArrayIndex;
+		private String variable0ArrayIndex;
 		
 		private char operator;
 		
 		private String variable1Name;
-		private int variable1ArrayIndex;
+		private String variable1ArrayIndex;
 		
 		private String value;
 		private String valueType;
@@ -214,10 +214,10 @@ public class JppCompiler {
 		public Operation() {
 			this.condition = false;
 			this.variable0Name = "";
-			this.variable0ArrayIndex = -1;
+			this.variable0ArrayIndex = "";
 			this.operator = 0;
 			this.variable1Name = "";
-			this.variable1ArrayIndex = -1;
+			this.variable1ArrayIndex = "";
 			this.value = "";
 			this.valueType = "";
 			this.parameters = new String[6];
@@ -231,7 +231,7 @@ public class JppCompiler {
 			this.variable0Name = variable0Name;
 		}
 
-		public void setVariable0ArrayIndex(int variable0ArrayIndex) {
+		public void setVariable0ArrayIndex(String variable0ArrayIndex) {
 			this.variable0ArrayIndex = variable0ArrayIndex;
 		}
 
@@ -243,7 +243,7 @@ public class JppCompiler {
 			this.variable1Name = variable1Name;
 		}
 
-		public void setVariable1ArrayIndex(int variable1ArrayIndex) {
+		public void setVariable1ArrayIndex(String variable1ArrayIndex) {
 			this.variable1ArrayIndex = variable1ArrayIndex;
 		}
 		
@@ -263,7 +263,7 @@ public class JppCompiler {
 			return variable0Name;
 		}
 
-		public int getVariable0ArrayIndex() {
+		public String getVariable0ArrayIndex() {
 			return variable0ArrayIndex;
 		}
 
@@ -275,7 +275,7 @@ public class JppCompiler {
 			return variable1Name;
 		}
 
-		public int getVariable1ArrayIndex() {
+		public String getVariable1ArrayIndex() {
 			return variable1ArrayIndex;
 		}
 		
@@ -560,14 +560,14 @@ public class JppCompiler {
 			if(operationData[0].contains(KEYWORD_ARRAY_START)) {
 				String[] variableData = operationData[0].replace(KEYWORD_ARRAY_END, "").split("\\" + KEYWORD_ARRAY_START);
 				operation.setVariable0Name(variableData[0]);
-				operation.setVariable0ArrayIndex(Integer.parseInt(variableData[1]));
+				operation.setVariable0ArrayIndex(variableData[1]);
 			} else {
 				operation.setVariable0Name(operationData[0]);
 			}
 			if(operationData[1].contains(KEYWORD_ARRAY_START)) {
 				String[] variableData = operationData[1].replace(KEYWORD_ARRAY_END, "").split("\\" + KEYWORD_ARRAY_START);
 				operation.setVariable1Name(variableData[0]);
-				operation.setVariable1ArrayIndex(Integer.parseInt(variableData[1]));
+				operation.setVariable1ArrayIndex(variableData[1]);
 			} else {
 				// part behind the operator may contain a value instead of variable
 				parseBinaryOperationValue(operationData, variables, parameters, operation);
@@ -716,14 +716,22 @@ public class JppCompiler {
 
 	private String writeBinaryOperation(String code, final String[] functionParameters, final Map<String, Variable>[] variables, Operation operation) {
 		code += getVirtualMachineVariableName(operation.getVariable0Name(), functionParameters, variables);
-		if(operation.getVariable0ArrayIndex() >= 0) {
+		if(!operation.getVariable0ArrayIndex().isEmpty()) {
 			// +1 because 0 is null character
-			code += "" + (char)(operation.getVariable0ArrayIndex() + JppVirtualMachine.ARRAY_INDICES_START);
+			try {
+				code += "" + (char)(Integer.parseInt(operation.getVariable0ArrayIndex()) + JppVirtualMachine.ARRAY_INDEXES_START);
+			} catch (NumberFormatException e) {
+				code += getVirtualMachineVariableName(operation.getVariable0ArrayIndex(), functionParameters, variables);				
+			}
 		}
 		code += "" + operation.getOperator();
 		code += getVirtualMachineVariableName(operation.getVariable1Name(), functionParameters, variables);
-		if(operation.getVariable1ArrayIndex() >= 0) {
-			code += "" + (char)(operation.getVariable1ArrayIndex() + JppVirtualMachine.ARRAY_INDICES_START);
+		if(!operation.getVariable1ArrayIndex().isEmpty()) {
+			try {
+				code += "" + (char)(Integer.parseInt(operation.getVariable1ArrayIndex()) + JppVirtualMachine.ARRAY_INDEXES_START);
+			} catch (NumberFormatException e) {
+				code += getVirtualMachineVariableName(operation.getVariable1ArrayIndex(), functionParameters, variables);
+			}
 		}
 		if(!operation.getValueType().isEmpty()) {
 			if(operation.getValueType().equals(TYPE_CHAR)) {

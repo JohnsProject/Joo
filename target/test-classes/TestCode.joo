@@ -16,7 +16,7 @@ intTest0 += 100
 intTest0 -= intTest1
 intTest0 *= 2
 intTest0 /= 10
-intTest1 = 20
+intTest1 = 6
 
 fixedTest0 += fixedTest1
 fixedTest0 -= 0.5
@@ -131,8 +131,9 @@ function FunctionTest: int _paramTest0: int[] _paramTest1
 _paramTest0 += 100
 _paramTest1[5] = _paramTest0
 _paramTest1[4] = _paramTest1[5]
-_paramTest0 = _paramTest1[4]
-_paramTest0 = intTest1
+_paramTest0 += _paramTest1[4]
+_paramTest1[intTest1] = intTest1
+_paramTest0 -= _paramTest1[intTest1]
 
 if _paramTest0 < _paramTest1[5]
 ifTest += 1
