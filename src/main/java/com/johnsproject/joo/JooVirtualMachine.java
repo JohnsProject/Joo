@@ -3,7 +3,7 @@ package com.johnsproject.joo;
 /*
 MIT License
 
-Copyright (c) 2019 John´s Project
+Copyright (c) 2020 John´s Project
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -58,6 +58,7 @@ public class JooVirtualMachine {
 	
 	public static final byte PARAMETERS_START = 66;
 	public static final byte COMPONENTS_START = 1;
+	public static final byte COMPONENTS_END = 65;
 	public static final byte ARRAY_INDEXES_START = 72;
 	public static final byte TYPES_START = 119;
 	public static final byte OPERATORS_START = 1;
@@ -242,7 +243,7 @@ public class JooVirtualMachine {
 				return;
 			case KEYWORD_FUNCTION_CALL:
 				if(canInterpretCode) {
-					interpretFunctionCall(codeIndex);
+					interpretFunctionCall(codeIndex, true);
 				}
 				break;
 			case KEYWORD_FUNCTION_REPEAT:
@@ -253,7 +254,11 @@ public class JooVirtualMachine {
 				break;
 			default:
 				if(canInterpretCode) {
-					interpretVariableOperation(codeIndex);
+					if(interpretComponentType(code[codeIndex] - COMPONENTS_START) == TYPE_FUNCTION) {
+						interpretFunctionCall(codeIndex, false);
+					} else {
+						interpretVariableOperation(codeIndex);
+					}
 				}
 				break;
 			}
@@ -288,8 +293,10 @@ public class JooVirtualMachine {
 		}
 	}
 	
-	void interpretFunctionCall(int codeIndex) {
-		codeIndex++;
+	void interpretFunctionCall(int codeIndex, boolean nativeFunction) {
+		if(nativeFunction) {
+			codeIndex++;
+		}
 		int parameter0 = parameters[0];
 		int parameter1 = parameters[1];
 		int parameter2 = parameters[2];
@@ -310,7 +317,11 @@ public class JooVirtualMachine {
 				continue;
 			}
 		}
-		interpretFunction((char) (code[codeIndex] - COMPONENTS_START));
+		if(nativeFunction) {
+			callNativeFunction(code[codeIndex]);
+		} else {
+			interpretFunction((char) (code[codeIndex] - COMPONENTS_START));
+		}
 		parameters[0] = parameter0;
 		parameters[1] = parameter1;
 		parameters[2] = parameter2;
@@ -386,6 +397,37 @@ public class JooVirtualMachine {
 		return variableArrayIndex;
 	}
 	
+	char interpretComponentType(int componentIndex) {
+		if(componentIndex < componentIndexes[TYPE_FIXED - TYPES_START]) {
+			return TYPE_INT;
+		}
+		else if(componentIndex < componentIndexes[TYPE_BOOL - TYPES_START]) {
+			return TYPE_FIXED;
+		}
+		else if(componentIndex < componentIndexes[TYPE_CHAR - TYPES_START]) {
+			return TYPE_BOOL;
+		}
+		else if(componentIndex < componentIndexes[TYPE_ARRAY_INT - TYPES_START]) {
+			return TYPE_CHAR;
+		}
+		else if(componentIndex < componentIndexes[TYPE_ARRAY_FIXED - TYPES_START]) {
+			return TYPE_ARRAY_INT;
+		}
+		else if(componentIndex < componentIndexes[TYPE_ARRAY_BOOL - TYPES_START]) {
+			return TYPE_ARRAY_FIXED;
+		} 
+		else if(componentIndex < componentIndexes[TYPE_ARRAY_CHAR - TYPES_START]) {
+			return TYPE_ARRAY_BOOL;
+		} 
+		else if(componentIndex < componentIndexes[TYPE_FUNCTION - TYPES_START]) {
+			return TYPE_ARRAY_CHAR;
+		}
+		else if (componentIndex < COMPONENTS_END){
+			return TYPE_FUNCTION;
+		}
+		return 0;
+	}
+	
 	boolean interpretVariableOperation(char variable0Type, int variable0Index, char operator, int variable1Value, int[] values) {
 		switch (operator) {
 		case OPERATOR_ADD:
@@ -429,32 +471,11 @@ public class JooVirtualMachine {
 		return false;
 	}
 	
-	char interpretComponentType(int componentIndex) {
-		if(componentIndex < componentIndexes[TYPE_FIXED - TYPES_START]) {
-			return TYPE_INT;
-		}
-		else if(componentIndex < componentIndexes[TYPE_BOOL - TYPES_START]) {
-			return TYPE_FIXED;
-		}
-		else if(componentIndex < componentIndexes[TYPE_CHAR - TYPES_START]) {
-			return TYPE_BOOL;
-		}
-		else if(componentIndex < componentIndexes[TYPE_ARRAY_INT - TYPES_START]) {
-			return TYPE_CHAR;
-		}
-		else if(componentIndex < componentIndexes[TYPE_ARRAY_FIXED - TYPES_START]) {
-			return TYPE_ARRAY_INT;
-		}
-		else if(componentIndex < componentIndexes[TYPE_ARRAY_BOOL - TYPES_START]) {
-			return TYPE_ARRAY_FIXED;
-		} 
-		else if(componentIndex < componentIndexes[TYPE_ARRAY_CHAR - TYPES_START]) {
-			return TYPE_ARRAY_BOOL;
-		} 
-		else if(componentIndex < componentIndexes[TYPE_FUNCTION - TYPES_START]) {
-			return TYPE_ARRAY_CHAR;
-		} else {
-			return TYPE_FUNCTION;
+	void callNativeFunction(char functionIndex) {
+		switch (functionIndex) {
+		case FUNCTION_PRINT:
+			
+			break;
 		}
 	}
 }

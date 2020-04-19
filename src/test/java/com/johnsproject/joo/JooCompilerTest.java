@@ -148,9 +148,7 @@ public class JooCompilerTest {
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION_CALL + functionTestName
-				+ JooVirtualMachine.KEYWORD_PARAMETER + intTest0Name 
-				+ JooVirtualMachine.KEYWORD_PARAMETER + intTestName);
+		assertEquals(jooLines[line++], "" + functionTestName + JooVirtualMachine.KEYWORD_PARAMETER + intTest0Name + JooVirtualMachine.KEYWORD_PARAMETER + intTestName);
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION + functionTestName);
 		assertEquals(jooLines[line++], "" + fixedTest1Name + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("" + Math.round(25f * 255)));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + fixedTest1Name + JooVirtualMachine.COMPARATOR_SMALLER_EQUALS + toVirtualMachineNumber("" + Math.round(80f * 255)));
@@ -968,9 +966,7 @@ public class JooCompilerTest {
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION_CALL + functionTestName
-				+ JooVirtualMachine.KEYWORD_PARAMETER + intTest0Name 
-				+ JooVirtualMachine.KEYWORD_PARAMETER + intTestName);
+		assertEquals(jooLines[line++], "" + functionTestName + JooVirtualMachine.KEYWORD_PARAMETER + intTest0Name + JooVirtualMachine.KEYWORD_PARAMETER + intTestName);
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION + functionTestName);
 		assertEquals(jooLines[line++], "" + fixedTest1Name + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("" + Math.round(25f * 255)));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + fixedTest1Name + JooVirtualMachine.COMPARATOR_SMALLER_EQUALS + toVirtualMachineNumber("" + Math.round(80f * 255)));

@@ -12,37 +12,63 @@
 =
 
 @FUNCTIONS
-Print
-PrintLine
-Copy
-SetDelay
-GetSecond
-String
-Invert
-Positive
-Negative
-Random
-Max
-Min
-Sin
-Cos
-Tan
-Pow
-Sqrt
-GetKey
-GetButton
-GetMouse
-DrawColor
-DrawWindow
-DrawPoint
-DrawLine
-DrawTrianle
-DrawRect
-DrawCircle
-DrawString
-FillTriangle
-FillRect
-FillCircle
-StartPin
-GetPin
-SetPin
+#Standart Native Library is a set of functions that the virtual machine
+#implements independent of the platform the virtual machine runs on.
+
+#Standart Graphics Library
+Graphics_HasOutputSupport
+Graphics_SetColor
+Graphics_DrawWindow
+Graphics_DrawPoint
+Graphics_DrawLine
+Graphics_DrawTriangle
+Graphics_DrawRect
+Graphics_DrawCircle
+Graphics_DrawText
+Graphics_HasInputSupport
+Graphics_GetInputPosition
+Graphics_GetInputCode
+
+#Standart Audio Library
+Audio_HasOutputSupport
+Audio_PlaySound
+
+#Standart Serial Library
+Serial_HasOutputSupport
+Serial_Write
+Serial_WriteText
+Serial_HasInputSupport
+Serial_HasInput
+Serial_Read
+Serial_ReadText
+
+#Standart Math Library
+Math_Max
+Math_Min
+Math_Pow
+Math_Sqrt
+Math_Abs
+Math_Sin
+Math_Cos
+Math_Tan
+Math_Random
+Math_Degrees
+Math_Radians
+
+#Standart Time Library
+Time_Delay
+Time_GetSeconds
+
+#Standart Storage Library
+Storage_Clear
+Storage_Put
+Storage_Get
+
+#Standart Conversion Library
+
+
+#Standart Array Library
+
+
+
+

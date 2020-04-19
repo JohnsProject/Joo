@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2019 John´s Project
+Copyright (c) 2020 John´s Project
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -559,7 +559,7 @@ public class JooCompiler {
 					} else {
 						for (int i = 0; i < nativeFunctions.size(); i++) {
 							if(nativeFunctions.get(i).equals(operation.getVariable1Name())) {
-								code += "" + (char)(i + JooVirtualMachine.NATIVE_FUNCTIONS_START);
+								code += "" + operation.getOperator() + (char)(i + JooVirtualMachine.NATIVE_FUNCTIONS_START);
 							}
 						}
 					}
@@ -581,7 +581,9 @@ public class JooCompiler {
 				code += getVirtualMachineVariableName(operation.getVariable0ArrayIndex(), functionParameters, variables);				
 			}
 		}
-		code += "" + operation.getOperator();
+		if(operation.getOperator() != JooVirtualMachine.KEYWORD_FUNCTION_CALL) {
+			code += "" + operation.getOperator();
+		}
 		code += getVirtualMachineVariableName(operation.getVariable1Name(), functionParameters, variables);
 		if(!operation.getVariable1ArrayIndex().isEmpty()) {
 			try {
