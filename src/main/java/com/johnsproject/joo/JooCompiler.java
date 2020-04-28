@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.johnsproject.joo.util.FileUtil;
 
@@ -58,6 +59,10 @@ public class JooCompiler {
 	public static final String TYPE_FIXED = "fixed";
 	public static final String TYPE_BOOL = "bool";
 	public static final String TYPE_CHAR = "char";
+	public static final String TYPE_ARRAY_INT = TYPE_INT + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END;
+	public static final String TYPE_ARRAY_FIXED = TYPE_FIXED + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END;
+	public static final String TYPE_ARRAY_BOOL = TYPE_BOOL + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END;
+	public static final String TYPE_ARRAY_CHAR = TYPE_CHAR + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END;
 	
 	public static final String LINE_BREAK = "\n";
 	
@@ -70,10 +75,10 @@ public class JooCompiler {
 			TYPE_FIXED,
 			TYPE_BOOL,
 			TYPE_CHAR,
-			TYPE_INT + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END,
-			TYPE_FIXED + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END,
-			TYPE_BOOL + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END,
-			TYPE_CHAR + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END,
+			TYPE_ARRAY_INT,
+			TYPE_ARRAY_FIXED,
+			TYPE_ARRAY_BOOL,
+			TYPE_ARRAY_CHAR,
 	};
 	
 	public static final char[] VM_TYPES = new char[] {
@@ -268,7 +273,7 @@ public class JooCompiler {
 				for (int j = 0; j < COMPILER_TYPES.length; j++) {
 					// whitespace ensures the variable type isn't part of a bigger word
 					if(functionParameterData.contains(COMPILER_TYPES[j] + " ")) {
-						parameterType = "" + VM_TYPES[j];
+						parameterType = "" + COMPILER_TYPES[j];
 						parameterName = functionParameterData.replace(COMPILER_TYPES[j], "").replace(" ", "");
 						parameters.put(parameterName, parameterType);
 					}
@@ -277,7 +282,7 @@ public class JooCompiler {
 		} else {
 			functionName = codeLine.replace(" ", "").replaceFirst(KEYWORD_FUNCTION, "");
 		}
-		Function result = new Function(name++, parameters);
+		final Function result = new Function(functionName, name++, parameters);
 		functions.put(functionName, result);
 		return result;	
 	}
@@ -340,7 +345,8 @@ public class JooCompiler {
 					variableName = codeLine.replaceFirst(variableType, "");
 				}	
 				// name++ because names used in joo virtual machine are unique characters	
-				variables.put(variableName, new Variable(name++, variableValue));
+				final Variable result = new Variable(variableName, name++, variableValue);
+				variables.put(variableName, result);
 				codeLines[i] = "";
 			}
 		}
@@ -365,7 +371,8 @@ public class JooCompiler {
 			if(codeLine.contains(arrayType + KEYWORD_ARRAY_START) && !codeLine.contains(KEYWORD_FUNCTION)) {
 				final String[] variableData = codeLine.replace(arrayType + KEYWORD_ARRAY_START, "").split(KEYWORD_ARRAY_END);
 				// name++ because names used in joo virtual machine are unique characters	
-				variables.put(variableData[1], new Variable(name++, "" + (char)Integer.parseInt(variableData[0])));			
+				final Variable result = new Variable(variableData[1], name++, variableData[0]);
+				variables.put(variableData[1], result);			
 				codeLines[i] = "";
 			}
 		}
@@ -513,8 +520,8 @@ public class JooCompiler {
 				}
 				boolean isIntParameter = false;
 				if(parameters.containsKey(variableName)) {
-					isIntParameter = parameters.get(variableName).equals("" + JooVirtualMachine.TYPE_INT)
-									|| parameters.get(variableName).equals("" + JooVirtualMachine.TYPE_ARRAY_INT);
+					isIntParameter = parameters.get(variableName).equals(TYPE_INT)
+									|| parameters.get(variableName).equals(TYPE_ARRAY_INT);
 				}
 				// if variable before operator is int
 				if(variables[0].containsKey(variableName) || variables[4].containsKey(variableName) || isIntParameter) {
@@ -556,9 +563,11 @@ public class JooCompiler {
 				for (Variable variable : variables[i].values()) {
 					String value = variable.getValue();
 					if(i < 3) { // if value is number
-						value = toVirtualMachineNumber(variable.getValue());
+						value = toVirtualMachineNumber(value);
+					} else if(i > 3) { // if value is array index
+						value = "" + (char)Integer.parseInt(value);
 					}
-					code += "" + variable.getName() + value + JooVirtualMachine.LINE_BREAK;
+					code += "" + variable.getByteCodeName() + value + JooVirtualMachine.LINE_BREAK;
 				}
 			}
 		}
@@ -584,15 +593,15 @@ public class JooCompiler {
 	String writeFunctionsAndOperations(String code, final Map<String, Variable>[] variables, final Map<String, Function> functions, List<String> nativeFunctions) {
 		for (Function function : functions.values()) {
 			// doesn't need the parameters in the function declaration, the parameters are already listed in function call
-			code += "" + JooVirtualMachine.KEYWORD_FUNCTION + function.getName() + JooVirtualMachine.LINE_BREAK;
+			code += "" + JooVirtualMachine.KEYWORD_FUNCTION + function.getByteCodeName() + JooVirtualMachine.LINE_BREAK;
 			for (Operation operation : function.getOperations()) {
 				if(operation.isCondition()) {
 					code += "" + JooVirtualMachine.KEYWORD_IF;
 				}
-				code = writeBinaryOperation(code, function.getParameters().keySet().toArray(new String[0]), variables, operation);
+				code = writeBinaryOperation(code, function.getParameters().keySet(), variables, operation);
 				if(operation.getOperator() == JooVirtualMachine.KEYWORD_FUNCTION_CALL) {
 					if(functions.containsKey(operation.getVariable1Name())) {
-						code += "" + functions.get(operation.getVariable1Name()).getName();
+						code += "" + functions.get(operation.getVariable1Name()).getByteCodeName();
 					} else {
 						for (int i = 0; i < nativeFunctions.size(); i++) {
 							if(nativeFunctions.get(i).equals(operation.getVariable1Name())) {
@@ -608,25 +617,25 @@ public class JooCompiler {
 		return code;
 	}
 
-	private String writeBinaryOperation(String code, final String[] functionParameters, final Map<String, Variable>[] variables, Operation operation) {
-		code += getVirtualMachineVariableName(operation.getVariable0Name(), functionParameters, variables);
+	private String writeBinaryOperation(String code, final Set<String> parameters, final Map<String, Variable>[] variables, Operation operation) {
+		code += getVirtualMachineVariableName(operation.getVariable0Name(), parameters, variables);
 		if(!operation.getVariable0ArrayIndex().isEmpty()) {
 			// +1 because 0 is null character
 			try {
 				code += "" + (char)(Integer.parseInt(operation.getVariable0ArrayIndex()) + JooVirtualMachine.ARRAY_INDEXES_START);
 			} catch (NumberFormatException e) {
-				code += getVirtualMachineVariableName(operation.getVariable0ArrayIndex(), functionParameters, variables);				
+				code += getVirtualMachineVariableName(operation.getVariable0ArrayIndex(), parameters, variables);				
 			}
 		}
 		if(operation.getOperator() != JooVirtualMachine.KEYWORD_FUNCTION_CALL) {
 			code += "" + operation.getOperator();
 		}
-		code += getVirtualMachineVariableName(operation.getVariable1Name(), functionParameters, variables);
+		code += getVirtualMachineVariableName(operation.getVariable1Name(), parameters, variables);
 		if(!operation.getVariable1ArrayIndex().isEmpty()) {
 			try {
 				code += "" + (char)(Integer.parseInt(operation.getVariable1ArrayIndex()) + JooVirtualMachine.ARRAY_INDEXES_START);
 			} catch (NumberFormatException e) {
-				code += getVirtualMachineVariableName(operation.getVariable1ArrayIndex(), functionParameters, variables);
+				code += getVirtualMachineVariableName(operation.getVariable1ArrayIndex(), parameters, variables);
 			}
 		}
 		if(!operation.getValueType().isEmpty()) {
@@ -641,18 +650,18 @@ public class JooCompiler {
 		return code;
 	}
 	
-	private String getVirtualMachineVariableName(String variableName, final String[] functionParameters, final Map<String, Variable>[] variables) {
+	private String getVirtualMachineVariableName(String variableName, final Set<String> parameters, final Map<String, Variable>[] variables) {
 		for (int i = 0; i < variables.length; i++) {
 			if(variables[i].containsKey(variableName)) {
-				return "" + variables[i].get(variableName).getName();
+				return "" + variables[i].get(variableName).getByteCodeName();
 			}
 		}
-		for (int i = 0; i < functionParameters.length; i++) {
-			if(functionParameters[i] != null) {
-				if(functionParameters[i].equals(variableName)) {
-					return "" + (char)(i + JooVirtualMachine.PARAMETERS_START);
-				}
+		int i = 0;
+		for (String parameter : parameters) {
+			if(parameter.equals(variableName)) {
+				return "" + (char)(i + JooVirtualMachine.PARAMETERS_START);
 			}
+			i++;
 		}
 		return "";
 	}
@@ -682,7 +691,7 @@ public class JooCompiler {
 				String newParameterName = "";
 				for (int i = 0; i < variables.length; i++) {
 					if(variables[i].containsKey(parameterName)) {
-						newParameterName = "" + variables[i].get(parameterName).getName();
+						newParameterName = "" + variables[i].get(parameterName).getByteCodeName();
 						break;
 					}
 				}

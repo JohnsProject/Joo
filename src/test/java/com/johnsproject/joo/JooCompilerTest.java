@@ -192,43 +192,43 @@ public class JooCompilerTest {
 		final Map<String, Variable>[] variables = jooCompiler.getVariables();
 		
 		int type = 0;
-		assert(variables[type].get("intTest0").getName() == 1);
-		assert(variables[type].get("intTest1").getName() == 2);
-		assert(variables[type].get("ifTest").getName() == 3);
+		assert(variables[type].get("intTest0").getByteCodeName() == 1);
+		assert(variables[type].get("intTest1").getByteCodeName() == 2);
+		assert(variables[type].get("ifTest").getByteCodeName() == 3);
 		assertEquals(variables[type].get("intTest0").getValue(), "");
 		assertEquals(variables[type].get("intTest1").getValue(), "10");
 		assertEquals(variables[type].get("ifTest").getValue(), "");
 		type++;
-		assert(variables[type].get("fixedTest0").getName() == 4);
-		assert(variables[type].get("fixedTest1").getName() == 5);
+		assert(variables[type].get("fixedTest0").getByteCodeName() == 4);
+		assert(variables[type].get("fixedTest1").getByteCodeName() == 5);
 		assertEquals(variables[type].get("fixedTest0").getValue(), "");
 		assertEquals(variables[type].get("fixedTest1").getValue(), "" + Math.round(100.5f * 255));
 		type++;
-		assert(variables[type].get("boolTest0").getName() == 6);
-		assert(variables[type].get("boolTest1").getName() == 7);
-		assert(variables[type].get("boolTest2").getName() == 8);
+		assert(variables[type].get("boolTest0").getByteCodeName() == 6);
+		assert(variables[type].get("boolTest1").getByteCodeName() == 7);
+		assert(variables[type].get("boolTest2").getByteCodeName() == 8);
 		assertEquals(variables[type].get("boolTest0").getValue(), "");
 		assertEquals(variables[type].get("boolTest1").getValue(), "1");
 		assertEquals(variables[type].get("boolTest2").getValue(), "0");
 		type++;
-		assert(variables[type].get("charTest0").getName() == 9);
-		assert(variables[type].get("charTest1").getName() == 10);
-		assert(variables[type].get("charTest2").getName() == 11);
+		assert(variables[type].get("charTest0").getByteCodeName() == 9);
+		assert(variables[type].get("charTest1").getByteCodeName() == 10);
+		assert(variables[type].get("charTest2").getByteCodeName() == 11);
 		assertEquals(variables[type].get("charTest0").getValue(), "");
 		assertEquals(variables[type].get("charTest1").getValue(), "A");	
 		assertEquals(variables[type].get("charTest2").getValue(), "C");	
 		type++;
-		assert(variables[type].get("intTest").getName() == 12);
-		assertEquals(variables[type].get("intTest").getValue(), "" + (char)10);
+		assert(variables[type].get("intTest").getByteCodeName() == 12);
+		assertEquals(variables[type].get("intTest").getValue(), "10");
 		type++;
-		assert(variables[type].get("fixedTest").getName() == 13);
-		assertEquals(variables[type].get("fixedTest").getValue(), "" + (char)5);
+		assert(variables[type].get("fixedTest").getByteCodeName() == 13);
+		assertEquals(variables[type].get("fixedTest").getValue(), "5");
 		type++;
-		assert(variables[type].get("boolTest").getName() == 14);
-		assertEquals(variables[type].get("boolTest").getValue(), "" + (char)15);
+		assert(variables[type].get("boolTest").getByteCodeName() == 14);
+		assertEquals(variables[type].get("boolTest").getValue(), "15");
 		type++;
-		assert(variables[type].get("charTest").getName() == 15);
-		assertEquals(variables[type].get("charTest").getValue(), "" + (char)13);			
+		assert(variables[type].get("charTest").getByteCodeName() == 15);
+		assertEquals(variables[type].get("charTest").getValue(), "13");			
 	}
 	
 	@Test
@@ -240,14 +240,14 @@ public class JooCompilerTest {
 		final Function start = functions.get("Start");
 		final Function functionTest = functions.get("FunctionTest");
 		
-		assert(start.getName() == 16);
+		assert(start.getByteCodeName() == 16);
 		assertEquals(start.getParameters().size(), 0);
 		
-		assert(functionTest.getName() == 17);
+		assert(functionTest.getByteCodeName() == 17);
 		assert(functionTest.getParameters().containsKey("_paramTest0"));
 		assert(functionTest.getParameters().containsKey("_paramTest1"));
-		assertEquals(functionTest.getParameters().get("_paramTest0"), "" + JooVirtualMachine.TYPE_INT);
-		assertEquals(functionTest.getParameters().get("_paramTest1"), "" + JooVirtualMachine.TYPE_ARRAY_INT);
+		assertEquals(functionTest.getParameters().get("_paramTest0"), "" + TYPE_INT);
+		assertEquals(functionTest.getParameters().get("_paramTest1"), "" + TYPE_ARRAY_INT);
 		
 		int currentOperationIndex = 0;
 		Operation currentOperation = null;

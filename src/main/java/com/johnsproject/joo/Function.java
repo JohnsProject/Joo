@@ -30,27 +30,30 @@ import java.util.Map;
 /**
  * The Function class contains the data of a joo function (like name and parameters).
  * This class isn't private because unit tests need to access it.
- * <br>
- * If the function doesn't have parameters the parameter names are null, the
- * parameter names array itself should always be a string array with length 6.
  * 
  * @author John Ferraz Salomon
  *
  */
 public class Function {
-	
-	private final char name;
+
+	private final String name;
+	private final char byteCodeName;
 	private Map<String, String> parameters;
 	private List<Operation> operations;
 	
-	public Function(final char name, final Map<String, String> parameters) {
+	public Function(final String name, final char byteCodeName, final Map<String, String> parameters) {
 		this.name = name;
+		this.byteCodeName = byteCodeName;
 		this.parameters = parameters;
 		this.operations = new ArrayList<>();
 	}
 	
-	public char getName() {
+	public String getName() {
 		return name;
+	}
+	
+	public char getByteCodeName() {
+		return byteCodeName;
 	}
 
 	public Map<String, String> getParameters() {

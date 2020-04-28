@@ -27,8 +27,6 @@ package com.johnsproject.joo;
  * The Variable class contains the data of a joo variable (like name and value).
  * This class isn't private because unit tests need to access it.
  * <br>
- * If there is no value given in the variable declaration the default is 0.
- * <br>
  * If the variable is a array the value parameter is the array size.
  * 
  * @author John Ferraz Salomon
@@ -36,16 +34,22 @@ package com.johnsproject.joo;
  */
 public class Variable {
 	
-	private final char name;
+	private final String name;
+	private final char byteCodeName;
 	private final String value;
 	
-	public Variable(final char name, final String value) {
+	public Variable(final String name, final char byteCodeName, final String value) {
 		this.name = name;
+		this.byteCodeName = byteCodeName;
 		this.value = value;
 	}
 	
-	public char getName() {
+	public String getName() {
 		return name;
+	}
+	
+	public char getByteCodeName() {
+		return byteCodeName;
 	}
 
 	public String getValue() {
