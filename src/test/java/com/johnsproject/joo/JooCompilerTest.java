@@ -1,12 +1,8 @@
 package com.johnsproject.joo;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-
-import com.johnsproject.joo.util.FileUtil;
 
 import static com.johnsproject.joo.JooCompiler.*;
 import static org.junit.Assert.assertEquals;
@@ -249,623 +245,623 @@ public class JooCompilerTest {
 		assertEquals(functionTest.getParameters().get("_paramTest0"), "" + TYPE_INT);
 		assertEquals(functionTest.getParameters().get("_paramTest1"), "" + TYPE_ARRAY_INT);
 		
-		int currentOperationIndex = 0;
-		Operation currentOperation = null;
+		int currentInstructionIndex = 0;
+		Instruction currentInstruction = null;
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "intTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "100");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "100");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "intTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
-		assertEquals(currentOperation.getVariable1Name(), "intTest1");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
+		assertEquals(currentInstruction.getVariable1Name(), "intTest1");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "intTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_MULTIPLY);
-		assertEquals(currentOperation.getValue(), "2");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_MULTIPLY);
+		assertEquals(currentInstruction.getValue(), "2");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "intTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_DIVIDE);
-		assertEquals(currentOperation.getValue(), "10");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_DIVIDE);
+		assertEquals(currentInstruction.getValue(), "10");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "intTest1");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getValue(), "6");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest1");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getValue(), "6");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "fixedTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getVariable1Name(), "fixedTest1");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "fixedTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getVariable1Name(), "fixedTest1");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "fixedTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
-		assertEquals(currentOperation.getValue(), "" + Math.round(0.5 * 255));
-		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "fixedTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
+		assertEquals(currentInstruction.getValue(), "" + Math.round(0.5 * 255));
+		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "fixedTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_MULTIPLY);
-		assertEquals(currentOperation.getValue(), "" + Math.round(2.5 * 255));
-		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "fixedTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_MULTIPLY);
+		assertEquals(currentInstruction.getValue(), "" + Math.round(2.5 * 255));
+		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "fixedTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_DIVIDE);
-		assertEquals(currentOperation.getValue(), "" + Math.round(5 * 255));
-		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "fixedTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_DIVIDE);
+		assertEquals(currentInstruction.getValue(), "" + Math.round(5 * 255));
+		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "fixedTest1");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getValue(), "" + Math.round(50 * 255));
-		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "fixedTest1");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getValue(), "" + Math.round(50 * 255));
+		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "boolTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getValue(), "1");
-		assertEquals(currentOperation.getValueType(), TYPE_BOOL);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "boolTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "boolTest1");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getValue(), "0");
-		assertEquals(currentOperation.getValueType(), TYPE_BOOL);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "boolTest1");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getValue(), "0");
+		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "boolTest2");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getVariable1Name(), "boolTest1");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "boolTest2");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getVariable1Name(), "boolTest1");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "charTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getValue(), "A");
-		assertEquals(currentOperation.getValueType(), TYPE_CHAR);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "charTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getValue(), "A");
+		assertEquals(currentInstruction.getValueType(), TYPE_CHAR);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "charTest1");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getValue(), "B");
-		assertEquals(currentOperation.getValueType(), TYPE_CHAR);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "charTest1");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getValue(), "B");
+		assertEquals(currentInstruction.getValueType(), TYPE_CHAR);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "charTest2");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getVariable1Name(), "charTest1");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "charTest2");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getVariable1Name(), "charTest1");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getValue(), "30");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getValue(), "30");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "1");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "15");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "1");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "15");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
-		assertEquals(currentOperation.getVariable1Name(), "intTest1");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
+		assertEquals(currentInstruction.getVariable1Name(), "intTest1");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "1");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_DIVIDE);
-		assertEquals(currentOperation.getValue(), "5");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "1");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_DIVIDE);
+		assertEquals(currentInstruction.getValue(), "5");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_MULTIPLY);
-		assertEquals(currentOperation.getVariable1Name(), "intTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "1");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_MULTIPLY);
+		assertEquals(currentInstruction.getVariable1Name(), "intTest");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "1");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "7");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getValue(), "25");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "7");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getValue(), "25");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getValue(),  "" + Math.round(60.5 * 255));
-		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "fixedTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getValue(),  "" + Math.round(60.5 * 255));
+		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "1");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(),  "" + Math.round(15 * 255));
-		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "fixedTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "1");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(),  "" + Math.round(15 * 255));
+		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
-		assertEquals(currentOperation.getVariable1Name(), "fixedTest1");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "fixedTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
+		assertEquals(currentInstruction.getVariable1Name(), "fixedTest1");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "1");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_DIVIDE);
-		assertEquals(currentOperation.getValue(),  "" + Math.round(5 * 255));
-		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "fixedTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "1");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_DIVIDE);
+		assertEquals(currentInstruction.getValue(),  "" + Math.round(5 * 255));
+		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_MULTIPLY);
-		assertEquals(currentOperation.getVariable1Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "1");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "fixedTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_MULTIPLY);
+		assertEquals(currentInstruction.getVariable1Name(), "fixedTest");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "1");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "2");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_NEGATIVE);
-		assertEquals(currentOperation.getValue(),  "" + Math.round(10 * 255));
-		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "fixedTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_NEGATIVE);
+		assertEquals(currentInstruction.getValue(),  "" + Math.round(10 * 255));
+		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "3");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_POSITIVE);
-		assertEquals(currentOperation.getVariable1Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "2");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "fixedTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "3");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_POSITIVE);
+		assertEquals(currentInstruction.getVariable1Name(), "fixedTest");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "2");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "4");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_INVERSE);
-		assertEquals(currentOperation.getVariable1Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "3");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "fixedTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "4");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_INVERSE);
+		assertEquals(currentInstruction.getVariable1Name(), "fixedTest");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "3");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "5");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getValue(),  "" + Math.round(25.25 * 255));
-		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "fixedTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "5");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getValue(),  "" + Math.round(25.25 * 255));
+		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "boolTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "9");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getVariable1Name(), "boolTest0");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "boolTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "9");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getVariable1Name(), "boolTest0");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "boolTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "10");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getValue(), "1");
-		assertEquals(currentOperation.getValueType(), TYPE_BOOL);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "boolTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "10");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "boolTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "11");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getVariable1Name(), "boolTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "10");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "boolTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "11");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getVariable1Name(), "boolTest");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "10");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "boolTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "2");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_NEGATIVE);
-		assertEquals(currentOperation.getValue(), "1");
-		assertEquals(currentOperation.getValueType(), TYPE_BOOL);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "boolTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_NEGATIVE);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "boolTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "3");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_POSITIVE);
-		assertEquals(currentOperation.getVariable1Name(), "boolTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "2");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "boolTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "3");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_POSITIVE);
+		assertEquals(currentInstruction.getVariable1Name(), "boolTest");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "2");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "boolTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "4");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_INVERSE);
-		assertEquals(currentOperation.getVariable1Name(), "boolTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "3");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "boolTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "4");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_INVERSE);
+		assertEquals(currentInstruction.getVariable1Name(), "boolTest");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "3");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "boolTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "5");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getValue(), "1");
-		assertEquals(currentOperation.getValueType(), TYPE_BOOL);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "boolTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "5");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "charTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "9");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getVariable1Name(), "charTest0");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "charTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "9");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getVariable1Name(), "charTest0");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "charTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "10");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getValue(), "C");
-		assertEquals(currentOperation.getValueType(), TYPE_CHAR);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "charTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "10");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getValue(), "C");
+		assertEquals(currentInstruction.getValueType(), TYPE_CHAR);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "charTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "11");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getVariable1Name(), "charTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "10");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "charTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "11");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getVariable1Name(), "charTest");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "10");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "charTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getValue(), "d");
-		assertEquals(currentOperation.getValueType(), TYPE_CHAR);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "charTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getValue(), "d");
+		assertEquals(currentInstruction.getValueType(), TYPE_CHAR);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.isCondition(), true);
-		assertEquals(currentOperation.getVariable0Name(), "intTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.COMPARATOR_EQUALS);
-		assertEquals(currentOperation.getValue(), "18");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isCondition(), true);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_EQUALS);
+		assertEquals(currentInstruction.getValue(), "18");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "1");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.isCondition(), true);
-		assertEquals(currentOperation.getVariable0Name(), "intTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.COMPARATOR_NOT_EQUALS);
-		assertEquals(currentOperation.getValue(), "18");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isCondition(), true);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_NOT_EQUALS);
+		assertEquals(currentInstruction.getValue(), "18");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "1");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
 
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "2");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "2");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_IF);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "1");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
 
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "2");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "2");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_IF);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.isCondition(), true);
-		assertEquals(currentOperation.getVariable0Name(), "intTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.COMPARATOR_NOT_EQUALS);
-		assertEquals(currentOperation.getVariable1Name(), "intTest1");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isCondition(), true);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_NOT_EQUALS);
+		assertEquals(currentInstruction.getVariable1Name(), "intTest1");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "1");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
 
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "2");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "2");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_IF);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "2");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getValue(), "100");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getValue(), "100");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.isCondition(), true);
-		assertEquals(currentOperation.getVariable0Name(), "intTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER);
-		assertEquals(currentOperation.getVariable1Name(), "intTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "2");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isCondition(), true);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER);
+		assertEquals(currentInstruction.getVariable1Name(), "intTest");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "2");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "1");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
 
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "2");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "2");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_IF);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.isCondition(), true);
-		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "2");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.COMPARATOR_BIGGER);
-		assertEquals(currentOperation.getVariable1Name(), "intTest0");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isCondition(), true);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_BIGGER);
+		assertEquals(currentInstruction.getVariable1Name(), "intTest0");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "1");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
 
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "2");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "2");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_IF);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.isCondition(), true);
-		assertEquals(currentOperation.getVariable0Name(), "intTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER_EQUALS);
-		assertEquals(currentOperation.getVariable1Name(), "intTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "2");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isCondition(), true);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER_EQUALS);
+		assertEquals(currentInstruction.getVariable1Name(), "intTest");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "2");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "1");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
 
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "2");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "2");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_IF);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.isCondition(), true);
-		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "2");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.COMPARATOR_BIGGER_EQUALS);
-		assertEquals(currentOperation.getVariable1Name(), "intTest0");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isCondition(), true);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_BIGGER_EQUALS);
+		assertEquals(currentInstruction.getVariable1Name(), "intTest0");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "1");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
 
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "2");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "2");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_IF);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "3");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getVariable1Name(), "intTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "2");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "3");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getVariable1Name(), "intTest");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "2");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.isCondition(), true);
-		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "2");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.COMPARATOR_BIGGER_EQUALS);
-		assertEquals(currentOperation.getVariable1Name(), "intTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "3");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isCondition(), true);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_BIGGER_EQUALS);
+		assertEquals(currentInstruction.getVariable1Name(), "intTest");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "3");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "1");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
 
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "2");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "2");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_IF);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.isCondition(), true);
-		assertEquals(currentOperation.getVariable0Name(), "intTest");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "2");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER_EQUALS);
-		assertEquals(currentOperation.getVariable1Name(), "intTest");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "3");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isCondition(), true);
+		assertEquals(currentInstruction.getVariable0Name(), "intTest");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER_EQUALS);
+		assertEquals(currentInstruction.getVariable1Name(), "intTest");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "3");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "1");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
 
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "2");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "2");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_IF);
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_FUNCTION_CALL);
-		assertEquals(currentOperation.getVariable1Name(), "FunctionTest");
-		assertEquals(currentOperation.getParameters()[0], "intTest0");
-		assertEquals(currentOperation.getParameters()[1], "intTest");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isFunctionCall(), true);
+		assertEquals(currentInstruction.getFunctionName(), "FunctionTest");
+		assertEquals(currentInstruction.getParameters().get(0), "intTest0");
+		assertEquals(currentInstruction.getParameters().get(1), "intTest");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_FUNCTION_CALL);
-		assertEquals(currentOperation.getVariable1Name(), "TestLibrary_FunctionTest");
-		assertEquals(currentOperation.getParameters()[0], "intTest");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isFunctionCall(), true);
+		assertEquals(currentInstruction.getFunctionName(), "TestLibrary_FunctionTest");
+		assertEquals(currentInstruction.getParameters().get(0), "intTest");
 		
-		currentOperation = start.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_FUNCTION_CALL);
-		assertEquals(currentOperation.getVariable1Name(), "TestDirectoryLibrary_FunctionTest");
-		assertEquals(currentOperation.getParameters()[0], "intTest");
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isFunctionCall(), true);
+		assertEquals(currentInstruction.getFunctionName(), "TestDirectoryLibrary_FunctionTest");
+		assertEquals(currentInstruction.getParameters().get(0), "intTest");
 		
-		currentOperationIndex = 0;
+		currentInstructionIndex = 0;
 		
-		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "fixedTest1");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "" + Math.round(25 * 255));
-		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
+		currentInstruction = functionTest.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "fixedTest1");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "" + Math.round(25 * 255));
+		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
-		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.isCondition(), true);
-		assertEquals(currentOperation.getVariable0Name(), "fixedTest1");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER_EQUALS);
-		assertEquals(currentOperation.getValue(),  "" + Math.round(80 * 255));
-		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
+		currentInstruction = functionTest.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isCondition(), true);
+		assertEquals(currentInstruction.getVariable0Name(), "fixedTest1");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER_EQUALS);
+		assertEquals(currentInstruction.getValue(),  "" + Math.round(80 * 255));
+		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
-		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_FUNCTION_REPEAT);
+		currentInstruction = functionTest.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_FUNCTION_REPEAT);
 		
-		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_IF);
+		currentInstruction = functionTest.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
 		
-		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "_paramTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "100");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = functionTest.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "_paramTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "100");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "_paramTest1");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "5");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getVariable1Name(), "_paramTest0");
+		currentInstruction = functionTest.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "_paramTest1");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "5");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getVariable1Name(), "_paramTest0");
 		
-		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "_paramTest1");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "4");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getVariable1Name(), "_paramTest1");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "5");
+		currentInstruction = functionTest.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "_paramTest1");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "4");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getVariable1Name(), "_paramTest1");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "5");
 		
-		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "_paramTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getVariable1Name(), "_paramTest1");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "4");
+		currentInstruction = functionTest.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "_paramTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getVariable1Name(), "_paramTest1");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "4");
 		
-		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "_paramTest1");
-		assertEquals(currentOperation.getVariable0ArrayIndex(), "intTest1");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentOperation.getVariable1Name(), "intTest1");
+		currentInstruction = functionTest.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "_paramTest1");
+		assertEquals(currentInstruction.getVariable0ArrayIndex(), "intTest1");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getVariable1Name(), "intTest1");
 		
-		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "_paramTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
-		assertEquals(currentOperation.getVariable1Name(), "_paramTest1");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "intTest1");
+		currentInstruction = functionTest.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "_paramTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
+		assertEquals(currentInstruction.getVariable1Name(), "_paramTest1");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "intTest1");
 		
-		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.isCondition(), true);
-		assertEquals(currentOperation.getVariable0Name(), "_paramTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER);
-		assertEquals(currentOperation.getVariable1Name(), "_paramTest1");
-		assertEquals(currentOperation.getVariable1ArrayIndex(), "5");
+		currentInstruction = functionTest.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isCondition(), true);
+		assertEquals(currentInstruction.getVariable0Name(), "_paramTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER);
+		assertEquals(currentInstruction.getVariable1Name(), "_paramTest1");
+		assertEquals(currentInstruction.getVariable1ArrayIndex(), "5");
 		
-		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "1");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = functionTest.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
+		currentInstruction = functionTest.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
 
-		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getVariable0Name(), "ifTest");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentOperation.getValue(), "2");
-		assertEquals(currentOperation.getValueType(), TYPE_INT);
+		currentInstruction = functionTest.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "2");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
-		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.KEYWORD_IF);
+		currentInstruction = functionTest.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
 	}
 	
 	private char toIndex(int i) {

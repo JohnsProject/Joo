@@ -139,7 +139,7 @@ public class JooCompiler {
 		functions = parseFunctions(codeLines, operators, variables);
 		String compiledJooCode = "";
 		compiledJooCode = writeVariablesAndFunctions(compiledJooCode, variables, functions);
-		compiledJooCode = writeFunctionsAndOperations(compiledJooCode, variables, functions, nativeFunctions);
+		compiledJooCode = writeFunctionsAndInstructions(compiledJooCode, variables, functions, nativeFunctions);
 		return compiledJooCode;
 	}
 	
@@ -250,9 +250,9 @@ public class JooCompiler {
 				codeLines[i] = "";
 			}
 			if(currentFunction != null) {
-				Operation operation = parseOperation(codeLine, operators, variables, currentFunction.getParameters());
-				if(operation != null) {
-					currentFunction.addOperation(operation);
+				Instruction instruction = parseInstruction(codeLine, operators, variables, currentFunction.getParameters());
+				if(instruction != null) {
+					currentFunction.addInstruction(instruction);
 				}
 			}
 		}
@@ -380,113 +380,117 @@ public class JooCompiler {
 	}
 	
 	/**
-	 * This method tries to parse the operation in the given code line. 
-	 * If it is a known operation the operation get's parsed into a Operation object that 
-	 * is then returned, null is returned if it's a comment or unknown operation.
+	 * This method tries to parse the instruction in the given code line. 
+	 * If it's a known instruction it get's parsed into a instruction object that 
+	 * is then returned, null is returned if it's a comment or unknown instruction.
 	 * 
 	 * 
 	 * @param codeLine
 	 * @param operators
 	 * @param variables
 	 * @param parameters
-	 * @return Operation object if operation can be parsed, null if it's a comment or unknown operation.
+	 * @return Instruction object if instruction can be parsed, null if it's a comment or unknown instruction.
 	 */
-	private Operation parseOperation(String codeLine, final List<String> operators, final Map<String, Variable>[] variables, final Map<String, String> parameters) {		
+	private Instruction parseInstruction(String codeLine, final List<String> operators, final Map<String, Variable>[] variables, final Map<String, String> parameters) {		
 		if(codeLine.contains(KEYWORD_COMMENT)) {
 			return null;
 		}
-		Operation operation = new Operation();
+		Instruction instruction = new Instruction();
 		// whitespace ensures the keyword isn't part of a bigger word
 		if(codeLine.contains(KEYWORD_FUNCTION_CALL + " ")) {
-			parseFunctionCall(codeLine, operation);
+			parseFunctionCall(codeLine, instruction);
+			instruction.isFunctionCall(true);
 		}
 		else if(codeLine.contains(KEYWORD_IF + " ")) {
 			codeLine = codeLine.replaceFirst(KEYWORD_IF, "");
-			parseBinaryOperation(codeLine, variables, parameters, operators, operation);
-			operation.isCondition(true);
+			parseBinaryOperation(codeLine, variables, parameters, operators, instruction);
+			instruction.isCondition(true);
 		}
 		else if(codeLine.contains(KEYWORD_ELSE)) {
-			operation.setOperator(JooVirtualMachine.KEYWORD_ELSE);
+			instruction.setOperator(JooVirtualMachine.KEYWORD_ELSE);
 		}
 		else if(codeLine.contains(KEYWORD_IF_END)) {
-			operation.setOperator(JooVirtualMachine.KEYWORD_IF);
+			instruction.setOperator(JooVirtualMachine.KEYWORD_IF);
 		}
 		else if(codeLine.contains(KEYWORD_FUNCTION_REPEAT)) {
-			operation.setOperator(JooVirtualMachine.KEYWORD_FUNCTION_REPEAT);
+			instruction.setOperator(JooVirtualMachine.KEYWORD_FUNCTION_REPEAT);
 		}
 		else if(codeLine.contains(KEYWORD_FUNCTION_END)) {
-			operation.setOperator(JooVirtualMachine.KEYWORD_FUNCTION);
-		} else { // if all if's failed it means the operation is a variable operation
-			parseBinaryOperation(codeLine, variables, parameters, operators, operation);
+			instruction.setOperator(JooVirtualMachine.KEYWORD_FUNCTION);
+		} else { // if all if's failed it means the instruction is a variable operation
+			parseBinaryOperation(codeLine, variables, parameters, operators, instruction);
 		}
-		// if operator is null the operation could not be parsed
-		if(operation.getOperator() == 0) {
+		if(!instruction.isFunctionCall() && (instruction.getOperator() == 0)) {
 			return null;
 		}		
-		return operation;
+		return instruction;
 	}
 	
-	private void parseFunctionCall(String codeLine, Operation operation) {
+	private void parseFunctionCall(String codeLine, Instruction instruction) {
 		codeLine = codeLine.replace(" ", "").replaceFirst(KEYWORD_FUNCTION_CALL, "");
 		if(codeLine.contains(KEYWORD_PARAMETER)) {
 			String[] functionCallData = codeLine.split(KEYWORD_PARAMETER);
-			operation.setVariable1Name(functionCallData[0]);
+			instruction.setFunctionName(functionCallData[0]);
 			// parsing in case of array with index as parameter will be done later
 			for (int i = 1; i < functionCallData.length; i++) {
-				operation.getParameters()[i-1] = functionCallData[i];
+				instruction.addParameter(functionCallData[i]);
 			}
 		} else {
-			operation.setVariable1Name(codeLine);
+			instruction.setFunctionName(codeLine);
 		}
-		operation.setOperator(JooVirtualMachine.KEYWORD_FUNCTION_CALL);
 	}
 	
 	/**
 	 * This method parses a binary operation (operation like a + b) with the possible operators
-	 * and fills the given operation object with the parsed data.
+	 * and fills the given instruction object with the parsed data.
 	 * 
 	 * @param codeLine
 	 * @param variables
 	 * @param parameters
 	 * @param operators
-	 * @param operation
+	 * @param instruction
 	 */
 	private void parseBinaryOperation(String codeLine, final Map<String, Variable>[] variables, final Map<String, String> parameters,
-																				List<String> operators, Operation operation) {
-		String[] operationData = parseBinaryOperationVariablesAndOperator(codeLine, operators, operation);
+																				List<String> operators, Instruction instruction) {
+		String[] operationData = parseBinaryOperationVariablesAndOperator(codeLine, operators, instruction);
 		if(operationData != null) {
 			if(operationData[0].contains(KEYWORD_ARRAY_START)) {
 				String[] variableData = operationData[0].replace(KEYWORD_ARRAY_END, "").split("\\" + KEYWORD_ARRAY_START);
-				operation.setVariable0Name(variableData[0]);
-				operation.setVariable0ArrayIndex(variableData[1]);
+				instruction.setVariable0Name(variableData[0]);
+				instruction.hasVariable0(true);
+				instruction.setVariable0ArrayIndex(variableData[1]);
+				instruction.hasVariable0ArrayIndex(true);
 			} else {
-				operation.setVariable0Name(operationData[0]);
+				instruction.setVariable0Name(operationData[0]);
+				instruction.hasVariable0(true);
 			}
 			if(operationData[1].contains(KEYWORD_ARRAY_START)) {
 				String[] variableData = operationData[1].replace(KEYWORD_ARRAY_END, "").split("\\" + KEYWORD_ARRAY_START);
-				operation.setVariable1Name(variableData[0]);
-				operation.setVariable1ArrayIndex(variableData[1]);
+				instruction.setVariable1Name(variableData[0]);
+				instruction.hasVariable1(true);
+				instruction.setVariable1ArrayIndex(variableData[1]);
+				instruction.hasVariable1ArrayIndex(true);
 			} else {
 				// part behind the operator may contain a value instead of variable
-				parseBinaryOperationValue(operationData, variables, parameters, operation);
+				parseBinaryOperationValue(operationData, variables, parameters, instruction);
 			}
 		}
 	}
 	
 	/**
 	 * This method parses the operator used in the operation and and returns the variables before and 
-	 * after the operator. It also sets the operator in the Operation object.
+	 * after the operator. It also sets the operator in the instruction object.
 	 * 
 	 * @param codeLine
 	 * @param operators
-	 * @param operation
+	 * @param instruction
 	 * @return variables before and after the operator.
 	 */
-	private String[] parseBinaryOperationVariablesAndOperator(String codeLine, List<String> operators, Operation operation) {
+	private String[] parseBinaryOperationVariablesAndOperator(String codeLine, List<String> operators, Instruction instruction) {
 		String[] operationData = null;
 		for (int i = 0; i < operators.size(); i++) {
 			if(codeLine.contains(" " + operators.get(i) + " ")) {
-				operation.setOperator((char) (i + JooVirtualMachine.OPERATORS_START));
+				instruction.setOperator((char) (i + JooVirtualMachine.OPERATORS_START));
 				String possibleOperator = operators.get(i);
 				// some characters like '+' need a backslash in front of it
 				possibleOperator = possibleOperator.replace("+", "\\+");
@@ -500,18 +504,19 @@ public class JooCompiler {
 	}
 	
 	/**
-	 * This method parses the variable or value after the operator and sets it in the Operation object.
+	 * This method parses the variable or value after the operator and sets it in the instruction object.
 	 * 
 	 * @param operationData
 	 * @param variables
 	 * @param parameters
-	 * @param operation
+	 * @param instruction
 	 */
 	private void parseBinaryOperationValue(final String[] operationData, final Map<String, Variable>[] variables,
-																			final Map<String, String> parameters, Operation operation) {
+																			final Map<String, String> parameters, Instruction instruction) {
 		if(operationData[1].contains(KEYWORD_CHAR)) {
-			operation.setValue("" + operationData[1].toCharArray()[1]);
-			operation.setValueType(TYPE_CHAR);
+			instruction.setValue("" + operationData[1].toCharArray()[1]);
+			instruction.hasValue(true);
+			instruction.setValueType(TYPE_CHAR);
 		} else {
 			try {
 				String variableName = operationData[0];
@@ -525,20 +530,24 @@ public class JooCompiler {
 				}
 				// if variable before operator is int
 				if(variables[0].containsKey(variableName) || variables[4].containsKey(variableName) || isIntParameter) {
-					operation.setValue("" + Integer.parseInt(operationData[1]));
-					operation.setValueType(TYPE_INT);
+					instruction.setValue("" + Integer.parseInt(operationData[1]));
+					instruction.hasValue(true);
+					instruction.setValueType(TYPE_INT);
 				}
 				else {
-					operation.setValue("" + Math.round(Float.parseFloat(operationData[1]) * FIXED_POINT));
-					operation.setValueType(TYPE_FIXED);
+					instruction.setValue("" + Math.round(Float.parseFloat(operationData[1]) * FIXED_POINT));
+					instruction.hasValue(true);
+					instruction.setValueType(TYPE_FIXED);
 				}
 			}
 			catch(NumberFormatException notNumber) {
 				if(operationData[1].equals(KEYWORD_TRUE) || operationData[1].equals(KEYWORD_FALSE)) {
-					operation.setValue("" + (operationData[1].equals(KEYWORD_FALSE) ? 0 : 1));
-					operation.setValueType(TYPE_BOOL);
+					instruction.setValue("" + (operationData[1].equals(KEYWORD_FALSE) ? 0 : 1));
+					instruction.hasValue(true);
+					instruction.setValueType(TYPE_BOOL);
 				} else {
-					operation.setVariable1Name(operationData[1]);
+					instruction.setVariable1Name(operationData[1]);
+					instruction.hasVariable1(true);
 				}
 			}
 		}
@@ -578,7 +587,7 @@ public class JooCompiler {
 	}
 	
 	/**
-	 * This method writes the function declaration and the function operations into the joo code string 
+	 * This method writes the function declaration and the function instructions into the joo code string 
 	 * in a way the joo virtual machine can read it.
 	 * <br>
 	 * The joo virtual machine can't understand code written by this method only, use the {@link #compile(String) compile} method 
@@ -590,61 +599,64 @@ public class JooCompiler {
 	 * @param nativeFunctions
 	 * @return
 	 */
-	String writeFunctionsAndOperations(String code, final Map<String, Variable>[] variables, final Map<String, Function> functions, List<String> nativeFunctions) {
+	String writeFunctionsAndInstructions(String code, final Map<String, Variable>[] variables, final Map<String, Function> functions, List<String> nativeFunctions) {
 		for (Function function : functions.values()) {
 			// doesn't need the parameters in the function declaration, the parameters are already listed in function call
 			code += "" + JooVirtualMachine.KEYWORD_FUNCTION + function.getByteCodeName() + JooVirtualMachine.LINE_BREAK;
-			for (Operation operation : function.getOperations()) {
-				if(operation.isCondition()) {
+			for (Instruction instruction : function.getInstructions()) {
+				if(instruction.isCondition()) {
 					code += "" + JooVirtualMachine.KEYWORD_IF;
+					code = writeBinaryOperation(code, function.getParameters().keySet(), variables, instruction);
 				}
-				code = writeBinaryOperation(code, function.getParameters().keySet(), variables, operation);
-				if(operation.getOperator() == JooVirtualMachine.KEYWORD_FUNCTION_CALL) {
-					if(functions.containsKey(operation.getVariable1Name())) {
-						code += "" + functions.get(operation.getVariable1Name()).getByteCodeName();
+				else if(instruction.isFunctionCall()) {
+					if(functions.containsKey(instruction.getFunctionName())) {
+						code += "" + functions.get(instruction.getFunctionName()).getByteCodeName();
 					} else {
 						for (int i = 0; i < nativeFunctions.size(); i++) {
-							if(nativeFunctions.get(i).equals(operation.getVariable1Name())) {
-								code += "" + operation.getOperator() + (char)(i + JooVirtualMachine.NATIVE_FUNCTIONS_START);
+							if(nativeFunctions.get(i).equals(instruction.getFunctionName())) {
+								code += "" + JooVirtualMachine.KEYWORD_FUNCTION_CALL + (char)(i + JooVirtualMachine.NATIVE_FUNCTIONS_START);
 							}
 						}
 					}
+				} else {
+					code = writeBinaryOperation(code, function.getParameters().keySet(), variables, instruction);
 				}
-				code = writeOperationParameters(code, variables, operation);
+				code = writeInstructionParameters(code, variables, instruction);
 				code += "" + JooVirtualMachine.LINE_BREAK;
 			}
 		}
 		return code;
 	}
 
-	private String writeBinaryOperation(String code, final Set<String> parameters, final Map<String, Variable>[] variables, Operation operation) {
-		code += getVirtualMachineVariableName(operation.getVariable0Name(), parameters, variables);
-		if(!operation.getVariable0ArrayIndex().isEmpty()) {
-			// +1 because 0 is null character
-			try {
-				code += "" + (char)(Integer.parseInt(operation.getVariable0ArrayIndex()) + JooVirtualMachine.ARRAY_INDEXES_START);
-			} catch (NumberFormatException e) {
-				code += getVirtualMachineVariableName(operation.getVariable0ArrayIndex(), parameters, variables);				
+	private String writeBinaryOperation(String code, final Set<String> parameters, final Map<String, Variable>[] variables, Instruction instruction) {
+		if(instruction.hasVariable0()) {
+			code += getVirtualMachineVariableName(instruction.getVariable0Name(), parameters, variables);
+			if(instruction.hasVariable0ArrayIndex()) {
+				try {
+					code += "" + (char)(Integer.parseInt(instruction.getVariable0ArrayIndex()) + JooVirtualMachine.ARRAY_INDEXES_START);
+				} catch (NumberFormatException e) {
+					code += getVirtualMachineVariableName(instruction.getVariable0ArrayIndex(), parameters, variables);				
+				}
 			}
 		}
-		if(operation.getOperator() != JooVirtualMachine.KEYWORD_FUNCTION_CALL) {
-			code += "" + operation.getOperator();
-		}
-		code += getVirtualMachineVariableName(operation.getVariable1Name(), parameters, variables);
-		if(!operation.getVariable1ArrayIndex().isEmpty()) {
-			try {
-				code += "" + (char)(Integer.parseInt(operation.getVariable1ArrayIndex()) + JooVirtualMachine.ARRAY_INDEXES_START);
-			} catch (NumberFormatException e) {
-				code += getVirtualMachineVariableName(operation.getVariable1ArrayIndex(), parameters, variables);
+		code += "" + instruction.getOperator();
+		if(instruction.hasVariable1()) {
+			code += getVirtualMachineVariableName(instruction.getVariable1Name(), parameters, variables);
+			if(instruction.hasVariable1ArrayIndex()) {
+				try {
+					code += "" + (char)(Integer.parseInt(instruction.getVariable1ArrayIndex()) + JooVirtualMachine.ARRAY_INDEXES_START);
+				} catch (NumberFormatException e) {
+					code += getVirtualMachineVariableName(instruction.getVariable1ArrayIndex(), parameters, variables);
+				}
 			}
 		}
-		if(!operation.getValueType().isEmpty()) {
-			if(operation.getValueType().equals(TYPE_CHAR)) {
+		if(instruction.hasValue()) {
+			if(instruction.getValueType().equals(TYPE_CHAR)) {
 				// put type char character in front of it so the virtual machine knows
 				// the character is not a variable name
-				code += JooVirtualMachine.TYPE_CHAR +  operation.getValue();
+				code += JooVirtualMachine.TYPE_CHAR +  instruction.getValue();
 			} else {				
-				code += toVirtualMachineNumber(operation.getValue());
+				code += toVirtualMachineNumber(instruction.getValue());
 			}
 		}
 		return code;
@@ -667,36 +679,34 @@ public class JooCompiler {
 	}
 	
 	/**
-	 * This method writes the operation parameters into the joo code string if the operation
+	 * This method writes the instruction parameters into the joo code string if the instruction
 	 * is a function call.
 	 * 
 	 * @param code
 	 * @param variables
-	 * @param operation
+	 * @param instruction
 	 * @return
 	 */
-	private String writeOperationParameters(String code, final Map<String, Variable>[] variables, Operation operation) {
-		for (String parameter : operation.getParameters()) {
-			if(parameter != null) {
-				String parameterName = "";
-				String parameterIndex = "";
-				// parse if parameter is a array with index				
-				if(parameter.contains(KEYWORD_ARRAY_START)) {
-					String[] parameterData = parameter.replace(KEYWORD_ARRAY_END, "").split("\\" + KEYWORD_ARRAY_START);
-					parameterName = parameterData[0];
-					parameterIndex = "" + (char) (Integer.parseInt(parameterData[1]) + 1);
-				} else {
-					parameterName = parameter;
-				}
-				String newParameterName = "";
-				for (int i = 0; i < variables.length; i++) {
-					if(variables[i].containsKey(parameterName)) {
-						newParameterName = "" + variables[i].get(parameterName).getByteCodeName();
-						break;
-					}
-				}
-				code += "" + JooVirtualMachine.KEYWORD_PARAMETER + newParameterName + parameterIndex;
+	private String writeInstructionParameters(String code, final Map<String, Variable>[] variables, Instruction instruction) {
+		for (String parameter : instruction.getParameters()) {
+			String parameterName = "";
+			String parameterIndex = "";
+			// parse if parameter is a array with index				
+			if(parameter.contains(KEYWORD_ARRAY_START)) {
+				String[] parameterData = parameter.replace(KEYWORD_ARRAY_END, "").split("\\" + KEYWORD_ARRAY_START);
+				parameterName = parameterData[0];
+				parameterIndex = "" + (char) (Integer.parseInt(parameterData[1]) + 1);
+			} else {
+				parameterName = parameter;
 			}
+			String newParameterName = "";
+			for (int i = 0; i < variables.length; i++) {
+				if(variables[i].containsKey(parameterName)) {
+					newParameterName = "" + variables[i].get(parameterName).getByteCodeName();
+					break;
+				}
+			}
+			code += "" + JooVirtualMachine.KEYWORD_PARAMETER + newParameterName + parameterIndex;
 		}
 		return code;
 	}
