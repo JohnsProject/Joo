@@ -1,0 +1,210 @@
+Joo Language Specification
+
+1 Introduction
+Joo is a programming language that is designed to run on machines 
+with extremely low resources. It's supposed to run on a desktop as well as on
+microcontrollers. It's based on the principle "compile once, run everywhere".
+That's why the Joo programming language uses a compiler to generate platform
+independent, high compressed bytecode that is then executed joo virtual machine.
+Joo is supposed to be as simple as possible to avoid complex compiler and 
+virtual machine implementations.
+
+2 Joo Compiler language
+The joo compiler language is the human readable code that the joo compiler
+understands and that is then compiled to bytecode (virtual machine readable code).
+Joo can basically be divided into 3 main components: variables, functions
+and instructions.
+
+2.1 Variables
+A variable is a unique named piece of data that can be manipulated using a certain
+type of instructions called operators. To make joo code less bug prone the type
+of data a variable stores is defined when the variable is declared. The type of
+data a variable stores is called a 'data type'. All variables in joo are globally
+accessible.
+
+2.1.1 Data types
+The joo data types can be divided into 3 main types: numbers, booleans and
+characters. The numbers are divided into 2 types: numbers with fractional part
+described by the 'fixed' keyword and numbers without fractional part described
+by the 'int' keyword. Booleans use the 'bool' and characters the 'char' keyword.
+
+int - 16 bit data type that represents positive and negative numbers without a
+fractional part.
+
+fixed - 16 bit data type that represents positive and negative numbers with a
+fractional part. The first 8 bits represent the int part and the following 8 bits
+represent the fractional part.
+
+bool - 1 bit data type that represents one bit. It can be 1 or 0, 'true' or 'false'.
+
+char - 7 bit data type that represents ASCII characters.
+
+2.1.2 Arrays
+A array is a special variable type that stores multiple unnamed variables.
+The size (how many variables it stores) of the array needs to be defined
+in the array declaration and can't be changed. The variables in the array
+can be accessed through indexing. Arrays can only be indexed by natural 
+numbers or int typed variables, negative indices or array sizes are not 
+supported. Operators can only manipulate the variables in the array,
+not the array itself.
+
+2.1.3 Example
+
+# variable declarations
+int variable0
+int variable1 = 3
+fixed variable2 = 10.5
+bool variable3 = 1/0/true/false
+char variable4 = 'A'
+
+# array declarations
+int[5] variable5
+fixed[10] variable6
+bool[3] variable7
+char[7] variable8
+
+# variable operations
+variable0 += 10
+variable0 = variable1
+
+# array operations
+variable0 = variable5[2]
+variable5[2] = variable0
+variable5[3] = variable5[2]
+variable5[variable1] = 10
+
+
+2.1.2 Operators
+A operator is used to manipulate variables. Joo only supports binary operators.
+That means that there must be a variable before and after an operator. The variable
+before the operator is the variable to be changed, behind the operator there can be
+a variable or a value, the value of the variable or the value behind the operator
+is used to manipulate the variable before the operator as the operator specifies.
+
+Supported operators:
++=	addition
+-=	subtraction
+*=	multiplication
+/=	division
+=	assignment
+
+Supported comparators (Comparison operators):
+==	equal to
+!=	not equal to
+<	less than
+>	greater than
+<=	less than or equal to
+>=	greater than or equal to
+
+2.2 Functions
+A function is a unique named set of instructions. Instructions can only be written
+inside functions. The only exceptions are variable declarations, those can be anywhere.
+A function is declared using the 'function' and ends at the 'endFunction' keyword.
+The 'repeatFunction' keyword can be used to re-execute the function.
+
+2.2.1 Parameters
+A parameter is a input provided to a function. One function can have multiple
+parameters as well as no parameters. Only a variable can be provided as a parameter.
+The value of the parameter is directly linked to the variable value. This means that if
+the parameter value changes the variable value changes. The ':' character is used to
+separate the parameters of a function.
+
+2.2.2 Function calls
+A function call is used to execute the function with the given name. The function
+call also specifies the variables to be used as the function's parameters. The
+'call' keyword is used to call a function and the ':' character is used to
+separate the parameters.
+
+2.2.3 Execution conditions
+Execution conditions are used to execute a set of instructions only if a condition is
+met. In joo a execution condition is declared using the 'if' keyword and ends at the
+'endIf' keyword. This means that the instructions between the 'if' and the 'endIf'
+keyword are only executed if the given condition is met. The 'else' keyword is used
+to invert the execution condition. This means that the code between the the 'else'
+and the 'endIf' keyword are only executed if the given condition is not met. The
+'else' keyword should only be used between the 'if' and the 'endIf' keyword.
+
+2.2.4 Example
+
+int variable0
+
+function Start
+int[5] variable1
+
+if variable0 == 100
+variable1[0] += 10
+else
+variable1[0] += 5
+endIf
+
+call Function0
+call Function1: variable0: variable1
+
+endFunction
+
+function Function0
+variable1[1] = variable0
+
+endFunction
+
+function Function1: int _parameter0: int[] _parameter1
+
+_parameter0 -= 10
+_parameter1[2] *= _parameter0
+
+if _parameter1[2] == _parameter0
+
+if _parameter0 == _parameter1[2]
+
+endIf
+
+endIf
+
+endFunction
+
+2.3 Further syntax
+
+2.3.1 Keywords should have a whitespace after them.
+
+2.3.2 Operators should have a whitespace after them.
+
+2.3.3 Names should have a whitespace after them, except if they are followed
+by a array index or parameter separator.
+
+2.3.4 Each instruction is separated using line breaks.
+
+2.3.5 # - Code comment keyword. Lines with this keyword will be skipped.
+
+2.3.6 include - Used to include code from external joo files. This keyword tells the 
+compiler to attach the code from the given file to the end of the current code
+before compilation.
+
+2.3.7 define - Used to name a constant value. This keyword tells the compiler to 
+replace the defined name by the value in all code pieces it's found before
+compilation.
+
+2.3.8 import - Used to enable access to external files.
+
+3 Joo Virtual Machine language (Bytecode)
+The joo virtual machine language is the code that the joo virtual machine
+understands. The joo bytecode is ASCII based. All keywords, variable
+and function names are represented as single characters.
+
+3.1 Variables
+
+3.1.1 Data types
+
+3.1.2 Operators
+
+3.1.3 Arrays
+
+3.2 Functions
+
+3.2.1 Parameters
+
+3.2.2 Function calls
+
+3.2.3 Execution conditions
+
+
+

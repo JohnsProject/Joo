@@ -5,17 +5,27 @@
 >
 ==
 !=
-+=
--=
-*=
-/=
 =
+=+
+=-
+=!
++
+-
+*
+/
+%
+&
+^
+|
+~
+<<
+>>
 
 @FUNCTIONS
-#Standart Native Library is a set of functions that the virtual machine
-#implements independent of the platform the virtual machine runs on.
+# The Standard Native Library is a set of platform independent functions
+# that aims to help developing joo applications
 
-#Standart Graphics Library
+# Standard Graphics Library
 Graphics_HasOutputSupport
 Graphics_SetColor
 Graphics_DrawWindow
@@ -29,11 +39,11 @@ Graphics_HasInputSupport
 Graphics_GetInputPosition
 Graphics_GetInputCode
 
-#Standart Audio Library
+# Standard Audio Library
 Audio_HasOutputSupport
 Audio_PlaySound
 
-#Standart Serial Library
+# Standart Serial Library
 Serial_HasOutputSupport
 Serial_Write
 Serial_WriteText
@@ -42,7 +52,7 @@ Serial_HasInput
 Serial_Read
 Serial_ReadText
 
-#Standart Math Library
+# Standard Math Library
 Math_Max
 Math_Min
 Math_Pow
@@ -55,19 +65,19 @@ Math_Random
 Math_Degrees
 Math_Radians
 
-#Standart Time Library
+# Standard Time Library
 Time_Delay
 Time_GetSeconds
 
-#Standart Storage Library
+# Standard Storage Library
 Storage_Clear
 Storage_Put
 Storage_Get
 
-#Standart Conversion Library
+# Standard Type Library
 
 
-#Standart Array Library
+# Standard Array Library
 
 
 

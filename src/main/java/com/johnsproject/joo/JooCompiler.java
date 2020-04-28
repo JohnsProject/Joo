@@ -34,6 +34,8 @@ import com.johnsproject.joo.util.FileUtil;
 public class JooCompiler {
 
 	public static final String KEYWORD_INCLUDE = "include";
+	public static final String KEYWORD_IMPORT = "import";
+	public static final String KEYWORD_DEFINE = "define";
 	public static final String KEYWORD_IF = "if";
 	public static final String KEYWORD_ELSE = "else";
 	public static final String KEYWORD_IF_END = "endIf";
@@ -48,6 +50,7 @@ public class JooCompiler {
 	public static final String KEYWORD_ARRAY_START = "[";
 	public static final String KEYWORD_ARRAY_END = "]";
 	public static final String KEYWORD_CHAR = "'";
+	public static final String KEYWORD_VARIABLE_ASSIGN = "=";
 
 	public static final String TYPE_PARAMETER = "parameter";
 	public static final String TYPE_FUNCTION = "function";
@@ -55,19 +58,6 @@ public class JooCompiler {
 	public static final String TYPE_FIXED = "fixed";
 	public static final String TYPE_BOOL = "bool";
 	public static final String TYPE_CHAR = "char";
-	
-	public static final String COMPARATOR_SMALLER = "<";
-	public static final String COMPARATOR_BIGGER = ">";
-	public static final String COMPARATOR_SMALLER_EQUALS = "<=";
-	public static final String COMPARATOR_BIGGER_EQUALS = ">=";
-	public static final String COMPARATOR_EQUALS = "==";
-	public static final String COMPARATOR_NOT_EQUALS = "!=";
-	
-	public static final String OPERATOR_ADD = "+=";
-	public static final String OPERATOR_SUBTRACT = "-=";
-	public static final String OPERATOR_MULTIPLY = "*=";
-	public static final String OPERATOR_DIVIDE = "/=";
-	public static final String OPERATOR_SET_EQUALS = "=";
 	
 	public static final String LINE_BREAK = "\n";
 	
@@ -284,8 +274,8 @@ public class JooCompiler {
 				codeLine = codeLine.replace(" ", "");
 				String variableName = "";
 				String variableValue = "";
-				if(codeLine.contains(OPERATOR_SET_EQUALS)) {
-					final String[] variableData = codeLine.replaceFirst(variableType, "").split(OPERATOR_SET_EQUALS);
+				if(codeLine.contains(KEYWORD_VARIABLE_ASSIGN)) {
+					final String[] variableData = codeLine.replaceFirst(variableType, "").split(KEYWORD_VARIABLE_ASSIGN);
 					variableName = variableData[0];
 					if(variableType.equals(TYPE_INT))
 						variableValue = variableData[1];
@@ -353,7 +343,7 @@ public class JooCompiler {
 			parseFunctionCall(codeLine, operation);
 		}
 		else if(codeLine.contains(KEYWORD_IF + " ")) {
-			codeLine = codeLine.replace(" ", "").replaceFirst(KEYWORD_IF, "");
+			codeLine = codeLine.replaceFirst(KEYWORD_IF, "");
 			parseBinaryOperation(codeLine, variables, parameters, operators, operation);
 			operation.isCondition(true);
 		}
@@ -369,7 +359,6 @@ public class JooCompiler {
 		else if(codeLine.contains(KEYWORD_FUNCTION_END)) {
 			operation.setOperator(JooVirtualMachine.KEYWORD_FUNCTION);
 		} else { // if all if's failed it means the operation is a variable operation
-			codeLine = codeLine.replace(" ", "");
 			parseBinaryOperation(codeLine, variables, parameters, operators, operation);
 		}
 		// if operator is null the operation could not be parsed
@@ -438,17 +427,14 @@ public class JooCompiler {
 	private String[] parseBinaryOperationVariablesAndOperator(String codeLine, List<String> operators, Operation operation) {
 		String[] operationData = null;
 		for (int i = 0; i < operators.size(); i++) {
-			if(codeLine.contains(operators.get(i))) {
+			if(codeLine.contains(" " + operators.get(i) + " ")) {
 				operation.setOperator((char) (i + JooVirtualMachine.OPERATORS_START));
-				// some characters like '+' need a backslash in front of it
 				String possibleOperator = operators.get(i);
-				if(possibleOperator.equals(OPERATOR_ADD)) {
-					possibleOperator = "\\" + OPERATOR_ADD;
-				}
-				if(possibleOperator.equals(OPERATOR_MULTIPLY)) {
-					possibleOperator = "\\" + OPERATOR_MULTIPLY;
-				}
-				operationData = codeLine.split(possibleOperator);
+				// some characters like '+' need a backslash in front of it
+				possibleOperator = possibleOperator.replace("+", "\\+");
+				possibleOperator = possibleOperator.replace("*", "\\*");
+				possibleOperator = possibleOperator.replace("?", "\\?");
+				operationData = codeLine.replace(" ", "").split(possibleOperator);
 				break;
 			}
 		}

@@ -72,34 +72,40 @@ public class JooCompilerTest {
 		assertEquals(jooLines[line++], "" + intTest0Name + JooVirtualMachine.OPERATOR_SUBTRACT + intTest1Name);
 		assertEquals(jooLines[line++], "" + intTest0Name + JooVirtualMachine.OPERATOR_MULTIPLY + toVirtualMachineNumber("2"));
 		assertEquals(jooLines[line++], "" + intTest0Name + JooVirtualMachine.OPERATOR_DIVIDE + toVirtualMachineNumber("10"));
-		assertEquals(jooLines[line++], "" + intTest1Name + JooVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("6"));
+		assertEquals(jooLines[line++], "" + intTest1Name + JooVirtualMachine.OPERATOR_ASSIGN + toVirtualMachineNumber("6"));
 		assertEquals(jooLines[line++], "" + fixedTest0Name + JooVirtualMachine.OPERATOR_ADD + fixedTest1Name);
 		assertEquals(jooLines[line++], "" + fixedTest0Name + JooVirtualMachine.OPERATOR_SUBTRACT + toVirtualMachineNumber("" + Math.round(0.5f * 255)));
 		assertEquals(jooLines[line++], "" + fixedTest0Name + JooVirtualMachine.OPERATOR_MULTIPLY + toVirtualMachineNumber("" + Math.round(2.5f * 255)));
 		assertEquals(jooLines[line++], "" + fixedTest0Name + JooVirtualMachine.OPERATOR_DIVIDE + toVirtualMachineNumber("" + Math.round(5f * 255)));
-		assertEquals(jooLines[line++], "" + fixedTest1Name + JooVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("" + Math.round(50f * 255)));
-		assertEquals(jooLines[line++], "" + boolTest0Name + JooVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("1"));
-		assertEquals(jooLines[line++], "" + boolTest1Name + JooVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("0"));
-		assertEquals(jooLines[line++], "" + boolTest2Name + JooVirtualMachine.OPERATOR_SET_EQUALS + boolTest1Name);
-		assertEquals(jooLines[line++], "" + charTest0Name + JooVirtualMachine.OPERATOR_SET_EQUALS + JooVirtualMachine.TYPE_CHAR + 'A');
-		assertEquals(jooLines[line++], "" + charTest1Name + JooVirtualMachine.OPERATOR_SET_EQUALS + JooVirtualMachine.TYPE_CHAR + 'B');
-		assertEquals(jooLines[line++], "" + charTest2Name + JooVirtualMachine.OPERATOR_SET_EQUALS + charTest1Name);
-		assertEquals(jooLines[line++], "" + intTestName + toIndex(0) + JooVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("30"));
+		assertEquals(jooLines[line++], "" + fixedTest1Name + JooVirtualMachine.OPERATOR_ASSIGN + toVirtualMachineNumber("" + Math.round(50f * 255)));
+		assertEquals(jooLines[line++], "" + boolTest0Name + JooVirtualMachine.OPERATOR_ASSIGN + toVirtualMachineNumber("1"));
+		assertEquals(jooLines[line++], "" + boolTest1Name + JooVirtualMachine.OPERATOR_ASSIGN + toVirtualMachineNumber("0"));
+		assertEquals(jooLines[line++], "" + boolTest2Name + JooVirtualMachine.OPERATOR_ASSIGN + boolTest1Name);
+		assertEquals(jooLines[line++], "" + charTest0Name + JooVirtualMachine.OPERATOR_ASSIGN + JooVirtualMachine.TYPE_CHAR + 'A');
+		assertEquals(jooLines[line++], "" + charTest1Name + JooVirtualMachine.OPERATOR_ASSIGN + JooVirtualMachine.TYPE_CHAR + 'B');
+		assertEquals(jooLines[line++], "" + charTest2Name + JooVirtualMachine.OPERATOR_ASSIGN + charTest1Name);
+		assertEquals(jooLines[line++], "" + intTestName + toIndex(0) + JooVirtualMachine.OPERATOR_ASSIGN + toVirtualMachineNumber("30"));
 		assertEquals(jooLines[line++], "" + intTestName + toIndex(1) + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("15"));
 		assertEquals(jooLines[line++], "" + intTestName + toIndex(0) + JooVirtualMachine.OPERATOR_SUBTRACT + intTest1Name);
 		assertEquals(jooLines[line++], "" + intTestName + toIndex(1) + JooVirtualMachine.OPERATOR_DIVIDE + toVirtualMachineNumber("5"));
 		assertEquals(jooLines[line++], "" + intTestName + toIndex(0) + JooVirtualMachine.OPERATOR_MULTIPLY + intTestName + toIndex(1));
-		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(0) + JooVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("" + Math.round(60.5f * 255)));
+		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(0) + JooVirtualMachine.OPERATOR_ASSIGN + toVirtualMachineNumber("" + Math.round(60.5f * 255)));
 		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(1) + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("" + Math.round(15f * 255)));
 		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(0) + JooVirtualMachine.OPERATOR_SUBTRACT + fixedTest1Name);
 		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(1) + JooVirtualMachine.OPERATOR_DIVIDE + toVirtualMachineNumber("" + Math.round(5f * 255)));
 		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(0) + JooVirtualMachine.OPERATOR_MULTIPLY + fixedTestName + toIndex(1));
-		assertEquals(jooLines[line++], "" + boolTestName + toIndex(9) + JooVirtualMachine.OPERATOR_SET_EQUALS + boolTest0Name);
-		assertEquals(jooLines[line++], "" + boolTestName + toIndex(10) + JooVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("1"));
-		assertEquals(jooLines[line++], "" + boolTestName + toIndex(11) + JooVirtualMachine.OPERATOR_SET_EQUALS + boolTestName + toIndex(10));
-		assertEquals(jooLines[line++], "" + charTestName + toIndex(9) + JooVirtualMachine.OPERATOR_SET_EQUALS + charTest0Name);
-		assertEquals(jooLines[line++], "" + charTestName + toIndex(10) + JooVirtualMachine.OPERATOR_SET_EQUALS + JooVirtualMachine.TYPE_CHAR + 'C');
-		assertEquals(jooLines[line++], "" + charTestName + toIndex(11) + JooVirtualMachine.OPERATOR_SET_EQUALS + charTestName + toIndex(10));
+		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(2) + JooVirtualMachine.OPERATOR_ASSIGN_NEGATIVE + toVirtualMachineNumber("" + Math.round(10f * 255)));
+		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(3) + JooVirtualMachine.OPERATOR_ASSIGN_POSITIVE + fixedTestName + toIndex(2));
+		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(4) + JooVirtualMachine.OPERATOR_ASSIGN_INVERSE + fixedTestName + toIndex(3));
+		assertEquals(jooLines[line++], "" + boolTestName + toIndex(9) + JooVirtualMachine.OPERATOR_ASSIGN + boolTest0Name);
+		assertEquals(jooLines[line++], "" + boolTestName + toIndex(10) + JooVirtualMachine.OPERATOR_ASSIGN + toVirtualMachineNumber("1"));
+		assertEquals(jooLines[line++], "" + boolTestName + toIndex(11) + JooVirtualMachine.OPERATOR_ASSIGN + boolTestName + toIndex(10));
+		assertEquals(jooLines[line++], "" + boolTestName + toIndex(2) + JooVirtualMachine.OPERATOR_ASSIGN_NEGATIVE + toVirtualMachineNumber("1"));	
+		assertEquals(jooLines[line++], "" + boolTestName + toIndex(3) + JooVirtualMachine.OPERATOR_ASSIGN_POSITIVE + boolTestName + toIndex(2));	
+		assertEquals(jooLines[line++], "" + boolTestName + toIndex(4) + JooVirtualMachine.OPERATOR_ASSIGN_INVERSE + boolTestName + toIndex(3));	
+		assertEquals(jooLines[line++], "" + charTestName + toIndex(9) + JooVirtualMachine.OPERATOR_ASSIGN + charTest0Name);
+		assertEquals(jooLines[line++], "" + charTestName + toIndex(10) + JooVirtualMachine.OPERATOR_ASSIGN + JooVirtualMachine.TYPE_CHAR + 'C');
+		assertEquals(jooLines[line++], "" + charTestName + toIndex(11) + JooVirtualMachine.OPERATOR_ASSIGN + charTestName + toIndex(10));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intTest0Name + JooVirtualMachine.COMPARATOR_EQUALS + toVirtualMachineNumber("18"));
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intTest0Name + JooVirtualMachine.COMPARATOR_NOT_EQUALS + toVirtualMachineNumber("18"));
@@ -116,7 +122,7 @@ public class JooCompilerTest {
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
-		assertEquals(jooLines[line++], "" + intTestName + toIndex(2) + JooVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("100"));
+		assertEquals(jooLines[line++], "" + intTestName + toIndex(2) + JooVirtualMachine.OPERATOR_ASSIGN + toVirtualMachineNumber("100"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intTest0Name + JooVirtualMachine.COMPARATOR_SMALLER + intTestName + toIndex(2));
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
@@ -137,7 +143,7 @@ public class JooCompilerTest {
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
-		assertEquals(jooLines[line++], "" + intTestName + toIndex(3) + JooVirtualMachine.OPERATOR_SET_EQUALS + intTestName + toIndex(2));
+		assertEquals(jooLines[line++], "" + intTestName + toIndex(3) + JooVirtualMachine.OPERATOR_ASSIGN + intTestName + toIndex(2));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intTestName + toIndex(2) + JooVirtualMachine.COMPARATOR_BIGGER_EQUALS + intTestName + toIndex(3));
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
@@ -155,10 +161,10 @@ public class JooCompilerTest {
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION_REPEAT);
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
 		assertEquals(jooLines[line++], "" + paramTest0Name + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("100"));
-		assertEquals(jooLines[line++], "" + paramTest1Name + toIndex(5) + JooVirtualMachine.OPERATOR_SET_EQUALS + paramTest0Name);
-		assertEquals(jooLines[line++], "" + paramTest1Name + toIndex(4) + JooVirtualMachine.OPERATOR_SET_EQUALS + paramTest1Name + toIndex(5));
+		assertEquals(jooLines[line++], "" + paramTest1Name + toIndex(5) + JooVirtualMachine.OPERATOR_ASSIGN + paramTest0Name);
+		assertEquals(jooLines[line++], "" + paramTest1Name + toIndex(4) + JooVirtualMachine.OPERATOR_ASSIGN + paramTest1Name + toIndex(5));
 		assertEquals(jooLines[line++], "" + paramTest0Name + JooVirtualMachine.OPERATOR_ADD + paramTest1Name + toIndex(4));
-		assertEquals(jooLines[line++], "" + paramTest1Name + intTest1Name + JooVirtualMachine.OPERATOR_SET_EQUALS + intTest1Name);
+		assertEquals(jooLines[line++], "" + paramTest1Name + intTest1Name + JooVirtualMachine.OPERATOR_ASSIGN + intTest1Name);
 		assertEquals(jooLines[line++], "" + paramTest0Name + JooVirtualMachine.OPERATOR_SUBTRACT + paramTest1Name + intTest1Name);
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + paramTest0Name + JooVirtualMachine.COMPARATOR_SMALLER + paramTest1Name + toIndex(5));
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
@@ -265,7 +271,7 @@ public class JooCompilerTest {
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "intTest1");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getValue(), "6");
 		assertEquals(currentOperation.getValueType(), TYPE_INT);
 		
@@ -294,48 +300,48 @@ public class JooCompilerTest {
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "fixedTest1");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getValue(), "" + Math.round(50 * 255));
 		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "boolTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getValue(), "1");
 		assertEquals(currentOperation.getValueType(), TYPE_BOOL);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "boolTest1");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getValue(), "0");
 		assertEquals(currentOperation.getValueType(), TYPE_BOOL);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "boolTest2");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getVariable1Name(), "boolTest1");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "charTest0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getValue(), "A");
 		assertEquals(currentOperation.getValueType(), TYPE_CHAR);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "charTest1");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getValue(), "B");
 		assertEquals(currentOperation.getValueType(), TYPE_CHAR);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "charTest2");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getVariable1Name(), "charTest1");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "intTest");
 		assertEquals(currentOperation.getVariable0ArrayIndex(), "0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getValue(), "30");
 		assertEquals(currentOperation.getValueType(), TYPE_INT);
 		
@@ -369,7 +375,7 @@ public class JooCompilerTest {
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
 		assertEquals(currentOperation.getVariable0ArrayIndex(), "0");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getValue(),  "" + Math.round(60.5 * 255));
 		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
 		
@@ -401,42 +407,84 @@ public class JooCompilerTest {
 		assertEquals(currentOperation.getVariable1ArrayIndex(), "1");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "2");
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_NEGATIVE);
+		assertEquals(currentOperation.getValue(),  "" + Math.round(10 * 255));
+		assertEquals(currentOperation.getValueType(), TYPE_FIXED);
+		
+		currentOperation = start.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "3");
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_POSITIVE);
+		assertEquals(currentOperation.getVariable1Name(), "fixedTest");
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "2");
+		
+		currentOperation = start.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.getVariable0Name(), "fixedTest");
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "4");
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_INVERSE);
+		assertEquals(currentOperation.getVariable1Name(), "fixedTest");
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "3");
+		
+		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "boolTest");
 		assertEquals(currentOperation.getVariable0ArrayIndex(), "9");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getVariable1Name(), "boolTest0");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "boolTest");
 		assertEquals(currentOperation.getVariable0ArrayIndex(), "10");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getValue(), "1");
 		assertEquals(currentOperation.getValueType(), TYPE_BOOL);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "boolTest");
 		assertEquals(currentOperation.getVariable0ArrayIndex(), "11");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getVariable1Name(), "boolTest");
 		assertEquals(currentOperation.getVariable1ArrayIndex(), "10");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.getVariable0Name(), "boolTest");
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "2");
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_NEGATIVE);
+		assertEquals(currentOperation.getValue(), "1");
+		assertEquals(currentOperation.getValueType(), TYPE_BOOL);
+		
+		currentOperation = start.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.getVariable0Name(), "boolTest");
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "3");
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_POSITIVE);
+		assertEquals(currentOperation.getVariable1Name(), "boolTest");
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "2");
+		
+		currentOperation = start.getOperations().get(currentOperationIndex++);
+		assertEquals(currentOperation.getVariable0Name(), "boolTest");
+		assertEquals(currentOperation.getVariable0ArrayIndex(), "4");
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_INVERSE);
+		assertEquals(currentOperation.getVariable1Name(), "boolTest");
+		assertEquals(currentOperation.getVariable1ArrayIndex(), "3");
+		
+		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "charTest");
 		assertEquals(currentOperation.getVariable0ArrayIndex(), "9");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getVariable1Name(), "charTest0");
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "charTest");
 		assertEquals(currentOperation.getVariable0ArrayIndex(), "10");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getValue(), "C");
 		assertEquals(currentOperation.getValueType(), TYPE_CHAR);
 		
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "charTest");
 		assertEquals(currentOperation.getVariable0ArrayIndex(), "11");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getVariable1Name(), "charTest");
 		assertEquals(currentOperation.getVariable1ArrayIndex(), "10");
 		
@@ -523,7 +571,7 @@ public class JooCompilerTest {
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "intTest");
 		assertEquals(currentOperation.getVariable0ArrayIndex(), "2");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getValue(), "100");
 		assertEquals(currentOperation.getValueType(), TYPE_INT);
 		
@@ -630,7 +678,7 @@ public class JooCompilerTest {
 		currentOperation = start.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "intTest");
 		assertEquals(currentOperation.getVariable0ArrayIndex(), "3");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getVariable1Name(), "intTest");
 		assertEquals(currentOperation.getVariable1ArrayIndex(), "2");
 		
@@ -723,13 +771,13 @@ public class JooCompilerTest {
 		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "_paramTest1");
 		assertEquals(currentOperation.getVariable0ArrayIndex(), "5");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getVariable1Name(), "_paramTest0");
 		
 		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "_paramTest1");
 		assertEquals(currentOperation.getVariable0ArrayIndex(), "4");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getVariable1Name(), "_paramTest1");
 		assertEquals(currentOperation.getVariable1ArrayIndex(), "5");
 		
@@ -742,7 +790,7 @@ public class JooCompilerTest {
 		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
 		assertEquals(currentOperation.getVariable0Name(), "_paramTest1");
 		assertEquals(currentOperation.getVariable0ArrayIndex(), "intTest1");
-		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_SET_EQUALS);
+		assertEquals(currentOperation.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
 		assertEquals(currentOperation.getVariable1Name(), "intTest1");
 		
 		currentOperation = functionTest.getOperations().get(currentOperationIndex++);
@@ -874,15 +922,15 @@ public class JooCompilerTest {
 		
 		// shows each character of the compiled code as numbers
 		// makes debugging easier
-//		String kindOfReadableCompiledJooCode = "";
-//		for (int i = 0; i < jooLines.length; i++) {
-//			char[] jooLineChars = jooLines[i].toCharArray();
-//			for (int j = 0; j < jooLineChars.length; j++) {
-//				kindOfReadableCompiledJooCode += (int)jooLineChars[j] + "-";
-//			}
-//			kindOfReadableCompiledJooCode += "\n";
-//		}
-//		System.out.print(kindOfReadableCompiledJooCode);
+		String kindOfReadableCompiledJooCode = "";
+		for (int i = 0; i < jooLines.length; i++) {
+			char[] jooLineChars = jooLines[i].toCharArray();
+			for (int j = 0; j < jooLineChars.length; j++) {
+				kindOfReadableCompiledJooCode += (int)jooLineChars[j] + "-";
+			}
+			kindOfReadableCompiledJooCode += "\n";
+		}
+		System.out.print(kindOfReadableCompiledJooCode);
 		
 		int line = 0;
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION + startName);
@@ -890,34 +938,40 @@ public class JooCompilerTest {
 		assertEquals(jooLines[line++], "" + intTest0Name + JooVirtualMachine.OPERATOR_SUBTRACT + intTest1Name);
 		assertEquals(jooLines[line++], "" + intTest0Name + JooVirtualMachine.OPERATOR_MULTIPLY + toVirtualMachineNumber("2"));
 		assertEquals(jooLines[line++], "" + intTest0Name + JooVirtualMachine.OPERATOR_DIVIDE + toVirtualMachineNumber("10"));
-		assertEquals(jooLines[line++], "" + intTest1Name + JooVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("6"));
+		assertEquals(jooLines[line++], "" + intTest1Name + JooVirtualMachine.OPERATOR_ASSIGN + toVirtualMachineNumber("6"));
 		assertEquals(jooLines[line++], "" + fixedTest0Name + JooVirtualMachine.OPERATOR_ADD + fixedTest1Name);
 		assertEquals(jooLines[line++], "" + fixedTest0Name + JooVirtualMachine.OPERATOR_SUBTRACT + toVirtualMachineNumber("" + Math.round(0.5f * 255)));
 		assertEquals(jooLines[line++], "" + fixedTest0Name + JooVirtualMachine.OPERATOR_MULTIPLY + toVirtualMachineNumber("" + Math.round(2.5f * 255)));
 		assertEquals(jooLines[line++], "" + fixedTest0Name + JooVirtualMachine.OPERATOR_DIVIDE + toVirtualMachineNumber("" + Math.round(5f * 255)));
-		assertEquals(jooLines[line++], "" + fixedTest1Name + JooVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("" + Math.round(50f * 255)));
-		assertEquals(jooLines[line++], "" + boolTest0Name + JooVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("1"));
-		assertEquals(jooLines[line++], "" + boolTest1Name + JooVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("0"));
-		assertEquals(jooLines[line++], "" + boolTest2Name + JooVirtualMachine.OPERATOR_SET_EQUALS + boolTest1Name);
-		assertEquals(jooLines[line++], "" + charTest0Name + JooVirtualMachine.OPERATOR_SET_EQUALS + JooVirtualMachine.TYPE_CHAR + 'A');
-		assertEquals(jooLines[line++], "" + charTest1Name + JooVirtualMachine.OPERATOR_SET_EQUALS + JooVirtualMachine.TYPE_CHAR + 'B');
-		assertEquals(jooLines[line++], "" + charTest2Name + JooVirtualMachine.OPERATOR_SET_EQUALS + charTest1Name);
-		assertEquals(jooLines[line++], "" + intTestName + toIndex(0) + JooVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("30"));
+		assertEquals(jooLines[line++], "" + fixedTest1Name + JooVirtualMachine.OPERATOR_ASSIGN + toVirtualMachineNumber("" + Math.round(50f * 255)));
+		assertEquals(jooLines[line++], "" + boolTest0Name + JooVirtualMachine.OPERATOR_ASSIGN + toVirtualMachineNumber("1"));
+		assertEquals(jooLines[line++], "" + boolTest1Name + JooVirtualMachine.OPERATOR_ASSIGN + toVirtualMachineNumber("0"));
+		assertEquals(jooLines[line++], "" + boolTest2Name + JooVirtualMachine.OPERATOR_ASSIGN + boolTest1Name);
+		assertEquals(jooLines[line++], "" + charTest0Name + JooVirtualMachine.OPERATOR_ASSIGN + JooVirtualMachine.TYPE_CHAR + 'A');
+		assertEquals(jooLines[line++], "" + charTest1Name + JooVirtualMachine.OPERATOR_ASSIGN + JooVirtualMachine.TYPE_CHAR + 'B');
+		assertEquals(jooLines[line++], "" + charTest2Name + JooVirtualMachine.OPERATOR_ASSIGN + charTest1Name);
+		assertEquals(jooLines[line++], "" + intTestName + toIndex(0) + JooVirtualMachine.OPERATOR_ASSIGN + toVirtualMachineNumber("30"));
 		assertEquals(jooLines[line++], "" + intTestName + toIndex(1) + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("15"));
 		assertEquals(jooLines[line++], "" + intTestName + toIndex(0) + JooVirtualMachine.OPERATOR_SUBTRACT + intTest1Name);
 		assertEquals(jooLines[line++], "" + intTestName + toIndex(1) + JooVirtualMachine.OPERATOR_DIVIDE + toVirtualMachineNumber("5"));
 		assertEquals(jooLines[line++], "" + intTestName + toIndex(0) + JooVirtualMachine.OPERATOR_MULTIPLY + intTestName + toIndex(1));
-		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(0) + JooVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("" + Math.round(60.5f * 255)));
+		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(0) + JooVirtualMachine.OPERATOR_ASSIGN + toVirtualMachineNumber("" + Math.round(60.5f * 255)));
 		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(1) + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("" + Math.round(15f * 255)));
 		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(0) + JooVirtualMachine.OPERATOR_SUBTRACT + fixedTest1Name);
 		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(1) + JooVirtualMachine.OPERATOR_DIVIDE + toVirtualMachineNumber("" + Math.round(5f * 255)));
 		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(0) + JooVirtualMachine.OPERATOR_MULTIPLY + fixedTestName + toIndex(1));
-		assertEquals(jooLines[line++], "" + boolTestName + toIndex(9) + JooVirtualMachine.OPERATOR_SET_EQUALS + boolTest0Name);
-		assertEquals(jooLines[line++], "" + boolTestName + toIndex(10) + JooVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("1"));
-		assertEquals(jooLines[line++], "" + boolTestName + toIndex(11) + JooVirtualMachine.OPERATOR_SET_EQUALS + boolTestName + toIndex(10));
-		assertEquals(jooLines[line++], "" + charTestName + toIndex(9) + JooVirtualMachine.OPERATOR_SET_EQUALS + charTest0Name);
-		assertEquals(jooLines[line++], "" + charTestName + toIndex(10) + JooVirtualMachine.OPERATOR_SET_EQUALS + JooVirtualMachine.TYPE_CHAR + 'C');
-		assertEquals(jooLines[line++], "" + charTestName + toIndex(11) + JooVirtualMachine.OPERATOR_SET_EQUALS + charTestName + toIndex(10));
+		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(2) + JooVirtualMachine.OPERATOR_ASSIGN_NEGATIVE + toVirtualMachineNumber("" + Math.round(10f * 255)));
+		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(3) + JooVirtualMachine.OPERATOR_ASSIGN_POSITIVE + fixedTestName + toIndex(2));
+		assertEquals(jooLines[line++], "" + fixedTestName + toIndex(4) + JooVirtualMachine.OPERATOR_ASSIGN_INVERSE + fixedTestName + toIndex(3));
+		assertEquals(jooLines[line++], "" + boolTestName + toIndex(9) + JooVirtualMachine.OPERATOR_ASSIGN + boolTest0Name);
+		assertEquals(jooLines[line++], "" + boolTestName + toIndex(10) + JooVirtualMachine.OPERATOR_ASSIGN + toVirtualMachineNumber("1"));
+		assertEquals(jooLines[line++], "" + boolTestName + toIndex(11) + JooVirtualMachine.OPERATOR_ASSIGN + boolTestName + toIndex(10));
+		assertEquals(jooLines[line++], "" + boolTestName + toIndex(2) + JooVirtualMachine.OPERATOR_ASSIGN_NEGATIVE + toVirtualMachineNumber("1"));	
+		assertEquals(jooLines[line++], "" + boolTestName + toIndex(3) + JooVirtualMachine.OPERATOR_ASSIGN_POSITIVE + boolTestName + toIndex(2));	
+		assertEquals(jooLines[line++], "" + boolTestName + toIndex(4) + JooVirtualMachine.OPERATOR_ASSIGN_INVERSE + boolTestName + toIndex(3));			
+		assertEquals(jooLines[line++], "" + charTestName + toIndex(9) + JooVirtualMachine.OPERATOR_ASSIGN + charTest0Name);
+		assertEquals(jooLines[line++], "" + charTestName + toIndex(10) + JooVirtualMachine.OPERATOR_ASSIGN + JooVirtualMachine.TYPE_CHAR + 'C');
+		assertEquals(jooLines[line++], "" + charTestName + toIndex(11) + JooVirtualMachine.OPERATOR_ASSIGN + charTestName + toIndex(10));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intTest0Name + JooVirtualMachine.COMPARATOR_EQUALS + toVirtualMachineNumber("18"));
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intTest0Name + JooVirtualMachine.COMPARATOR_NOT_EQUALS + toVirtualMachineNumber("18"));
@@ -934,7 +988,7 @@ public class JooCompilerTest {
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
-		assertEquals(jooLines[line++], "" + intTestName + toIndex(2) + JooVirtualMachine.OPERATOR_SET_EQUALS + toVirtualMachineNumber("100"));
+		assertEquals(jooLines[line++], "" + intTestName + toIndex(2) + JooVirtualMachine.OPERATOR_ASSIGN + toVirtualMachineNumber("100"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intTest0Name + JooVirtualMachine.COMPARATOR_SMALLER + intTestName + toIndex(2));
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
@@ -955,7 +1009,7 @@ public class JooCompilerTest {
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
-		assertEquals(jooLines[line++], "" + intTestName + toIndex(3) + JooVirtualMachine.OPERATOR_SET_EQUALS + intTestName + toIndex(2));
+		assertEquals(jooLines[line++], "" + intTestName + toIndex(3) + JooVirtualMachine.OPERATOR_ASSIGN + intTestName + toIndex(2));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intTestName + toIndex(2) + JooVirtualMachine.COMPARATOR_BIGGER_EQUALS + intTestName + toIndex(3));
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
@@ -973,10 +1027,10 @@ public class JooCompilerTest {
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION_REPEAT);
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
 		assertEquals(jooLines[line++], "" + paramTest0Name + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("100"));
-		assertEquals(jooLines[line++], "" + paramTest1Name + toIndex(5) + JooVirtualMachine.OPERATOR_SET_EQUALS + paramTest0Name);
-		assertEquals(jooLines[line++], "" + paramTest1Name + toIndex(4) + JooVirtualMachine.OPERATOR_SET_EQUALS + paramTest1Name + toIndex(5));
+		assertEquals(jooLines[line++], "" + paramTest1Name + toIndex(5) + JooVirtualMachine.OPERATOR_ASSIGN + paramTest0Name);
+		assertEquals(jooLines[line++], "" + paramTest1Name + toIndex(4) + JooVirtualMachine.OPERATOR_ASSIGN + paramTest1Name + toIndex(5));
 		assertEquals(jooLines[line++], "" + paramTest0Name + JooVirtualMachine.OPERATOR_ADD + paramTest1Name + toIndex(4));
-		assertEquals(jooLines[line++], "" + paramTest1Name + intTest1Name + JooVirtualMachine.OPERATOR_SET_EQUALS + intTest1Name);
+		assertEquals(jooLines[line++], "" + paramTest1Name + intTest1Name + JooVirtualMachine.OPERATOR_ASSIGN + intTest1Name);
 		assertEquals(jooLines[line++], "" + paramTest0Name + JooVirtualMachine.OPERATOR_SUBTRACT + paramTest1Name + intTest1Name);
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + paramTest0Name + JooVirtualMachine.COMPARATOR_SMALLER + paramTest1Name + toIndex(5));
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));

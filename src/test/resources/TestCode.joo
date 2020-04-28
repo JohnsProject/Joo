@@ -14,16 +14,16 @@ int ifTest
 
 function Start
 
-intTest0 += 100
-intTest0 -= intTest1
-intTest0 *= 2
-intTest0 /= 10
+intTest0 + 100
+intTest0 - intTest1
+intTest0 * 2
+intTest0 / 10
 intTest1 = 6
 
-fixedTest0 += fixedTest1
-fixedTest0 -= 0.5
-fixedTest0 *= 2.5
-fixedTest0 /= 5
+fixedTest0 + fixedTest1
+fixedTest0 - 0.5
+fixedTest0 * 2.5
+fixedTest0 / 5
 fixedTest1 = 50
 
 boolTest0 = true
@@ -35,82 +35,89 @@ charTest1 = 'B'
 charTest2 = charTest1
 
 intTest[0] = 30
-intTest[1] += 15
-intTest[0] -= intTest1
-intTest[1] /= 5
-intTest[0] *= intTest[1]
+intTest[1] + 15
+intTest[0] - intTest1
+intTest[1] / 5
+intTest[0] * intTest[1]
 
 fixedTest[0] = 60.5
-fixedTest[1] += 15
-fixedTest[0] -= fixedTest1
-fixedTest[1] /= 5
-fixedTest[0] *= fixedTest[1]
+fixedTest[1] + 15
+fixedTest[0] - fixedTest1
+fixedTest[1] / 5
+fixedTest[0] * fixedTest[1]
+fixedTest[2] =- 10
+fixedTest[3] =+ fixedTest[2]
+fixedTest[4] =! fixedTest[3]
 
 boolTest[9] = boolTest0
 boolTest[10] = true
 boolTest[11] = boolTest[10]
+boolTest[2] =- true
+boolTest[3] =+ boolTest[2]
+boolTest[4] =! boolTest[3]
 
 charTest[9] = charTest0
 charTest[10] = 'C'
 charTest[11] = charTest[10]
 
+
 if intTest0 == 18
-ifTest += 1
+ifTest + 1
 
 if intTest0 != 18
-ifTest += 1
+ifTest + 1
 else
-ifTest += 2
+ifTest + 2
 endIf
 
-ifTest += 1
+ifTest + 1
 
 else
-ifTest += 2
+ifTest + 2
 endIf
 
 if intTest0 != intTest1
-ifTest += 1
+ifTest + 1
 else
-ifTest += 2
+ifTest + 2
 endIf
 
 intTest[2] = 100
 if intTest0 < intTest[2]
-ifTest += 1
+ifTest + 1
 else
-ifTest += 2
+ifTest + 2
 endIf
 
 if intTest[2] > intTest0
-ifTest += 1
+ifTest + 1
 else
-ifTest += 2
+ifTest + 2
 endIf
 
 if intTest0 <= intTest[2]
-ifTest += 1
+ifTest + 1
 else
-ifTest += 2
+ifTest + 2
 endIf
 
 if intTest[2] >= intTest0
-ifTest += 1
+ifTest + 1
 else
-ifTest += 2
+ifTest + 2
 endIf
 
 intTest[3] = intTest[2]
 if intTest[2] >= intTest[3]
-ifTest += 1
+ifTest + 1
 else
-ifTest += 2
+ifTest + 2
 endIf
 
 if intTest[2] <= intTest[3]
-ifTest += 1
+ifTest + 1
 else
-ifTest += 2
+ifTest + 2
 endIf
 
 call FunctionTest: intTest0: intTest
@@ -130,22 +137,22 @@ endFunction
 
 function FunctionTest: int _paramTest0: int[] _paramTest1
 
-fixedTest1 += 25
+fixedTest1 + 25
 if fixedTest1 <= 80
 repeatFunction
 endIf
 
-_paramTest0 += 100
+_paramTest0 + 100
 _paramTest1[5] = _paramTest0
 _paramTest1[4] = _paramTest1[5]
-_paramTest0 += _paramTest1[4]
+_paramTest0 + _paramTest1[4]
 _paramTest1[intTest1] = intTest1
-_paramTest0 -= _paramTest1[intTest1]
+_paramTest0 - _paramTest1[intTest1]
 
 if _paramTest0 < _paramTest1[5]
-ifTest += 1
+ifTest + 1
 else
-ifTest += 2
+ifTest + 2
 endIf
 
 endFunction 

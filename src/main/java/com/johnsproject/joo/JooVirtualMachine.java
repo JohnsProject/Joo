@@ -73,12 +73,22 @@ public class JooVirtualMachine {
 	public static final char COMPARATOR_BIGGER = 3 + OPERATORS_START;
 	public static final char COMPARATOR_EQUALS = 4 + OPERATORS_START;
 	public static final char COMPARATOR_NOT_EQUALS = 5 + OPERATORS_START;
-	
-	public static final char OPERATOR_ADD = 6 + OPERATORS_START;
-	public static final char OPERATOR_SUBTRACT = 7 + OPERATORS_START;
-	public static final char OPERATOR_MULTIPLY = 8 + OPERATORS_START;
-	public static final char OPERATOR_DIVIDE = 9 + OPERATORS_START;
-	public static final char OPERATOR_SET_EQUALS = 10 + OPERATORS_START;
+
+	public static final char OPERATOR_ASSIGN = 6 + OPERATORS_START;
+	public static final char OPERATOR_ASSIGN_POSITIVE = 7 + OPERATORS_START;
+	public static final char OPERATOR_ASSIGN_NEGATIVE = 8 + OPERATORS_START;
+	public static final char OPERATOR_ASSIGN_INVERSE = 9 + OPERATORS_START;
+	public static final char OPERATOR_ADD = 10 + OPERATORS_START;
+	public static final char OPERATOR_SUBTRACT = 11 + OPERATORS_START;
+	public static final char OPERATOR_MULTIPLY = 12 + OPERATORS_START;
+	public static final char OPERATOR_DIVIDE = 13 + OPERATORS_START;
+	public static final char OPERATOR_REMAINDER = 14 + OPERATORS_START;
+	public static final char OPERATOR_BITWISE_AND = 15 + OPERATORS_START;
+	public static final char OPERATOR_BITWISE_XOR = 16 + OPERATORS_START;
+	public static final char OPERATOR_BITWISE_OR = 17 + OPERATORS_START;
+	public static final char OPERATOR_BITWISE_NOT = 18 + OPERATORS_START;
+	public static final char OPERATOR_BITSHIFT_LEFT = 19 + OPERATORS_START;
+	public static final char OPERATOR_BITSHIFT_RIGHT = 20 + OPERATORS_START;
 	
 	public static final char FUNCTION_PRINT = 0 + NATIVE_FUNCTIONS_START;
 
@@ -430,6 +440,54 @@ public class JooVirtualMachine {
 	
 	boolean interpretVariableOperation(char variable0Type, int variable0Index, char operator, int variable1Value, int[] values) {
 		switch (operator) {
+		case COMPARATOR_SMALLER_EQUALS:
+			return values[variable0Index] <= variable1Value;
+		case COMPARATOR_BIGGER_EQUALS:
+			return values[variable0Index] >= variable1Value;
+		case COMPARATOR_SMALLER:
+			return values[variable0Index] < variable1Value;
+		case COMPARATOR_BIGGER:
+			return values[variable0Index] > variable1Value;
+		case COMPARATOR_EQUALS:
+			return values[variable0Index] == variable1Value;
+		case COMPARATOR_NOT_EQUALS:
+			return values[variable0Index] != variable1Value;
+		case OPERATOR_ASSIGN:
+			values[variable0Index] = variable1Value;
+			break;
+		case OPERATOR_ASSIGN_POSITIVE:
+			if(variable0Type == TYPE_BOOL) {
+				values[variable0Index] = 1;
+			} else {
+				if(variable1Value < 0) {
+					values[variable0Index] = -variable1Value;
+				} else {
+					values[variable0Index] = variable1Value;
+				}
+			}
+			break;
+		case OPERATOR_ASSIGN_NEGATIVE:
+			if(variable0Type == TYPE_BOOL) {
+				values[variable0Index] = 0;
+			} else {
+				if(variable1Value < 0) {
+					values[variable0Index] = variable1Value;
+				} else {
+					values[variable0Index] = -variable1Value;
+				}
+			}
+			break;
+		case OPERATOR_ASSIGN_INVERSE:
+			if(variable0Type == TYPE_BOOL) {
+				if(variable1Value == 0) {
+					values[variable0Index] = 1;
+				} else {
+					values[variable0Index] = 0;
+				}
+			} else {
+				values[variable0Index] = -variable1Value;
+			}
+			break;
 		case OPERATOR_ADD:
 			values[variable0Index] += variable1Value;
 			break;
@@ -452,21 +510,27 @@ public class JooVirtualMachine {
 				values[variable0Index] /= variable1Value;
 			}
 			break;
-		case OPERATOR_SET_EQUALS:
-			values[variable0Index] = variable1Value;
+		case OPERATOR_REMAINDER:
+			values[variable0Index] %= variable1Value;
 			break;
-		case COMPARATOR_EQUALS:
-			return values[variable0Index] == variable1Value;
-		case COMPARATOR_NOT_EQUALS:
-			return values[variable0Index] != variable1Value;
-		case COMPARATOR_BIGGER:
-			return values[variable0Index] > variable1Value;
-		case COMPARATOR_SMALLER:
-			return values[variable0Index] < variable1Value;
-		case COMPARATOR_BIGGER_EQUALS:
-			return values[variable0Index] >= variable1Value;
-		case COMPARATOR_SMALLER_EQUALS:
-			return values[variable0Index] <= variable1Value;
+		case OPERATOR_BITWISE_AND:
+			values[variable0Index] &= variable1Value;
+			break;
+		case OPERATOR_BITWISE_XOR:
+			values[variable0Index] ^= variable1Value;
+			break;
+		case OPERATOR_BITWISE_OR:
+			values[variable0Index] |= variable1Value;
+			break;
+		case OPERATOR_BITWISE_NOT:
+			values[variable0Index] = ~variable1Value;
+			break;
+		case OPERATOR_BITSHIFT_LEFT:
+			values[variable0Index] <<= variable1Value;
+			break;
+		case OPERATOR_BITSHIFT_RIGHT:
+			values[variable0Index] >>= variable1Value;
+			break;
 		}
 		return false;
 	}
