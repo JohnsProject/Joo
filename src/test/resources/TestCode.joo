@@ -1,5 +1,12 @@
-# This is a example code used to test the joo
-# programming language
+# This is a example code used to test the joo programming language
+
+include TestLibrary.joo
+include TestLibraries/TestDirectoryLibrary.joo
+
+define TEST_INT_CONSTANT = 25
+define TEST_FIXED_CONSTANT = 25.25
+define TEST_BOOL_CONSTANT = true
+define TEST_CHAR_CONSTANT = 'd'
 
 int intTest0
 int intTest1 = 10
@@ -39,6 +46,7 @@ intTest[1] + 15
 intTest[0] - intTest1
 intTest[1] / 5
 intTest[0] * intTest[1]
+intTest[7] = TEST_INT_CONSTANT
 
 fixedTest[0] = 60.5
 fixedTest[1] + 15
@@ -48,6 +56,7 @@ fixedTest[0] * fixedTest[1]
 fixedTest[2] =- 10
 fixedTest[3] =+ fixedTest[2]
 fixedTest[4] =! fixedTest[3]
+fixedTest[5] = TEST_FIXED_CONSTANT
 
 boolTest[9] = boolTest0
 boolTest[10] = true
@@ -55,11 +64,12 @@ boolTest[11] = boolTest[10]
 boolTest[2] =- true
 boolTest[3] =+ boolTest[2]
 boolTest[4] =! boolTest[3]
+boolTest[5] = TEST_BOOL_CONSTANT
 
 charTest[9] = charTest0
 charTest[10] = 'C'
 charTest[11] = charTest[10]
-
+charTest[0] = TEST_CHAR_CONSTANT
 
 if intTest0 == 18
 ifTest + 1
@@ -121,6 +131,8 @@ ifTest + 2
 endIf
 
 call FunctionTest: intTest0: intTest
+call TestLibrary_FunctionTest: intTest
+call TestDirectoryLibrary_FunctionTest: intTest
 
 bool boolTest0
 bool boolTest1 = true

@@ -70,6 +70,7 @@ Time_Delay
 Time_GetSeconds
 
 # Standard Storage Library
+Storage_HasSupport
 Storage_Clear
 Storage_Put
 Storage_Get

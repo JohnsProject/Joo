@@ -88,11 +88,31 @@ public class JooCompiler {
 	};
 	
 	private char name;
+	private List<String> operators;
+	private List<String> nativeFunctions;
+	private Map<String, Variable>[] variables;
+	private Map<String, Function> functions;
 	
 	public JooCompiler() {
 		name = JooVirtualMachine.COMPONENTS_START;
 	}
 	
+	public List<String> getOperators() {
+		return operators;
+	}
+
+	public List<String> getNativeFunctions() {
+		return nativeFunctions;
+	}
+
+	public Map<String, Variable>[] getVariables() {
+		return variables;
+	}
+
+	public Map<String, Function> getFunctions() {
+		return functions;
+	}
+
 	/**
 	 * This method compiles the human readable joo code in the code string
 	 * to joo virtual machine readable joo code.
@@ -100,16 +120,18 @@ public class JooCompiler {
 	 * @param path human readable joo code path.
 	 * @return joo virtual machine readable joo code.
 	 */
-	String compile(final String path) {
+	public String compile(final String path) {
 		name = JooVirtualMachine.COMPONENTS_START;
 		String directoryPath = getDirectoryPath(path);
 		String jooCode = FileUtil.read(path);
-		List<String> operators = new ArrayList<>();
-		List<String> nativeFunctions = new ArrayList<>();
+		jooCode = includeIncludes(directoryPath, jooCode);
+		jooCode = replaceDefines(jooCode);
+		operators = new ArrayList<>();
+		nativeFunctions = new ArrayList<>();
 		parseConfig(directoryPath, operators, nativeFunctions);
 		final String[] codeLines = getLines(jooCode);		
-		final Map<String, Variable>[] variables = parseVariables(codeLines);
-		final Map<String, Function> functions = parseFunctions(codeLines, operators, variables);
+		variables = parseVariables(codeLines);
+		functions = parseFunctions(codeLines, operators, variables);
 		String compiledJooCode = "";
 		compiledJooCode = writeVariablesAndFunctions(compiledJooCode, variables, functions);
 		compiledJooCode = writeFunctionsAndOperations(compiledJooCode, variables, functions, nativeFunctions);
@@ -123,6 +145,35 @@ public class JooCompiler {
 			codeDirectoryPath += pathPieces[i] + File.separator;
 		}
 		return codeDirectoryPath;
+	}
+	
+	String includeIncludes(String directoryPath, String jooCode) {
+		final String[] codeLines = getLines(jooCode);
+		for (int i = 0; i < codeLines.length; i++) {
+			if(codeLines[i].contains(KEYWORD_INCLUDE + " ")) {
+				final String filePath = codeLines[i].replace(KEYWORD_INCLUDE + " ", "");
+				directoryPath += filePath;
+				if(FileUtil.fileExists(directoryPath)) {
+					jooCode += FileUtil.read(directoryPath);
+				} else {
+					jooCode += FileUtil.read(filePath);
+				}
+				jooCode = jooCode.replace(codeLines[i], "");
+			}
+		}
+		return jooCode;
+	}
+	
+	String replaceDefines(String jooCode) {
+		final String[] codeLines = getLines(jooCode);
+		for (int i = 0; i < codeLines.length; i++) {
+			if(codeLines[i].contains(KEYWORD_DEFINE + " ")) {
+				final String[] defineData = codeLines[i].replace(" ", "").replace(KEYWORD_DEFINE, "").split(KEYWORD_VARIABLE_ASSIGN);
+				jooCode = jooCode.replace(codeLines[i], "");
+				jooCode = jooCode.replace(defineData[0], defineData[1]);
+			}
+		}
+		return jooCode;
 	}
 	
 	void parseConfig(String directoryPath, List<String> operators, List<String> nativeFunctions) {

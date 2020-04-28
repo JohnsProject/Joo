@@ -50,7 +50,7 @@ public class JooVirtualMachineTest {
 		assertEquals(jooVM.getComponents()[boolArrayIndex + 0], 15);
 		assertEquals(jooVM.getComponents()[charArrayIndex + 0], 30);
 		assertEquals(jooVM.getComponents()[functionIndex + 0], 75);
-		assertEquals(jooVM.getComponents()[functionIndex + 1], 478);
+		assertEquals(jooVM.getComponents()[functionIndex + 1], 511);
 	}
 	
 	@Test
@@ -69,7 +69,6 @@ public class JooVirtualMachineTest {
 		int fixedArrayIndex = jooVM.getComponentIndexes()[TYPE_ARRAY_FIXED - TYPES_START];
 		int boolArrayIndex = jooVM.getComponentIndexes()[TYPE_ARRAY_BOOL - TYPES_START];
 		int charArrayIndex = jooVM.getComponentIndexes()[TYPE_ARRAY_CHAR - TYPES_START];
-		int functionIndex = jooVM.getComponentIndexes()[TYPE_FUNCTION - TYPES_START];
 		
 		assertEquals(jooVM.getComponents()[intIndex + 0], 230);
 		assertEquals(jooVM.getComponents()[intIndex + 1], 6);
@@ -86,28 +85,30 @@ public class JooVirtualMachineTest {
 		assertEquals(jooVM.getComponents()[fixedArrayIndex + 0], 10);
 		assertEquals(jooVM.getComponents()[boolArrayIndex + 0], 15);
 		assertEquals(jooVM.getComponents()[charArrayIndex + 0], 30);
-		assertEquals(jooVM.getComponents()[functionIndex + 0], 75);
-		assertEquals(jooVM.getComponents()[functionIndex + 1], 478);
-		assertEquals(jooVM.getArrays()[jooVM.getComponents()[intArrayIndex + 0] + 0], 72);
+		assertEquals(jooVM.getArrays()[jooVM.getComponents()[intArrayIndex + 0] + 0], 102);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[intArrayIndex + 0] + 1], 3);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[intArrayIndex + 0] + 2], 100);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[intArrayIndex + 0] + 3], 100);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[intArrayIndex + 0] + 4], 118);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[intArrayIndex + 0] + 5], 118);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[intArrayIndex + 0] + 6], 6);
+		assertEquals(jooVM.getArrays()[jooVM.getComponents()[intArrayIndex + 0] + 7], 25);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[fixedArrayIndex + 0] + 0], 8034);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[fixedArrayIndex + 0] + 1], 768);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[fixedArrayIndex + 0] + 2], -2550);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[fixedArrayIndex + 0] + 3], 2550);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[fixedArrayIndex + 0] + 4], -2550);
+		assertEquals(jooVM.getArrays()[jooVM.getComponents()[fixedArrayIndex + 0] + 5], 6396);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[boolArrayIndex + 0] + 9], 1);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[boolArrayIndex + 0] + 10], 1);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[boolArrayIndex + 0] + 11], 1);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[boolArrayIndex + 0] + 2], 0);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[boolArrayIndex + 0] + 3], 1);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[boolArrayIndex + 0] + 4], 0);
-		assertEquals(jooVM.getArrays()[jooVM.getComponents()[charArrayIndex + 0] + 9], 65);
-		assertEquals(jooVM.getArrays()[jooVM.getComponents()[charArrayIndex + 0] + 10], 67);
-		assertEquals(jooVM.getArrays()[jooVM.getComponents()[charArrayIndex + 0] + 11], 67);
+		assertEquals(jooVM.getArrays()[jooVM.getComponents()[boolArrayIndex + 0] + 5], 1);
+		assertEquals(jooVM.getArrays()[jooVM.getComponents()[charArrayIndex + 0] + 9], 'A');
+		assertEquals(jooVM.getArrays()[jooVM.getComponents()[charArrayIndex + 0] + 10], 'C');
+		assertEquals(jooVM.getArrays()[jooVM.getComponents()[charArrayIndex + 0] + 11], 'C');
+		assertEquals(jooVM.getArrays()[jooVM.getComponents()[charArrayIndex + 0] + 0], 'd');
 	}
 }
