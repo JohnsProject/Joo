@@ -36,12 +36,13 @@ public class JooVirtualMachine {
 	public static final char TYPE_ARRAY_CHAR = 120;
 	public static final char TYPE_FUNCTION = 119;
 	
-	public static final char KEYWORD_ELSE = 118;
-	public static final char KEYWORD_IF = 117;
-	public static final char KEYWORD_FUNCTION = 116;
-	public static final char KEYWORD_FUNCTION_CALL = 115;
-	public static final char KEYWORD_FUNCTION_REPEAT = 114;
-	public static final char KEYWORD_PARAMETER = 113;
+	public static final char KEYWORD_IF = 118;
+	public static final char KEYWORD_ELSE_IF = 117;
+	public static final char KEYWORD_ELSE = 116;
+	public static final char KEYWORD_FUNCTION = 115;
+	public static final char KEYWORD_FUNCTION_CALL = 114;
+	public static final char KEYWORD_FUNCTION_REPEAT = 113;
+	public static final char KEYWORD_PARAMETER = 112;
 	
 	public static final char LINE_BREAK = 101;
 	
@@ -247,6 +248,9 @@ public class JooVirtualMachine {
 				allIfs = interpretIfOperation(codeIndex, allIfs);
 				canInterpretCode = ifs[allIfs];
 				break;
+			case KEYWORD_ELSE_IF:
+				canInterpretCode = interpretElseIfOperation(codeIndex, allIfs);
+				break;
 			case KEYWORD_ELSE:
 				canInterpretCode = interpretElseOperation(allIfs, canInterpretCode);
 				break;
@@ -294,6 +298,14 @@ public class JooVirtualMachine {
 			ifs[allIfs] = interpretVariableOperation(codeIndex + 1);
 		}
 		return allIfs;
+	}
+	
+	boolean interpretElseIfOperation(int codeIndex, byte allIfs) {
+		if((allIfs > 0) && ifs[allIfs - 1]) {
+			return interpretVariableOperation(codeIndex + 1);
+		} else { // if there is only 1 if
+			return interpretVariableOperation(codeIndex + 1);
+		}
 	}
 	
 	boolean interpretElseOperation(byte allIfs, boolean canInterpretCode) {

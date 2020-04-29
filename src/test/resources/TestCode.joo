@@ -74,7 +74,7 @@ charTest[0] = TEST_CHAR_CONSTANT
 if intTest0 == 18
 ifTest + 1
 
-if intTest0 != 18
+if intTest1 == 6
 ifTest + 1
 else
 ifTest + 2
@@ -83,6 +83,12 @@ endIf
 ifTest + 1
 
 else
+ifTest + 2
+endIf
+
+if boolTest0 == false
+ifTest + 1
+elseIf boolTest0 == true
 ifTest + 2
 endIf
 

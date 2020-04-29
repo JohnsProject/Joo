@@ -34,11 +34,28 @@ import java.util.regex.Pattern;
 import com.johnsproject.joo.util.FileUtil;
 
 public class JooCompiler {
+	
+	// TODO
+	// import keyword
+	// compiler syntax analyser
+	// Standart native library
+	// specification
 
 	public static final String KEYWORD_INCLUDE = "include";
+	/*
+	 Import keyword is used to import external files. The file get's duplicated and renamed
+	 to a single character. The file has to be in the same folder or nested folder of the folder
+	 the joo file to be compiled is in. The file name can passed as parameter to the Native functions.
+	 Usage is like: 
+	 
+	 	# import <file name> = <file path>
+	  	import OtherJooApp = App2.cjoo
+	  	call <Native function name>: OtherJooApp
+	 */
 	public static final String KEYWORD_IMPORT = "import";
 	public static final String KEYWORD_DEFINE = "define";
 	public static final String KEYWORD_IF = "if";
+	public static final String KEYWORD_ELSE_IF = "elseIf";
 	public static final String KEYWORD_ELSE = "else";
 	public static final String KEYWORD_IF_END = "endIf";
 	public static final String KEYWORD_FUNCTION = "function";
@@ -127,7 +144,7 @@ public class JooCompiler {
 		nativeFunctions = new ArrayList<>();
 		parseConfig(directoryPath, operators, nativeFunctions);
 		String code = FileUtil.read(path);
-//		analyse(code, operators, nativeFunctions);
+		analyse(code, operators, nativeFunctions);
 		code = includeIncludes(directoryPath, code);
 		code = replaceDefines(code);
 		final String[] codeLines = getLines(code);		
@@ -151,6 +168,7 @@ public class JooCompiler {
 	String includeIncludes(String directoryPath, String code) {
 		final String[] codeLines = getLines(code);
 		for (int i = 0; i < codeLines.length; i++) {
+			// whitespace ensures the include keyword isn't part of a bigger word
 			if(codeLines[i].contains(KEYWORD_INCLUDE + " ")) {
 				final String filePath = codeLines[i].replace(KEYWORD_INCLUDE + " ", "");
 				directoryPath += filePath;
@@ -168,6 +186,7 @@ public class JooCompiler {
 	String replaceDefines(String code) {
 		final String[] codeLines = getLines(code);
 		for (int i = 0; i < codeLines.length; i++) {
+			// whitespace ensures the define keyword isn't part of a bigger word
 			if(codeLines[i].contains(KEYWORD_DEFINE + " ")) {
 				final String[] defineData = codeLines[i].replace(" ", "").replace(KEYWORD_DEFINE, "").split(KEYWORD_VARIABLE_ASSIGN);
 				code = code.replace(codeLines[i], "");
@@ -470,10 +489,11 @@ public class JooCompiler {
 			parseFunctionCall(codeLine, instruction);
 			instruction.isFunctionCall(true);
 		}
+		else if(codeLine.contains(KEYWORD_ELSE_IF + " ")) {
+			parseCondition(codeLine, KEYWORD_ELSE_IF, instruction, operators, variables, parameters);
+		}
 		else if(codeLine.contains(KEYWORD_IF + " ")) {
-			codeLine = codeLine.replaceFirst(KEYWORD_IF, "");
-			parseBinaryOperation(codeLine, variables, parameters, operators, instruction);
-			instruction.isCondition(true);
+			parseCondition(codeLine, KEYWORD_IF, instruction, operators, variables, parameters);
 		}
 		else if(codeLine.contains(KEYWORD_ELSE)) {
 			instruction.setOperator(JooVirtualMachine.KEYWORD_ELSE);
@@ -507,6 +527,14 @@ public class JooCompiler {
 		} else {
 			instruction.setFunctionName(codeLine);
 		}
+	}
+	
+	private void parseCondition(String codeLine, String condtitionType, Instruction instruction,
+									final List<Operator> operators, final Map<String, Variable>[] variables, final Map<String, String> parameters) {
+		codeLine = codeLine.replaceFirst(condtitionType, "");
+		parseBinaryOperation(codeLine, variables, parameters, operators, instruction);
+		instruction.isCondition(true);
+		instruction.setConditionType(condtitionType);
 	}
 	
 	/**
@@ -590,16 +618,14 @@ public class JooCompiler {
 				}
 				boolean isIntParameter = false;
 				if(parameters.containsKey(variableName)) {
-					isIntParameter = parameters.get(variableName).equals(TYPE_INT)
-									|| parameters.get(variableName).equals(TYPE_ARRAY_INT);
+					isIntParameter = parameters.get(variableName).equals(TYPE_INT) || parameters.get(variableName).equals(TYPE_ARRAY_INT);
 				}
 				// if variable before operator is int
 				if(variables[0].containsKey(variableName) || variables[4].containsKey(variableName) || isIntParameter) {
 					instruction.setValue("" + Integer.parseInt(operationData[1]));
 					instruction.hasValue(true);
 					instruction.setValueType(TYPE_INT);
-				}
-				else {
+				} else {
 					instruction.setValue("" + Math.round(Float.parseFloat(operationData[1]) * FIXED_POINT));
 					instruction.hasValue(true);
 					instruction.setValueType(TYPE_FIXED);
@@ -670,7 +696,12 @@ public class JooCompiler {
 			code += "" + JooVirtualMachine.KEYWORD_FUNCTION + function.getByteCodeName() + JooVirtualMachine.LINE_BREAK;
 			for (Instruction instruction : function.getInstructions()) {
 				if(instruction.isCondition()) {
-					code += "" + JooVirtualMachine.KEYWORD_IF;
+					if(instruction.getConditionType().equals(KEYWORD_IF)) {
+						code += "" + JooVirtualMachine.KEYWORD_IF;
+					}
+					else if (instruction.getConditionType().equals(KEYWORD_ELSE_IF)) {
+						code += "" + JooVirtualMachine.KEYWORD_ELSE_IF;
+					}
 					code = writeBinaryOperation(code, function.getParameters().keySet(), variables, instruction);
 				}
 				else if(instruction.isFunctionCall()) {

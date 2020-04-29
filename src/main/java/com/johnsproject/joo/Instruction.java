@@ -36,6 +36,7 @@ import java.util.List;
 public class Instruction {
 	
 	private boolean isCondition;
+	private String conditionType;
 	
 	private boolean hasVariable0;
 	private String variable0Name;
@@ -59,6 +60,7 @@ public class Instruction {
 
 	public Instruction() {
 		isCondition = false;
+		conditionType = "";
 		hasVariable0 = false;
 		variable0Name = "";
 		hasVariable0ArrayIndex = false;
@@ -82,6 +84,14 @@ public class Instruction {
 
 	public void isCondition(boolean isCondition) {
 		this.isCondition = isCondition;
+	}
+
+	public String getConditionType() {
+		return conditionType;
+	}
+
+	public void setConditionType(String conditionType) {
+		this.conditionType = conditionType;
 	}
 
 	public boolean hasVariable0() {

@@ -110,13 +110,18 @@ public class JooCompilerTest {
 		assertEquals(jooLines[line++], "" + charTestName + toIndex(0) + JooVirtualMachine.OPERATOR_ASSIGN + JooVirtualMachine.TYPE_CHAR + 'd');
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intTest0Name + JooVirtualMachine.COMPARATOR_EQUALS + toVirtualMachineNumber("18"));
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intTest0Name + JooVirtualMachine.COMPARATOR_NOT_EQUALS + toVirtualMachineNumber("18"));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intTest1Name + JooVirtualMachine.COMPARATOR_EQUALS + toVirtualMachineNumber("6"));
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
+		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("2"));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + boolTest0Name + JooVirtualMachine.COMPARATOR_EQUALS + toVirtualMachineNumber("0"));
+		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("1"));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE_IF + boolTest0Name + JooVirtualMachine.COMPARATOR_EQUALS + toVirtualMachineNumber("1"));
 		assertEquals(jooLines[line++], "" + ifTestName + JooVirtualMachine.OPERATOR_ADD + toVirtualMachineNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intTest0Name + JooVirtualMachine.COMPARATOR_NOT_EQUALS + intTest1Name);
@@ -533,9 +538,9 @@ public class JooCompilerTest {
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.isCondition(), true);
-		assertEquals(currentInstruction.getVariable0Name(), "intTest0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_NOT_EQUALS);
-		assertEquals(currentInstruction.getValue(), "18");
+		assertEquals(currentInstruction.getVariable0Name(), "intTest1");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_EQUALS);
+		assertEquals(currentInstruction.getValue(), "6");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
@@ -564,6 +569,38 @@ public class JooCompilerTest {
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
+
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "2");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
+		
+		
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
+		
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isCondition(), true);
+		assertEquals(currentInstruction.getConditionType(), KEYWORD_IF);
+		assertEquals(currentInstruction.getVariable0Name(), "boolTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_EQUALS);
+		assertEquals(currentInstruction.getValue(), "0");
+		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
+		
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_INT);
+		
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isCondition(), true);
+		assertEquals(currentInstruction.getConditionType(), KEYWORD_ELSE_IF);
+		assertEquals(currentInstruction.getVariable0Name(), "boolTest0");
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_EQUALS);
+		assertEquals(currentInstruction.getValue(), "1");
+		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
 
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "ifTest");
