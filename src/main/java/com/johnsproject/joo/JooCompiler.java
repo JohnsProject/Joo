@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import com.johnsproject.joo.util.FileUtil;
 
@@ -52,6 +53,8 @@ public class JooCompiler {
 	public static final String KEYWORD_ARRAY_END = "]";
 	public static final String KEYWORD_CHAR = "'";
 	public static final String KEYWORD_VARIABLE_ASSIGN = "=";
+	// used in joo compiler config only
+	public static final String KEYWORD_TYPE_SEPARATOR = "|";
 
 	public static final String TYPE_PARAMETER = "parameter";
 	public static final String TYPE_FUNCTION = "function";
@@ -93,21 +96,13 @@ public class JooCompiler {
 	};
 	
 	private char name;
-	private List<String> operators;
-	private List<String> nativeFunctions;
+	private List<Operator> operators;
+	private List<NativeFunction> nativeFunctions;
 	private Map<String, Variable>[] variables;
 	private Map<String, Function> functions;
 	
 	public JooCompiler() {
 		name = JooVirtualMachine.COMPONENTS_START;
-	}
-	
-	public List<String> getOperators() {
-		return operators;
-	}
-
-	public List<String> getNativeFunctions() {
-		return nativeFunctions;
 	}
 
 	public Map<String, Variable>[] getVariables() {
@@ -128,13 +123,14 @@ public class JooCompiler {
 	public String compile(final String path) {
 		name = JooVirtualMachine.COMPONENTS_START;
 		String directoryPath = getDirectoryPath(path);
-		String jooCode = FileUtil.read(path);
-		jooCode = includeIncludes(directoryPath, jooCode);
-		jooCode = replaceDefines(jooCode);
 		operators = new ArrayList<>();
 		nativeFunctions = new ArrayList<>();
 		parseConfig(directoryPath, operators, nativeFunctions);
-		final String[] codeLines = getLines(jooCode);		
+		String code = FileUtil.read(path);
+//		analyse(code, operators, nativeFunctions);
+		code = includeIncludes(directoryPath, code);
+		code = replaceDefines(code);
+		final String[] codeLines = getLines(code);		
 		variables = parseVariables(codeLines);
 		functions = parseFunctions(codeLines, operators, variables);
 		String compiledJooCode = "";
@@ -144,7 +140,7 @@ public class JooCompiler {
 	}
 	
 	private String getDirectoryPath(String path) {
-		String[] pathPieces = path.split("\\" + File.separator);
+		String[] pathPieces = path.split(Pattern.quote(File.separator));
 		String codeDirectoryPath = "";
 		for (int i = 0; i < pathPieces.length - 1; i++) {
 			codeDirectoryPath += pathPieces[i] + File.separator;
@@ -152,36 +148,36 @@ public class JooCompiler {
 		return codeDirectoryPath;
 	}
 	
-	String includeIncludes(String directoryPath, String jooCode) {
-		final String[] codeLines = getLines(jooCode);
+	String includeIncludes(String directoryPath, String code) {
+		final String[] codeLines = getLines(code);
 		for (int i = 0; i < codeLines.length; i++) {
 			if(codeLines[i].contains(KEYWORD_INCLUDE + " ")) {
 				final String filePath = codeLines[i].replace(KEYWORD_INCLUDE + " ", "");
 				directoryPath += filePath;
 				if(FileUtil.fileExists(directoryPath)) {
-					jooCode += FileUtil.read(directoryPath);
+					code += FileUtil.read(directoryPath);
 				} else {
-					jooCode += FileUtil.read(filePath);
+					code += FileUtil.read(filePath);
 				}
-				jooCode = jooCode.replace(codeLines[i], "");
+				code = code.replace(codeLines[i], "");
 			}
 		}
-		return jooCode;
+		return code;
 	}
 	
-	String replaceDefines(String jooCode) {
-		final String[] codeLines = getLines(jooCode);
+	String replaceDefines(String code) {
+		final String[] codeLines = getLines(code);
 		for (int i = 0; i < codeLines.length; i++) {
 			if(codeLines[i].contains(KEYWORD_DEFINE + " ")) {
 				final String[] defineData = codeLines[i].replace(" ", "").replace(KEYWORD_DEFINE, "").split(KEYWORD_VARIABLE_ASSIGN);
-				jooCode = jooCode.replace(codeLines[i], "");
-				jooCode = jooCode.replace(defineData[0], defineData[1]);
+				code = code.replace(codeLines[i], "");
+				code = code.replace(defineData[0], defineData[1]);
 			}
 		}
-		return jooCode;
+		return code;
 	}
 	
-	void parseConfig(String directoryPath, List<String> operators, List<String> nativeFunctions) {
+	void parseConfig(String directoryPath, List<Operator> operators, List<NativeFunction> nativeFunctions) {
 		directoryPath += PATH_COMPILER_CONFIG;
 		final String config;
 		if(FileUtil.fileExists(directoryPath)) {
@@ -192,25 +188,62 @@ public class JooCompiler {
 		final String[] configLines = getLines(config);
 		int currentType = -1;
 		for (int i = 0; i < configLines.length; i++) {
-			if(configLines[i].contains(KEYWORD_COMMENT) || configLines[i].isEmpty()) {
+			String line = configLines[i].replace(" ", "");
+			if(line.isEmpty() || line.contains(KEYWORD_COMMENT)) {
 				continue;
 			}
-			else if(configLines[i].equals("@OPERATORS")) {
+			else if(line.equals("@OPERATORS")) {
 				currentType = 0;
-				continue;
 			}
-			else if(configLines[i].equals("@FUNCTIONS")) {
+			else if(line.equals("@FUNCTIONS")) {
 				currentType = 1;
-				continue;
+			} else {
+				switch (currentType) {
+				case 0:				
+					operators.add(parseOperator(line));		
+					break;
+				case 1:
+					nativeFunctions.add(parseNativeFunction(line));
+					break;
+				}
 			}
-			switch (currentType) {
-			case 0:
-				operators.add(configLines[i]);
-				break;
-			case 1:
-				nativeFunctions.add(configLines[i]);
-				break;
+		}
+	}
+	
+	private Operator parseOperator(String line) {
+		if(line.contains(KEYWORD_TYPE_SEPARATOR)) {
+			String[] operatorData = line.split(Pattern.quote(KEYWORD_TYPE_SEPARATOR));
+			Operator operator = new Operator(operatorData[0]);
+			for (int i = 1; i < operatorData.length; i++) {
+				operator.addSupportedType(operatorData[i]);
 			}
+			return operator;
+		} else {
+			return new Operator(line);
+		}
+	}
+	
+	private NativeFunction parseNativeFunction(String line) {
+		if(line.contains(KEYWORD_PARAMETER)) {
+			String[] nativeFunctionData = line.split(KEYWORD_PARAMETER);
+			NativeFunction nativeFunction = new NativeFunction(nativeFunctionData[0]);
+			for (int i = 1; i < nativeFunctionData.length; i++) {
+				parseParameter(nativeFunctionData[i], i - 1, nativeFunction);
+			}
+			return nativeFunction;				
+		} else {
+			return new NativeFunction(line);
+		}
+	}
+	
+	private void parseParameter(String parameter, int parameterIndex, NativeFunction nativeFunction) {
+		if(parameter.contains(KEYWORD_TYPE_SEPARATOR)) {
+			String[] parameterData = parameter.split(Pattern.quote(KEYWORD_TYPE_SEPARATOR));
+			for (int i = 0; i < parameterData.length; i++) {
+				nativeFunction.addParameterType(parameterIndex, parameterData[i]);
+			}
+		} else {
+			nativeFunction.addParameterType(parameterIndex, parameter);
 		}
 	}
 	
@@ -225,6 +258,36 @@ public class JooCompiler {
 		return code.replace("\r", "").split(LINE_BREAK);
 	}
 	
+	void analyse(final String code, final List<Operator> operators, final List<NativeFunction> nativeFunctions) {
+		List<String> warnings = new ArrayList<>();
+		List<String> errors = new ArrayList<>();
+		List<String> defineNames = new ArrayList<>();
+		final String[] codeLines = getLines(code);
+		for (int i = 0; i < codeLines.length; i++) {
+			String line = codeLines[i];
+			String errorData = "Line " + i + " : ";
+			if(line.contains(KEYWORD_INCLUDE + " ")) {
+				String filePath = line.replace(KEYWORD_INCLUDE + " ", "").replace(" ", "");
+				if(!FileUtil.fileExists(filePath) && !FileUtil.isResource(filePath)) {
+					errors.add(errorData + "Included file does not exist : " + filePath);
+				}
+			}
+			else if(line.contains(KEYWORD_DEFINE + " ")) {
+				line = line.replace(KEYWORD_DEFINE + " ", "");
+				if(line.contains(KEYWORD_VARIABLE_ASSIGN)) {
+					String defineName =  line.replace(" ", "").split(KEYWORD_VARIABLE_ASSIGN)[0];
+					if(defineNames.contains(defineName)) {
+						errors.add(errorData + "Duplicate constant name : " + defineName);
+					} else {
+						defineNames.add(defineName);
+					}
+				} else {
+					errors.add(errorData + "Unassigned constant : " + line);					
+				}
+			}
+		}
+	}
+	
 	/**
 	 * This method parses functions of the given type in the joo code lines. 
 	 * If a line with a declaration is found the functions is added to the map and the code 
@@ -235,11 +298,14 @@ public class JooCompiler {
 	 * @param variables
 	 * @return map of functions that contains the function names as keys and the function objects as values.
 	 */
-	Map<String, Function> parseFunctions(String[] codeLines, final List<String> operators, final Map<String, Variable>[] variables) {
+	Map<String, Function> parseFunctions(String[] codeLines, final List<Operator> operators, final Map<String, Variable>[] variables) {
 		Map<String, Function> functions = new LinkedHashMap<>();
 		Function currentFunction = null;
 		for (int i = 0; i < codeLines.length; i++) {
 			String codeLine = codeLines[i];
+			if(codeLine.isEmpty() || codeLine.contains(KEYWORD_COMMENT)) {
+				continue;
+			}
 			// whitespace ensures the function keyword isn't part of a bigger word
 			if(codeLine.contains(KEYWORD_FUNCTION + " ")) {
 				currentFunction = parseFunctionDeclaration(codeLine, functions);	
@@ -248,7 +314,7 @@ public class JooCompiler {
 			else if (codeLine.replace(" ", "").equals(KEYWORD_FUNCTION_END)) {
 				currentFunction = null;	
 				codeLines[i] = "";
-			}
+			} 
 			if(currentFunction != null) {
 				Instruction instruction = parseInstruction(codeLine, operators, variables, currentFunction.getParameters());
 				if(instruction != null) {
@@ -323,8 +389,11 @@ public class JooCompiler {
 		Map<String, Variable> variables = new LinkedHashMap<>();
 		for (int i = 0; i < codeLines.length; i++) {
 			String codeLine = codeLines[i];
+			if(codeLine.isEmpty() || codeLine.contains(KEYWORD_COMMENT)) {
+				continue;
+			}
 			// whitespace ensures the variable type isn't part of a bigger word
-			// function declaration also contain type declaration but should not be parsed here
+			// function declaration can also contain type declaration in parameter but should not be parsed here
 			if(codeLine.contains(variableType + " ") && !codeLine.contains(KEYWORD_FUNCTION)) {
 				// remove whitespaces, name and value shouldn't have whitespaces
 				codeLine = codeLine.replace(" ", "");
@@ -345,7 +414,7 @@ public class JooCompiler {
 					variableName = codeLine.replaceFirst(variableType, "");
 				}	
 				// name++ because names used in joo virtual machine are unique characters	
-				final Variable result = new Variable(variableName, name++, variableValue);
+				final Variable result = new Variable(variableName, variableType, name++, variableValue);
 				variables.put(variableName, result);
 				codeLines[i] = "";
 			}
@@ -366,12 +435,15 @@ public class JooCompiler {
 	private Map<String, Variable> parseArrays(String[] codeLines, final String arrayType) {
 		Map<String, Variable> variables = new LinkedHashMap<>();
 		for (int i = 0; i < codeLines.length; i++) {
+			if(codeLines[i].isEmpty() || codeLines[i].contains(KEYWORD_COMMENT)) {
+				continue;
+			}
 			// remove whitespaces, name and value shouldn't have whitespaces
 			final String codeLine = codeLines[i].replace(" ", "");
 			if(codeLine.contains(arrayType + KEYWORD_ARRAY_START) && !codeLine.contains(KEYWORD_FUNCTION)) {
 				final String[] variableData = codeLine.replace(arrayType + KEYWORD_ARRAY_START, "").split(KEYWORD_ARRAY_END);
 				// name++ because names used in joo virtual machine are unique characters	
-				final Variable result = new Variable(variableData[1], name++, variableData[0]);
+				final Variable result = new Variable(variableData[1], arrayType, name++, variableData[0]);
 				variables.put(variableData[1], result);			
 				codeLines[i] = "";
 			}
@@ -391,10 +463,7 @@ public class JooCompiler {
 	 * @param parameters
 	 * @return Instruction object if instruction can be parsed, null if it's a comment or unknown instruction.
 	 */
-	private Instruction parseInstruction(String codeLine, final List<String> operators, final Map<String, Variable>[] variables, final Map<String, String> parameters) {		
-		if(codeLine.contains(KEYWORD_COMMENT)) {
-			return null;
-		}
+	private Instruction parseInstruction(String codeLine, final List<Operator> operators, final Map<String, Variable>[] variables, final Map<String, String> parameters) {		
 		Instruction instruction = new Instruction();
 		// whitespace ensures the keyword isn't part of a bigger word
 		if(codeLine.contains(KEYWORD_FUNCTION_CALL + " ")) {
@@ -451,11 +520,11 @@ public class JooCompiler {
 	 * @param instruction
 	 */
 	private void parseBinaryOperation(String codeLine, final Map<String, Variable>[] variables, final Map<String, String> parameters,
-																				List<String> operators, Instruction instruction) {
+																				List<Operator> operators, Instruction instruction) {
 		String[] operationData = parseBinaryOperationVariablesAndOperator(codeLine, operators, instruction);
 		if(operationData != null) {
 			if(operationData[0].contains(KEYWORD_ARRAY_START)) {
-				String[] variableData = operationData[0].replace(KEYWORD_ARRAY_END, "").split("\\" + KEYWORD_ARRAY_START);
+				String[] variableData = operationData[0].replace(KEYWORD_ARRAY_END, "").split(Pattern.quote(KEYWORD_ARRAY_START));
 				instruction.setVariable0Name(variableData[0]);
 				instruction.hasVariable0(true);
 				instruction.setVariable0ArrayIndex(variableData[1]);
@@ -465,7 +534,7 @@ public class JooCompiler {
 				instruction.hasVariable0(true);
 			}
 			if(operationData[1].contains(KEYWORD_ARRAY_START)) {
-				String[] variableData = operationData[1].replace(KEYWORD_ARRAY_END, "").split("\\" + KEYWORD_ARRAY_START);
+				String[] variableData = operationData[1].replace(KEYWORD_ARRAY_END, "").split(Pattern.quote(KEYWORD_ARRAY_START));
 				instruction.setVariable1Name(variableData[0]);
 				instruction.hasVariable1(true);
 				instruction.setVariable1ArrayIndex(variableData[1]);
@@ -486,17 +555,13 @@ public class JooCompiler {
 	 * @param instruction
 	 * @return variables before and after the operator.
 	 */
-	private String[] parseBinaryOperationVariablesAndOperator(String codeLine, List<String> operators, Instruction instruction) {
+	private String[] parseBinaryOperationVariablesAndOperator(String codeLine, List<Operator> operators, Instruction instruction) {
 		String[] operationData = null;
 		for (int i = 0; i < operators.size(); i++) {
-			if(codeLine.contains(" " + operators.get(i) + " ")) {
+			if(codeLine.contains(" " + operators.get(i).getName() + " ")) {
 				instruction.setOperator((char) (i + JooVirtualMachine.OPERATORS_START));
-				String possibleOperator = operators.get(i);
-				// some characters like '+' need a backslash in front of it
-				possibleOperator = possibleOperator.replace("+", "\\+");
-				possibleOperator = possibleOperator.replace("*", "\\*");
-				possibleOperator = possibleOperator.replace("?", "\\?");
-				operationData = codeLine.replace(" ", "").split(possibleOperator);
+				String possibleOperator = operators.get(i).getName();
+				operationData = codeLine.replace(" ", "").split(Pattern.quote(possibleOperator));
 				break;
 			}
 		}
@@ -521,7 +586,7 @@ public class JooCompiler {
 			try {
 				String variableName = operationData[0];
 				if(variableName.contains(KEYWORD_ARRAY_START)){
-					variableName = variableName.split("\\" + KEYWORD_ARRAY_START)[0];
+					variableName = variableName.split(Pattern.quote(KEYWORD_ARRAY_START))[0];
 				}
 				boolean isIntParameter = false;
 				if(parameters.containsKey(variableName)) {
@@ -599,7 +664,7 @@ public class JooCompiler {
 	 * @param nativeFunctions
 	 * @return
 	 */
-	String writeFunctionsAndInstructions(String code, final Map<String, Variable>[] variables, final Map<String, Function> functions, List<String> nativeFunctions) {
+	String writeFunctionsAndInstructions(String code, final Map<String, Variable>[] variables, final Map<String, Function> functions, final List<NativeFunction> nativeFunctions) {
 		for (Function function : functions.values()) {
 			// doesn't need the parameters in the function declaration, the parameters are already listed in function call
 			code += "" + JooVirtualMachine.KEYWORD_FUNCTION + function.getByteCodeName() + JooVirtualMachine.LINE_BREAK;
@@ -613,7 +678,7 @@ public class JooCompiler {
 						code += "" + functions.get(instruction.getFunctionName()).getByteCodeName();
 					} else {
 						for (int i = 0; i < nativeFunctions.size(); i++) {
-							if(nativeFunctions.get(i).equals(instruction.getFunctionName())) {
+							if(nativeFunctions.get(i).getName().equals(instruction.getFunctionName())) {
 								code += "" + JooVirtualMachine.KEYWORD_FUNCTION_CALL + (char)(i + JooVirtualMachine.NATIVE_FUNCTIONS_START);
 							}
 						}
@@ -693,7 +758,7 @@ public class JooCompiler {
 			String parameterIndex = "";
 			// parse if parameter is a array with index				
 			if(parameter.contains(KEYWORD_ARRAY_START)) {
-				String[] parameterData = parameter.replace(KEYWORD_ARRAY_END, "").split("\\" + KEYWORD_ARRAY_START);
+				String[] parameterData = parameter.replace(KEYWORD_ARRAY_END, "").split(Pattern.quote(KEYWORD_ARRAY_START));
 				parameterName = parameterData[0];
 				parameterIndex = "" + (char) (Integer.parseInt(parameterData[1]) + 1);
 			} else {

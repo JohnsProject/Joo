@@ -35,17 +35,23 @@ package com.johnsproject.joo;
 public class Variable {
 	
 	private final String name;
+	private final String type;
 	private final char byteCodeName;
 	private final String value;
 	
-	public Variable(final String name, final char byteCodeName, final String value) {
+	public Variable(final String name, final String type, final char byteCodeName, final String value) {
 		this.name = name;
+		this.type = type;
 		this.byteCodeName = byteCodeName;
 		this.value = value;
 	}
 	
 	public String getName() {
 		return name;
+	}
+	
+	public String getType() {
+		return type;
 	}
 	
 	public char getByteCodeName() {

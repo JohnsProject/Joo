@@ -95,7 +95,8 @@ public class JooVirtualMachine {
 	private int codeSize = 0;
 	private byte[] componentIndexes = new byte[9];
 	private int[] components = new int[64];
-	private int[] arrays = new int[126];
+	// could be 126 but 54 * 2 = 108 so exactly 2 array with max length can be created
+	private int[] arrays = new int[108];
 	private int[] parameters = new int[6];
 	private boolean[] ifs = new boolean[6];
 	private char[] code = new char[1024];
