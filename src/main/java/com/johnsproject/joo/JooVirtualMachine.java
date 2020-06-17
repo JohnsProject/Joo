@@ -1,28 +1,5 @@
 package com.johnsproject.joo;
 
-/*
-MIT License
-
-Copyright (c) 2020 John´s Project
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
- */
 public class JooVirtualMachine {
 
 	public static final char TYPE_INT = 127;
@@ -179,7 +156,7 @@ public class JooVirtualMachine {
 		if(code[codeIndex] == KEYWORD_FUNCTION) {
 			// - 1 because the compiler adds 1 to avoid names with character 0
 			int componentIndex = (int)code[codeIndex + 1] - COMPONENTS_START;
-			// jooCodeIndex + 3 because (KEYWORD_FUNCTION + name + lineBreak)
+			// jooCodeIndex + 3 because KEYWORD_FUNCTION + name + lineBreak
 			components[componentIndex] = codeIndex + 3;
 			return true;
 		}
@@ -189,17 +166,19 @@ public class JooVirtualMachine {
 	boolean parseVariableDeclaration(int codeIndex) {
 		int componentIndex = (int)code[codeIndex] - COMPONENTS_START;
 		char componentType = interpretComponentType(componentIndex);
-		if(code[codeIndex + 1] != LINE_BREAK) {
+		char componentValue = code[codeIndex + 1];
+		// if value is declared
+		if(componentValue != LINE_BREAK) {
 			// if variable is char or array there is no number behind the variable name
 			// as the array sizes are expressed as a char to make code smaller
 			if(componentType == TYPE_CHAR) {
-				components[componentIndex] = code[codeIndex + 1];
+				components[componentIndex] = componentValue;
 			}
 			// if is array
 			else if(componentType <= TYPE_ARRAY_INT) {
-				// assign array size to componentIndex + 1 to make arrayStartIndex is directly
+				// assign array size to componentIndex + 1 to make arrayStartIndex be directly
 				// accessible through jooComponents[array variable index]
-				int arrayStartIndex = code[codeIndex + 1] + components[componentIndex];
+				int arrayStartIndex = componentValue + components[componentIndex];
 				components[componentIndex + 1] = arrayStartIndex;
 			} else {
 				components[componentIndex] = parseNumber(codeIndex + 1);
@@ -365,14 +344,14 @@ public class JooVirtualMachine {
 		int variable1Value = interpretOperationValue(codeIndex);
 		// if is not array
 		if(variable0Type > TYPE_ARRAY_INT) {
-			return interpretVariableOperation(variable0Type, variable0Index, operator, variable1Value, components);
+			return interpretVariableOperation(components, variable0Index, variable0Type, operator, variable1Value);
 		} else {
 			int variable0ArrayIndex = interpretArrayIndex(code[codeIndex]);
 			// get index in arrays array
 			variable0Index = components[variable0Index] + variable0ArrayIndex;
 			// convert array type to primitive type
 			variable0Type = (char)(variable0Type + (TYPE_INT - TYPE_ARRAY_INT));
-			return interpretVariableOperation(variable0Type, variable0Index, operator, variable1Value, arrays);
+			return interpretVariableOperation(arrays, variable0Index, variable0Type, operator, variable1Value);
 		}
 	}
 	
@@ -451,7 +430,7 @@ public class JooVirtualMachine {
 		return 0;
 	}
 	
-	boolean interpretVariableOperation(char variable0Type, int variable0Index, char operator, int variable1Value, int[] values) {
+	boolean interpretVariableOperation(int[] values, int variable0Index, char variable0Type, char operator, int variable1Value) {
 		switch (operator) {
 		case COMPARATOR_SMALLER_EQUALS:
 			return values[variable0Index] <= variable1Value;

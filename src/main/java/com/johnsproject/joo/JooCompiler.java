@@ -1,26 +1,3 @@
-/*
-MIT License
-
-Copyright (c) 2020 John´s Project
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
- */
 package com.johnsproject.joo;
 
 import java.io.File;
@@ -40,6 +17,9 @@ public class JooCompiler {
 	// compiler syntax analyser
 	// Standart native library
 	// specification
+	// change to a license that needs to buy a license in case of commercial use
+	// add make types extencible like operators
+	// joo is a game development programming language
 
 	public static final String KEYWORD_INCLUDE = "include";
 	/*
@@ -90,17 +70,6 @@ public class JooCompiler {
 	
 	public static final String PATH_COMPILER_CONFIG = "JooCompilerConfig.jcc";
 	
-	public static final String[] COMPILER_TYPES = new String[] {
-			TYPE_INT,
-			TYPE_FIXED,
-			TYPE_BOOL,
-			TYPE_CHAR,
-			TYPE_ARRAY_INT,
-			TYPE_ARRAY_FIXED,
-			TYPE_ARRAY_BOOL,
-			TYPE_ARRAY_CHAR,
-	};
-	
 	public static final char[] VM_TYPES = new char[] {
 			JooVirtualMachine.TYPE_INT,
 			JooVirtualMachine.TYPE_FIXED,
@@ -137,22 +106,25 @@ public class JooCompiler {
 	 * @param path human readable joo code path.
 	 * @return joo virtual machine readable joo code.
 	 */
+	@SuppressWarnings("unchecked")
 	public String compile(final String path) {
 		name = JooVirtualMachine.COMPONENTS_START;
-		String directoryPath = getDirectoryPath(path);
 		operators = new ArrayList<>();
 		nativeFunctions = new ArrayList<>();
-		parseConfig(directoryPath, operators, nativeFunctions);
-		String code = FileUtil.read(path);
-		analyse(code, operators, nativeFunctions);
+		variables = new Map[VM_TYPES.length];
+		functions = new LinkedHashMap<String, Function>();
+		String directoryPath = getDirectoryPath(path);
+		parseConfig(directoryPath);
+		// remove all tabs they are not needed at all
+		String code = FileUtil.read(path).replaceAll("\t", "");
 		code = includeIncludes(directoryPath, code);
 		code = replaceDefines(code);
 		final String[] codeLines = getLines(code);		
-		variables = parseVariables(codeLines);
-		functions = parseFunctions(codeLines, operators, variables);
+		parseVariables(codeLines);
+		parseFunctions(codeLines);
 		String compiledJooCode = "";
-		compiledJooCode = writeVariablesAndFunctions(compiledJooCode, variables, functions);
-		compiledJooCode = writeFunctionsAndInstructions(compiledJooCode, variables, functions, nativeFunctions);
+		compiledJooCode = writeVariablesAndFunctions(compiledJooCode);
+		compiledJooCode = writeFunctionsAndInstructions(compiledJooCode);
 		return compiledJooCode;
 	}
 	
@@ -168,14 +140,21 @@ public class JooCompiler {
 	String includeIncludes(String directoryPath, String code) {
 		final String[] codeLines = getLines(code);
 		for (int i = 0; i < codeLines.length; i++) {
-			// whitespace ensures the include keyword isn't part of a bigger word
-			if(codeLines[i].contains(KEYWORD_INCLUDE + " ")) {
-				final String filePath = codeLines[i].replace(KEYWORD_INCLUDE + " ", "");
+			if(isNotCodeLine(codeLines[i])) {
+				continue;
+			}
+			final String[] codeLine = splitCodeLine(codeLines[i]);
+			if(codeLine[0].equals(KEYWORD_INCLUDE)) {
+				final String filePath = codeLine[1];
 				directoryPath += filePath;
 				if(FileUtil.fileExists(directoryPath)) {
 					code += FileUtil.read(directoryPath);
-				} else {
+				} 
+				else if (FileUtil.fileExists(filePath) || FileUtil.resourceExists(filePath)) {
 					code += FileUtil.read(filePath);
+				}
+				else {
+					System.err.println("Error, Line : " + i + ", Message : Included file does not exist, Path : " + filePath);
 				}
 				code = code.replace(codeLines[i], "");
 			}
@@ -185,18 +164,29 @@ public class JooCompiler {
 	
 	String replaceDefines(String code) {
 		final String[] codeLines = getLines(code);
+		List<String> defineNames = new ArrayList<>();
 		for (int i = 0; i < codeLines.length; i++) {
-			// whitespace ensures the define keyword isn't part of a bigger word
-			if(codeLines[i].contains(KEYWORD_DEFINE + " ")) {
-				final String[] defineData = codeLines[i].replace(" ", "").replace(KEYWORD_DEFINE, "").split(KEYWORD_VARIABLE_ASSIGN);
-				code = code.replace(codeLines[i], "");
-				code = code.replace(defineData[0], defineData[1]);
+			if(isNotCodeLine(codeLines[i])) {
+				continue;
+			}
+			final String[] codeLine = splitCodeLine(codeLines[i]);
+			if(codeLine[0].equals(KEYWORD_DEFINE)) {
+				if(defineNames.contains(codeLine[1])) {
+					System.err.println("Error, Line : " + i + ", Message : Duplicate constant, Name : " + codeLine[1]);	
+				}
+				else if(codeLine[2].equals(KEYWORD_VARIABLE_ASSIGN)) {
+					defineNames.add(codeLine[1]);
+					code = code.replace(codeLines[i], "");
+					code = code.replace(codeLine[1], codeLine[3]);
+				} else {
+					System.err.println("Error, Line : " + i + ", Message : Unassigned constant, Name : " + codeLine[1]);	
+				}
 			}
 		}
 		return code;
 	}
 	
-	void parseConfig(String directoryPath, List<Operator> operators, List<NativeFunction> nativeFunctions) {
+	void parseConfig(String directoryPath) {
 		directoryPath += PATH_COMPILER_CONFIG;
 		final String config;
 		if(FileUtil.fileExists(directoryPath)) {
@@ -277,128 +267,50 @@ public class JooCompiler {
 		return code.replace("\r", "").split(LINE_BREAK);
 	}
 	
-	void analyse(final String code, final List<Operator> operators, final List<NativeFunction> nativeFunctions) {
-		List<String> warnings = new ArrayList<>();
-		List<String> errors = new ArrayList<>();
-		List<String> defineNames = new ArrayList<>();
-		final String[] codeLines = getLines(code);
-		for (int i = 0; i < codeLines.length; i++) {
-			String line = codeLines[i];
-			String errorData = "Line " + i + " : ";
-			if(line.contains(KEYWORD_INCLUDE + " ")) {
-				String filePath = line.replace(KEYWORD_INCLUDE + " ", "").replace(" ", "");
-				if(!FileUtil.fileExists(filePath) && !FileUtil.isResource(filePath)) {
-					errors.add(errorData + "Included file does not exist : " + filePath);
-				}
-			}
-			else if(line.contains(KEYWORD_DEFINE + " ")) {
-				line = line.replace(KEYWORD_DEFINE + " ", "");
-				if(line.contains(KEYWORD_VARIABLE_ASSIGN)) {
-					String defineName =  line.replace(" ", "").split(KEYWORD_VARIABLE_ASSIGN)[0];
-					if(defineNames.contains(defineName)) {
-						errors.add(errorData + "Duplicate constant name : " + defineName);
-					} else {
-						defineNames.add(defineName);
-					}
-				} else {
-					errors.add(errorData + "Unassigned constant : " + line);					
-				}
-			}
-		}
-	}
-	
-	/**
-	 * This method parses functions of the given type in the joo code lines. 
-	 * If a line with a declaration is found the functions is added to the map and the code 
-	 * line is set to empty string to avoid conflict with other search methods.
-	 * 
-	 * @param codeLines
-	 * @param operators
-	 * @param variables
-	 * @return map of functions that contains the function names as keys and the function objects as values.
-	 */
-	Map<String, Function> parseFunctions(String[] codeLines, final List<Operator> operators, final Map<String, Variable>[] variables) {
-		Map<String, Function> functions = new LinkedHashMap<>();
-		Function currentFunction = null;
-		for (int i = 0; i < codeLines.length; i++) {
-			String codeLine = codeLines[i];
-			if(codeLine.isEmpty() || codeLine.contains(KEYWORD_COMMENT)) {
-				continue;
-			}
-			// whitespace ensures the function keyword isn't part of a bigger word
-			if(codeLine.contains(KEYWORD_FUNCTION + " ")) {
-				currentFunction = parseFunctionDeclaration(codeLine, functions);	
-				codeLines[i] = "";
-			}
-			else if (codeLine.replace(" ", "").equals(KEYWORD_FUNCTION_END)) {
-				currentFunction = null;	
-				codeLines[i] = "";
-			} 
-			if(currentFunction != null) {
-				Instruction instruction = parseInstruction(codeLine, operators, variables, currentFunction.getParameters());
-				if(instruction != null) {
-					currentFunction.addInstruction(instruction);
-				}
-			}
-		}
-		return functions;
-	}
-		
-	private Function parseFunctionDeclaration(String codeLine, Map<String, Function> functions) {
-		String functionName = "";
-		Map<String, String> parameters = new LinkedHashMap<>();
-		if(codeLine.contains(KEYWORD_PARAMETER)) {
-			final String[] functionData = codeLine.replace(KEYWORD_FUNCTION, "").split(KEYWORD_PARAMETER);
-			// remove whitespaces, names shouldn't have whitespaces
-			functionName = functionData[0].replace(" ", "");
-			for (int i = 1; i < functionData.length; i++) {
-				String functionParameterData = functionData[i];
-				String parameterType = "";
-				String parameterName = "";
-				for (int j = 0; j < COMPILER_TYPES.length; j++) {
-					// whitespace ensures the variable type isn't part of a bigger word
-					if(functionParameterData.contains(COMPILER_TYPES[j] + " ")) {
-						parameterType = "" + COMPILER_TYPES[j];
-						parameterName = functionParameterData.replace(COMPILER_TYPES[j], "").replace(" ", "");
-						parameters.put(parameterName, parameterType);
-					}
-				}
-			}
-		} else {
-			functionName = codeLine.replace(" ", "").replaceFirst(KEYWORD_FUNCTION, "");
-		}
-		final Function result = new Function(functionName, name++, parameters);
-		functions.put(functionName, result);
-		return result;	
-	}
-	
 	/**
 	 * This method parses variables and arrays of all types in the joo code lines. 
 	 * If a line with a declaration is found the variable is added to the map and the code 
-	 * line is set to empty string to avoid conflict with other search methods.
+	 * line is set to empty string to avoid conflict with other parse methods.
 	 * 
 	 * @param codeLines
 	 * @param variableType
 	 * @return map of variables that contains the variable names as keys and the variable objects as values.
 	 */
-	@SuppressWarnings("unchecked")
-	Map<String, Variable>[] parseVariables(String[] codeLines){
-		return new Map[] {
-				parseVariables(codeLines, TYPE_INT),
-				parseVariables(codeLines, TYPE_FIXED),
-				parseVariables(codeLines, TYPE_BOOL),
-				parseVariables(codeLines, TYPE_CHAR),
-				parseArrays(codeLines, TYPE_INT),
-				parseArrays(codeLines, TYPE_FIXED),
-				parseArrays(codeLines, TYPE_BOOL),
-				parseArrays(codeLines, TYPE_CHAR),
-		};
+	void parseVariables(String[] codeLines){
+		variables[0] = parseVariables(codeLines, TYPE_INT);
+		variables[1] = parseVariables(codeLines, TYPE_FIXED);
+		variables[2] = parseVariables(codeLines, TYPE_BOOL);
+		variables[3] = parseVariables(codeLines, TYPE_CHAR);
+		variables[4] = parseArrays(codeLines, TYPE_INT);
+		variables[5] = parseArrays(codeLines, TYPE_FIXED);
+		variables[6] = parseArrays(codeLines, TYPE_BOOL);
+		variables[7] = parseArrays(codeLines, TYPE_CHAR);
+		checkForDuplicateVariableNames();
+	}
+	
+	private void checkForDuplicateVariableNames() {
+		for (Map<String, Variable> map : variables) {
+			for (String name : map.keySet()) {
+				int namesCount = 0;
+				for (Map<String, Variable> otherMap : variables) {
+					for (String otherName : otherMap.keySet()) {
+						if(name.equals(otherName)) {
+							namesCount++;
+						}
+					}
+				}
+				if(namesCount > 1) {
+					System.err.println("Error, Message : Duplicate variable, Name : " + name);
+					return;
+				}
+			}
+		}
 	}
 	
 	/**
 	 * This method parses variables of the given type in the joo code lines. 
 	 * If a line with a declaration is found the variable is added to the map and the code 
-	 * line is set to empty string to avoid conflict with other search methods.
+	 * line is set to empty string to avoid conflict with other parse methods.
 	 * 
 	 * @param codeLines
 	 * @param variableType
@@ -407,31 +319,16 @@ public class JooCompiler {
 	private Map<String, Variable> parseVariables(String[] codeLines, final String variableType) {
 		Map<String, Variable> variables = new LinkedHashMap<>();
 		for (int i = 0; i < codeLines.length; i++) {
-			String codeLine = codeLines[i];
-			if(codeLine.isEmpty() || codeLine.contains(KEYWORD_COMMENT)) {
+			if(isNotCodeLine(codeLines[i])) {
 				continue;
 			}
-			// whitespace ensures the variable type isn't part of a bigger word
-			// function declaration can also contain type declaration in parameter but should not be parsed here
-			if(codeLine.contains(variableType + " ") && !codeLine.contains(KEYWORD_FUNCTION)) {
-				// remove whitespaces, name and value shouldn't have whitespaces
-				codeLine = codeLine.replace(" ", "");
-				String variableName = "";
-				String variableValue = "";
-				if(codeLine.contains(KEYWORD_VARIABLE_ASSIGN)) {
-					final String[] variableData = codeLine.replaceFirst(variableType, "").split(KEYWORD_VARIABLE_ASSIGN);
-					variableName = variableData[0];
-					if(variableType.equals(TYPE_INT))
-						variableValue = variableData[1];
-					else if(variableType.equals(TYPE_FIXED))
-						variableValue = "" + Math.round(Float.parseFloat(variableData[1]) * FIXED_POINT);
-					else if(variableType.equals(TYPE_BOOL))
-						variableValue = "" + (variableData[1].equals(KEYWORD_FALSE) ? 0 : 1);
-					else if(variableType.equals(TYPE_CHAR))
-						variableValue = "" + variableData[1].toCharArray()[1];
-				} else {
-					variableName = codeLine.replaceFirst(variableType, "");
-				}	
+			final String[] codeLine = splitCodeLine(codeLines[i]);
+			if(codeLine[0].equals(variableType)) {
+				String variableName = codeLine[1];
+				if(variables.containsKey(variableName)) {
+					System.err.println("Error, Message : Duplicate variable, Name : " + variableName);					
+				}
+				final String variableValue = getVariableValue(codeLine, variableType);
 				// name++ because names used in joo virtual machine are unique characters	
 				final Variable result = new Variable(variableName, variableType, name++, variableValue);
 				variables.put(variableName, result);
@@ -441,10 +338,29 @@ public class JooCompiler {
 		return variables;
 	}
 	
+	private String getVariableValue(final String[] codeLine, final String variableType) {
+		String variableValue = "";
+		if(codeLine.length > 2 && codeLine[2].equals(KEYWORD_VARIABLE_ASSIGN)) {
+			if(variableType.equals(TYPE_INT)) {
+				variableValue = codeLine[3];
+			}
+			else if(variableType.equals(TYPE_FIXED)) {
+				variableValue = "" + Math.round(Float.parseFloat(codeLine[3]) * FIXED_POINT);
+			}
+			else if(variableType.equals(TYPE_BOOL)) {
+				variableValue = "" + (codeLine[3].equals(KEYWORD_FALSE) ? 0 : 1);
+			}
+			else if(variableType.equals(TYPE_CHAR)) {
+				variableValue = "" + codeLine[3].toCharArray()[1];
+			}
+		}
+		return variableValue;
+	}
+	
 	/**
 	 * This method parses arrays of the given type in the joo code lines. 
 	 * If a line with a declaration is found the array is added to the map and the code 
-	 * line is set to empty string to avoid conflict with other search methods.
+	 * line is set to empty string to avoid conflict with other parse methods.
 	 * 
 	 * @param codeLines
 	 * @param arrayType
@@ -454,20 +370,133 @@ public class JooCompiler {
 	private Map<String, Variable> parseArrays(String[] codeLines, final String arrayType) {
 		Map<String, Variable> variables = new LinkedHashMap<>();
 		for (int i = 0; i < codeLines.length; i++) {
-			if(codeLines[i].isEmpty() || codeLines[i].contains(KEYWORD_COMMENT)) {
+			if(isNotCodeLine(codeLines[i])) {
 				continue;
 			}
-			// remove whitespaces, name and value shouldn't have whitespaces
-			final String codeLine = codeLines[i].replace(" ", "");
-			if(codeLine.contains(arrayType + KEYWORD_ARRAY_START) && !codeLine.contains(KEYWORD_FUNCTION)) {
-				final String[] variableData = codeLine.replace(arrayType + KEYWORD_ARRAY_START, "").split(KEYWORD_ARRAY_END);
+			final String[] codeLine = splitCodeLine(codeLines[i]);
+			if(codeLine[0].contains(arrayType + KEYWORD_ARRAY_START)) {
+				String variableName = codeLine[1];
+				if(variables.containsKey(variableName)) {
+					System.err.println("Error, Message : Duplicate variable, Name : " + variableName);					
+				}
+				final String arraySize = getArraySize(i, codeLine, arrayType, variableName);
 				// name++ because names used in joo virtual machine are unique characters	
-				final Variable result = new Variable(variableData[1], arrayType, name++, variableData[0]);
-				variables.put(variableData[1], result);			
+				final Variable result = new Variable(variableName, arrayType, name++, arraySize);
+				variables.put(variableName, result);			
 				codeLines[i] = "";
 			}
 		}
 		return variables;
+	}
+	
+	private String getArraySize(final int line, final String[] codeLine, final String arrayType, final String variableName) {
+		String arraySize = codeLine[0].replace(arrayType + KEYWORD_ARRAY_START, "");
+		if(arraySize.contains(KEYWORD_ARRAY_END)) {
+			arraySize = arraySize.replace(KEYWORD_ARRAY_END, "");
+		} else {
+			System.err.println("Error, Line : " + line + ", Message : Unclosed array size declaration, Name : " + variableName);
+		}
+		try {
+			int size = Integer.parseInt(arraySize);
+			if(size < 0) {
+				System.err.println("Error, Line : " + line + ", Message : Array size can't be negative, Name : " + variableName);						
+			}
+		} catch(NumberFormatException e) {
+			System.err.println("Error, Line : " + line + ", Message : Array size is not number, Name : " + variableName);
+		}
+		return arraySize;
+	}
+	
+	/**
+	 * This method parses functions of the given type in the joo code lines. 
+	 * If a line with a declaration is found the function is added to the map and the code 
+	 * line is set to empty string to avoid conflict with other parse methods.
+	 * 
+	 * @param codeLines
+	 * @return map of functions that contains the function names as keys and the function objects as values.
+	 */
+	void parseFunctions(String[] codeLines) {
+		// this first pass registers all functions, all functions must be
+		// known to know if a function call doesn't call a unknown function
+		parseFunctionDeclarations(codeLines);
+		parseFunctionsInstructions(codeLines);
+	}
+	
+	private void parseFunctionDeclarations(String[] codeLines) {
+		for (int i = 0; i < codeLines.length; i++) {
+			if(isNotCodeLine(codeLines[i])) {
+				continue;
+			}
+			String[] codeLine = splitCodeLine(codeLines[i]);
+			if(codeLine[0].equals(KEYWORD_FUNCTION)) {
+				parseFunctionDeclaration(codeLine);	
+			}
+		}
+	}
+	
+	private void parseFunctionDeclaration(String[] codeLine) {
+		String functionName = codeLine[1];
+		if(functions.containsKey(functionName)) {
+			System.err.println("Error, Message : Duplicate function, Name : " + functionName);
+		}
+		Map<String, String> parameters = new LinkedHashMap<>();
+		// are there parameters in the function declaration?
+		if(functionName.length() > 2) {
+			parseFunctionDeclarationParameters(codeLine, parameters, functionName);
+		}
+		final Function result = new Function(functionName, name++, parameters);
+		functions.put(functionName, result);
+	}
+	
+	private void parseFunctionDeclarationParameters(final String[] codeLine, Map<String, String> parameters, final String functionName) {
+		for (int i = 2; i < codeLine.length; i += 2) {
+			String parameterType = codeLine[i];
+			String parameterName = codeLine[i + 1];
+			for (Map<String, Variable> map : variables) {
+				if(map.containsKey(parameterName)) {
+					System.err.println("Error, Message : Parameter same as variable, FunctionName : " + functionName + ", ParameterName : " + parameterName);
+				}
+			}
+			if(parameters.containsKey(parameterName)) {
+				System.err.println("Error, Message : Duplicate parameter, FunctionName : " + functionName + ", ParameterName : " + parameterName);
+			}
+			final int typeIndex = getTypeIndex(parameterType);
+			// if type does not exist -1 is returned
+			if(typeIndex < 0) {
+				System.err.println("Error, Message : Unknown type declaration, FunctionName : " + functionName + ", Type : " + parameterType);		
+			} else {		
+				parameters.put(parameterName, parameterType);				
+			}
+		}
+	}
+	
+	private void parseFunctionsInstructions(String[] codeLines) {
+		Function currentFunction = null;
+		for (int i = 0; i < codeLines.length; i++) {
+			if(isNotCodeLine(codeLines[i])) {
+				continue;
+			}
+			String[] codeLine = splitCodeLine(codeLines[i]);
+			if(codeLine[0].equals(KEYWORD_FUNCTION)) {
+				currentFunction = functions.get(codeLine[1]);	
+				codeLines[i] = "";
+			}
+			else if (codeLine[0].equals(KEYWORD_FUNCTION_END)) {
+				currentFunction = null;	
+				codeLines[i] = "";
+			} else { 
+				if(currentFunction == null) {
+					System.err.println("Error, Line : " + i + ", Message : Instruction outside of function, Instruction : " + codeLines[i]);				
+				} else {
+					Instruction instruction = parseInstruction(i, codeLine, currentFunction.getParameters());
+					if(instruction == null) {
+						System.err.println("Error, Line : " + i + ", Message : Unknown instruction, Instruction : " + codeLines[i]);
+					} else {
+						currentFunction.addInstruction(instruction);
+					}
+				}
+			}
+		}
 	}
 	
 	/**
@@ -475,39 +504,35 @@ public class JooCompiler {
 	 * If it's a known instruction it get's parsed into a instruction object that 
 	 * is then returned, null is returned if it's a comment or unknown instruction.
 	 * 
-	 * 
+	 * @param lineIndex
 	 * @param codeLine
-	 * @param operators
-	 * @param variables
 	 * @param parameters
 	 * @return Instruction object if instruction can be parsed, null if it's a comment or unknown instruction.
 	 */
-	private Instruction parseInstruction(String codeLine, final List<Operator> operators, final Map<String, Variable>[] variables, final Map<String, String> parameters) {		
+	private Instruction parseInstruction(final int lineIndex, final String[] codeLine, final Map<String, String> parameters) {		
 		Instruction instruction = new Instruction();
-		// whitespace ensures the keyword isn't part of a bigger word
-		if(codeLine.contains(KEYWORD_FUNCTION_CALL + " ")) {
-			parseFunctionCall(codeLine, instruction);
+		if(codeLine[0].equals(KEYWORD_FUNCTION_CALL)) {
+			parseFunctionCall(lineIndex, codeLine, instruction);
 			instruction.isFunctionCall(true);
 		}
-		else if(codeLine.contains(KEYWORD_ELSE_IF + " ")) {
-			parseCondition(codeLine, KEYWORD_ELSE_IF, instruction, operators, variables, parameters);
+		else if(codeLine[0].equals(KEYWORD_IF) || codeLine[0].equals(KEYWORD_ELSE_IF)) {
+			instruction.isCondition(true);
+			instruction.setConditionType(codeLine[0]);
+			parseBinaryOperation(lineIndex, codeLine, parameters, instruction);
 		}
-		else if(codeLine.contains(KEYWORD_IF + " ")) {
-			parseCondition(codeLine, KEYWORD_IF, instruction, operators, variables, parameters);
-		}
-		else if(codeLine.contains(KEYWORD_ELSE)) {
+		else if(codeLine[0].equals(KEYWORD_ELSE)) {
 			instruction.setOperator(JooVirtualMachine.KEYWORD_ELSE);
 		}
-		else if(codeLine.contains(KEYWORD_IF_END)) {
+		else if(codeLine[0].equals(KEYWORD_IF_END)) {
 			instruction.setOperator(JooVirtualMachine.KEYWORD_IF);
 		}
-		else if(codeLine.contains(KEYWORD_FUNCTION_REPEAT)) {
+		else if(codeLine[0].equals(KEYWORD_FUNCTION_REPEAT)) {
 			instruction.setOperator(JooVirtualMachine.KEYWORD_FUNCTION_REPEAT);
 		}
-		else if(codeLine.contains(KEYWORD_FUNCTION_END)) {
+		else if(codeLine[0].equals(KEYWORD_FUNCTION_END)) {
 			instruction.setOperator(JooVirtualMachine.KEYWORD_FUNCTION);
 		} else { // if all if's failed it means the instruction is a variable operation
-			parseBinaryOperation(codeLine, variables, parameters, operators, instruction);
+			parseBinaryOperation(lineIndex, codeLine, parameters, instruction);
 		}
 		if(!instruction.isFunctionCall() && (instruction.getOperator() == 0)) {
 			return null;
@@ -515,26 +540,39 @@ public class JooCompiler {
 		return instruction;
 	}
 	
-	private void parseFunctionCall(String codeLine, Instruction instruction) {
-		codeLine = codeLine.replace(" ", "").replaceFirst(KEYWORD_FUNCTION_CALL, "");
-		if(codeLine.contains(KEYWORD_PARAMETER)) {
-			String[] functionCallData = codeLine.split(KEYWORD_PARAMETER);
-			instruction.setFunctionName(functionCallData[0]);
-			// parsing in case of array with index as parameter will be done later
-			for (int i = 1; i < functionCallData.length; i++) {
-				instruction.addParameter(functionCallData[i]);
+	private void parseFunctionCall(final int lineIndex, String[] codeLine, Instruction instruction) {
+		final String functionName = codeLine[1];
+		if(functions.containsKey(functionName)) {
+			final Function calledFunction = functions.get(functionName);
+			final Map<String, String> calledFunctionParams = calledFunction.getParameters();
+			instruction.setFunctionName(functionName);
+			if(calledFunctionParams.size() != codeLine.length - 2) {
+				System.err.println("Error, Line : " + lineIndex + ", Message : Function call parameters not equal to function parameters, Name : " + functionName);				
+			}
+			// Has the function call parameters?
+			if(codeLine.length > 2) {
+				parseFunctionCallParameters(lineIndex, codeLine, instruction, calledFunctionParams);
 			}
 		} else {
-			instruction.setFunctionName(codeLine);
+			System.err.println("Error, Line : " + lineIndex + ", Message : Unknown function call, Name : " + functionName);
 		}
 	}
 	
-	private void parseCondition(String codeLine, String condtitionType, Instruction instruction,
-									final List<Operator> operators, final Map<String, Variable>[] variables, final Map<String, String> parameters) {
-		codeLine = codeLine.replaceFirst(condtitionType, "");
-		parseBinaryOperation(codeLine, variables, parameters, operators, instruction);
-		instruction.isCondition(true);
-		instruction.setConditionType(condtitionType);
+	private void parseFunctionCallParameters(final int lineIndex, final String[] codeLine, Instruction instruction, final Map<String, String> calledFunctionParams) {
+		for (int i = 2; i < codeLine.length; i++) {
+			// parsing in case of array with index as parameter will be done later
+			final String variableName = codeLine[i];
+			instruction.addParameter(variableName);
+		}
+		int paramIndex = 0;
+		final List<String> instructionParams = instruction.getParameters();
+		for (String paramType : calledFunctionParams.values()) {
+			final String instructionParamName = instructionParams.get(paramIndex++);
+			final int typeIndex = getTypeIndex(paramType);
+			if(!variables[typeIndex].containsKey(instructionParamName)) {
+				System.err.println("Error, Line : " + lineIndex + ", Message : Function call parameter not equal to function parameter type, ParameterName : " + instructionParamName);					
+			}
+		}
 	}
 	
 	/**
@@ -542,106 +580,199 @@ public class JooCompiler {
 	 * and fills the given instruction object with the parsed data.
 	 * 
 	 * @param codeLine
-	 * @param variables
 	 * @param parameters
 	 * @param operators
 	 * @param instruction
 	 */
-	private void parseBinaryOperation(String codeLine, final Map<String, Variable>[] variables, final Map<String, String> parameters,
-																				List<Operator> operators, Instruction instruction) {
-		String[] operationData = parseBinaryOperationVariablesAndOperator(codeLine, operators, instruction);
-		if(operationData != null) {
-			if(operationData[0].contains(KEYWORD_ARRAY_START)) {
-				String[] variableData = operationData[0].replace(KEYWORD_ARRAY_END, "").split(Pattern.quote(KEYWORD_ARRAY_START));
-				instruction.setVariable0Name(variableData[0]);
-				instruction.hasVariable0(true);
-				instruction.setVariable0ArrayIndex(variableData[1]);
-				instruction.hasVariable0ArrayIndex(true);
-			} else {
-				instruction.setVariable0Name(operationData[0]);
-				instruction.hasVariable0(true);
-			}
-			if(operationData[1].contains(KEYWORD_ARRAY_START)) {
-				String[] variableData = operationData[1].replace(KEYWORD_ARRAY_END, "").split(Pattern.quote(KEYWORD_ARRAY_START));
-				instruction.setVariable1Name(variableData[0]);
-				instruction.hasVariable1(true);
-				instruction.setVariable1ArrayIndex(variableData[1]);
-				instruction.hasVariable1ArrayIndex(true);
-			} else {
-				// part behind the operator may contain a value instead of variable
-				parseBinaryOperationValue(operationData, variables, parameters, instruction);
-			}
+	private void parseBinaryOperation(final int lineIndex, final String[] codeLine, final Map<String, String> parameters, Instruction instruction) {
+		final int startIndex = instruction.isCondition() ? 1 : 0;
+		parseOperator(lineIndex, codeLine, codeLine[startIndex + 1], instruction);
+		parseVariable0(lineIndex, codeLine[startIndex + 0], instruction);
+		// try to parse the value behind the operator
+		parseValue(codeLine[startIndex + 0], codeLine[startIndex + 2], parameters, instruction);
+		// if there is no value it has to be a variable
+		if(!instruction.hasValue()) {
+			parseVariable1(lineIndex, codeLine[startIndex + 2], instruction);
 		}
 	}
 	
-	/**
-	 * This method parses the operator used in the operation and and returns the variables before and 
-	 * after the operator. It also sets the operator in the instruction object.
-	 * 
-	 * @param codeLine
-	 * @param operators
-	 * @param instruction
-	 * @return variables before and after the operator.
-	 */
-	private String[] parseBinaryOperationVariablesAndOperator(String codeLine, List<Operator> operators, Instruction instruction) {
-		String[] operationData = null;
+	private void parseOperator(final int lineIndex, final String[] codeLine, final String operator, Instruction instruction) {
 		for (int i = 0; i < operators.size(); i++) {
-			if(codeLine.contains(" " + operators.get(i).getName() + " ")) {
+			if(operator.equals(operators.get(i).getName())) {
 				instruction.setOperator((char) (i + JooVirtualMachine.OPERATORS_START));
-				String possibleOperator = operators.get(i).getName();
-				operationData = codeLine.replace(" ", "").split(Pattern.quote(possibleOperator));
-				break;
+				return;
 			}
 		}
-		return operationData;
+		System.err.println("Error, Line : " + lineIndex + ", Message : Unknown operator, Operator : " + operator);				
+	}
+	
+	private void parseVariable0(final int lineIndex, final String rawVariableData, Instruction instruction) {
+		if(rawVariableData.contains(KEYWORD_ARRAY_START)) {
+			String[] variableData = rawVariableData.replace(KEYWORD_ARRAY_END, "").split(Pattern.quote(KEYWORD_ARRAY_START));
+			instruction.setVariable0Name(variableData[0]);
+			instruction.setVariable0ArrayIndex(variableData[1]);
+			instruction.hasVariable0ArrayIndex(true);
+		} else {
+			instruction.setVariable0Name(rawVariableData);
+		}
+		instruction.hasVariable0(true);
+		if(!isNameUsed(instruction.getVariable0Name())) {
+			System.err.println("Error, Line : " + lineIndex + ", Message : Unknown variable, Name : " + instruction.getVariable0Name());					
+		}
 	}
 	
 	/**
 	 * This method parses the variable or value after the operator and sets it in the instruction object.
 	 * 
-	 * @param operationData
-	 * @param variables
+	 * @param variable0Data
+	 * @param variable1Data
 	 * @param parameters
 	 * @param instruction
 	 */
-	private void parseBinaryOperationValue(final String[] operationData, final Map<String, Variable>[] variables,
-																			final Map<String, String> parameters, Instruction instruction) {
-		if(operationData[1].contains(KEYWORD_CHAR)) {
-			instruction.setValue("" + operationData[1].toCharArray()[1]);
+	private void parseValue(final String variable0Data, final String variable1Data, final Map<String, String> parameters, Instruction instruction) {
+		parseCharValue(variable1Data, instruction);
+		if(!instruction.hasValue()) {
+			parseIntValue(variable0Data, variable1Data, parameters, instruction);
+		}
+		if(!instruction.hasValue()) {
+			parseFixedValue(variable1Data, instruction);
+		}
+		if(!instruction.hasValue()) {
+			parseBoolValue(variable1Data, instruction);
+		}
+	}
+	
+	private void parseCharValue(final String variable1Data, Instruction instruction) {
+		if(variable1Data.contains(KEYWORD_CHAR)) {
+			instruction.setValue("" + variable1Data.toCharArray()[1]);
 			instruction.hasValue(true);
 			instruction.setValueType(TYPE_CHAR);
-		} else {
-			try {
-				String variableName = operationData[0];
-				if(variableName.contains(KEYWORD_ARRAY_START)){
-					variableName = variableName.split(Pattern.quote(KEYWORD_ARRAY_START))[0];
-				}
-				boolean isIntParameter = false;
-				if(parameters.containsKey(variableName)) {
-					isIntParameter = parameters.get(variableName).equals(TYPE_INT) || parameters.get(variableName).equals(TYPE_ARRAY_INT);
-				}
-				// if variable before operator is int
-				if(variables[0].containsKey(variableName) || variables[4].containsKey(variableName) || isIntParameter) {
-					instruction.setValue("" + Integer.parseInt(operationData[1]));
-					instruction.hasValue(true);
-					instruction.setValueType(TYPE_INT);
-				} else {
-					instruction.setValue("" + Math.round(Float.parseFloat(operationData[1]) * FIXED_POINT));
-					instruction.hasValue(true);
-					instruction.setValueType(TYPE_FIXED);
-				}
+		}
+	}
+	
+	private void parseIntValue(final String variable0Data, final String variable1Data, final Map<String, String> parameters, Instruction instruction) {
+		try {
+			String variableName = variable0Data;
+			if(variableName.contains(KEYWORD_ARRAY_START)){
+				variableName = variableName.split(Pattern.quote(KEYWORD_ARRAY_START))[0];
 			}
-			catch(NumberFormatException notNumber) {
-				if(operationData[1].equals(KEYWORD_TRUE) || operationData[1].equals(KEYWORD_FALSE)) {
-					instruction.setValue("" + (operationData[1].equals(KEYWORD_FALSE) ? 0 : 1));
-					instruction.hasValue(true);
-					instruction.setValueType(TYPE_BOOL);
-				} else {
-					instruction.setVariable1Name(operationData[1]);
-					instruction.hasVariable1(true);
+			boolean isIntParameter = false;
+			if(parameters.containsKey(variableName)) {
+				isIntParameter = parameters.get(variableName).equals(TYPE_INT) || parameters.get(variableName).equals(TYPE_ARRAY_INT);
+			}
+			// if variable before operator is of type int, otherwise a number without fractional part of type fixed would be parsed into int
+			if(variables[0].containsKey(variableName) || variables[4].containsKey(variableName) || isIntParameter) {
+				instruction.setValue("" + Integer.parseInt(variable1Data));
+				instruction.hasValue(true);
+				instruction.setValueType(TYPE_INT);
+			} 
+		} catch(NumberFormatException notNumber) {
+			return;
+		}
+	}
+	
+	private void parseFixedValue(final String variable1Data, Instruction instruction) {
+		try {
+			instruction.setValue("" + Math.round(Float.parseFloat(variable1Data) * FIXED_POINT));
+			instruction.hasValue(true);
+			instruction.setValueType(TYPE_FIXED);
+		} catch(NumberFormatException notNumber) {
+			return;
+		}
+	}
+	
+	private void parseBoolValue(final String variable1Data, Instruction instruction) {
+		if(variable1Data.equals(KEYWORD_TRUE) || variable1Data.equals(KEYWORD_FALSE)) {
+			instruction.setValue("" + (variable1Data.equals(KEYWORD_FALSE) ? 0 : 1));
+			instruction.hasValue(true);
+			instruction.setValueType(TYPE_BOOL);
+		}
+	}
+	
+	private void parseVariable1(final int lineIndex, final String rawVariableData, Instruction instruction) {
+		if(rawVariableData.contains(KEYWORD_ARRAY_START)) {
+			String[] variableData = rawVariableData.replace(KEYWORD_ARRAY_END, "").split(Pattern.quote(KEYWORD_ARRAY_START));
+			instruction.setVariable1Name(variableData[0]);
+			instruction.setVariable1ArrayIndex(variableData[1]);
+			instruction.hasVariable1ArrayIndex(true);
+		} else {
+			instruction.setVariable1Name(rawVariableData);
+		}
+		instruction.hasVariable1(true);
+		if(!isNameUsed(instruction.getVariable1Name())) {
+			System.err.println("Error, Line : " + lineIndex + ", Message : Unknown variable, Name : " + instruction.getVariable1Name());					
+		}
+	}
+	
+	/**
+	 * Splits the code line by the empty spaces and returns a string array without empty strings.
+	 * 
+	 * @param line
+	 * @return A string array with the components of the code line.
+	 */
+	String[] splitCodeLine(final String line) {
+		final String[] rawCodeLine = line.split(" ");
+		int arraySize = 0;
+		for (int i = 0; i < rawCodeLine.length; i++) {
+			if(!rawCodeLine[i].isEmpty()) {
+				arraySize++;
+			}
+		}
+		String[] codeLine = new String[arraySize];
+		for (int i = 0, j = 0; i < rawCodeLine.length; i++) {
+			if(!rawCodeLine[i].isEmpty()) {
+				codeLine[j] = rawCodeLine[i];
+				j++;
+			}
+		}
+		return codeLine;
+	}
+	
+	private boolean isNameUsed(final String name) {
+		if(variables != null) {
+			for (Map<String, Variable> map : variables) {
+				if(map.containsKey(name)) {
+					return true;
 				}
 			}
 		}
+		if(functions != null) {
+			if(functions.containsKey(name)) {
+				return true;
+			}
+			for (Function function : functions.values()) {
+				if(function.getParameters().containsKey(name)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private int getTypeIndex(final String type) {
+		if(type.equals(TYPE_INT)) {
+			return 0;
+		} else if(type.equals(TYPE_FIXED)) {
+			return 1;
+		} else if(type.equals(TYPE_BOOL)) {
+			return 2;
+		} else if(type.equals(TYPE_CHAR)) {
+			return 3;
+		} else if(type.equals(TYPE_ARRAY_INT)) {
+			return 4;
+		} else if(type.equals(TYPE_ARRAY_FIXED)) {
+			return 5;
+		} else if(type.equals(TYPE_ARRAY_BOOL)) {
+			return 6;
+		} else if(type.equals(TYPE_ARRAY_CHAR)) {
+			return 7;
+		} else {
+			return -1;
+		}
+	}
+	
+	private boolean isNotCodeLine(final String codeLine) {
+		return codeLine.isEmpty() || codeLine.contains(KEYWORD_COMMENT);
 	}
 	
 	/**
@@ -652,11 +783,9 @@ public class JooCompiler {
 	 * to generate joo virtual machine readable code.
 	 * 
 	 * @param code
-	 * @param variables
-	 * @param functions
 	 * @return joo code string that contains variables and array declarations. 
 	 */
-	String writeVariablesAndFunctions(String code, final Map<String, Variable>[] variables, final Map<String, Function> functions) {
+	String writeVariablesAndFunctions(String code) {
 		for (int i = 0; i < variables.length; i++) {
 			if(variables[i].size() > 0) {
 				code += "" + VM_TYPES[i] + (char)variables[i].size() + JooVirtualMachine.LINE_BREAK;
@@ -685,12 +814,9 @@ public class JooCompiler {
 	 * to generate joo virtual machine readable code.
 	 * 
 	 * @param code
-	 * @param variables
-	 * @param functions
-	 * @param nativeFunctions
 	 * @return
 	 */
-	String writeFunctionsAndInstructions(String code, final Map<String, Variable>[] variables, final Map<String, Function> functions, final List<NativeFunction> nativeFunctions) {
+	String writeFunctionsAndInstructions(String code) {
 		for (Function function : functions.values()) {
 			// doesn't need the parameters in the function declaration, the parameters are already listed in function call
 			code += "" + JooVirtualMachine.KEYWORD_FUNCTION + function.getByteCodeName() + JooVirtualMachine.LINE_BREAK;
@@ -702,7 +828,7 @@ public class JooCompiler {
 					else if (instruction.getConditionType().equals(KEYWORD_ELSE_IF)) {
 						code += "" + JooVirtualMachine.KEYWORD_ELSE_IF;
 					}
-					code = writeBinaryOperation(code, function.getParameters().keySet(), variables, instruction);
+					code = writeBinaryOperation(code, function.getParameters().keySet(), instruction);
 				}
 				else if(instruction.isFunctionCall()) {
 					if(functions.containsKey(instruction.getFunctionName())) {
@@ -715,34 +841,34 @@ public class JooCompiler {
 						}
 					}
 				} else {
-					code = writeBinaryOperation(code, function.getParameters().keySet(), variables, instruction);
+					code = writeBinaryOperation(code, function.getParameters().keySet(), instruction);
 				}
-				code = writeInstructionParameters(code, variables, instruction);
+				code = writeInstructionParameters(code, instruction);
 				code += "" + JooVirtualMachine.LINE_BREAK;
 			}
 		}
 		return code;
 	}
 
-	private String writeBinaryOperation(String code, final Set<String> parameters, final Map<String, Variable>[] variables, Instruction instruction) {
+	private String writeBinaryOperation(String code, final Set<String> parameters, Instruction instruction) {
 		if(instruction.hasVariable0()) {
-			code += getVirtualMachineVariableName(instruction.getVariable0Name(), parameters, variables);
+			code += getVirtualMachineVariableName(instruction.getVariable0Name(), parameters);
 			if(instruction.hasVariable0ArrayIndex()) {
 				try {
 					code += "" + (char)(Integer.parseInt(instruction.getVariable0ArrayIndex()) + JooVirtualMachine.ARRAY_INDEXES_START);
 				} catch (NumberFormatException e) {
-					code += getVirtualMachineVariableName(instruction.getVariable0ArrayIndex(), parameters, variables);				
+					code += getVirtualMachineVariableName(instruction.getVariable0ArrayIndex(), parameters);				
 				}
 			}
 		}
 		code += "" + instruction.getOperator();
 		if(instruction.hasVariable1()) {
-			code += getVirtualMachineVariableName(instruction.getVariable1Name(), parameters, variables);
+			code += getVirtualMachineVariableName(instruction.getVariable1Name(), parameters);
 			if(instruction.hasVariable1ArrayIndex()) {
 				try {
 					code += "" + (char)(Integer.parseInt(instruction.getVariable1ArrayIndex()) + JooVirtualMachine.ARRAY_INDEXES_START);
 				} catch (NumberFormatException e) {
-					code += getVirtualMachineVariableName(instruction.getVariable1ArrayIndex(), parameters, variables);
+					code += getVirtualMachineVariableName(instruction.getVariable1ArrayIndex(), parameters);
 				}
 			}
 		}
@@ -758,7 +884,7 @@ public class JooCompiler {
 		return code;
 	}
 	
-	private String getVirtualMachineVariableName(String variableName, final Set<String> parameters, final Map<String, Variable>[] variables) {
+	private String getVirtualMachineVariableName(String variableName, final Set<String> parameters) {
 		for (int i = 0; i < variables.length; i++) {
 			if(variables[i].containsKey(variableName)) {
 				return "" + variables[i].get(variableName).getByteCodeName();
@@ -779,11 +905,10 @@ public class JooCompiler {
 	 * is a function call.
 	 * 
 	 * @param code
-	 * @param variables
 	 * @param instruction
 	 * @return
 	 */
-	private String writeInstructionParameters(String code, final Map<String, Variable>[] variables, Instruction instruction) {
+	private String writeInstructionParameters(String code, Instruction instruction) {
 		for (String parameter : instruction.getParameters()) {
 			String parameterName = "";
 			String parameterIndex = "";

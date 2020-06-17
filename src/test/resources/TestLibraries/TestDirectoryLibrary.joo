@@ -1,7 +1,7 @@
 # This is a example library used to test the joo programming language
 
-function TestDirectoryLibrary_FunctionTest: int[] _paramTest1
+function DirectoryLibrary_Function int[] _param1
 
-_paramTest1[0] + 20
+_param1[0] + 20
 
 endFunction 

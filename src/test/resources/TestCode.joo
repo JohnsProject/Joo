@@ -8,169 +8,162 @@ define TEST_FIXED_CONSTANT = 25.25
 define TEST_BOOL_CONSTANT = true
 define TEST_CHAR_CONSTANT = 'd'
 
-int intTest0
-int intTest1 = 10
+int int0
+int int1 = 10
 
-fixed fixedTest0
-fixed fixedTest1 = 100.5
+fixed fixed0
+fixed fixed1 = 100.5
 
-int[10] intTest
-fixed[5] fixedTest
+int[10] intArray
+fixed[5] fixedArray
 
-int ifTest
+int correctIfs
 
 function Start
+	int0 + 100
+	int0 - int1
+	int0 * 2
+	int0 / 10
+	int1 = 6
 
-intTest0 + 100
-intTest0 - intTest1
-intTest0 * 2
-intTest0 / 10
-intTest1 = 6
+	fixed0 + fixed1
+	fixed0 - 0.5
+	fixed0 * 2.5
+	fixed0 / 5
+	fixed1 = 50
 
-fixedTest0 + fixedTest1
-fixedTest0 - 0.5
-fixedTest0 * 2.5
-fixedTest0 / 5
-fixedTest1 = 50
+	bool0 = true
+	bool1 = false
+	bool2 = bool1
 
-boolTest0 = true
-boolTest1 = false
-boolTest2 = boolTest1
+	char0 = 'A'
+	char1 = 'B'
+	char2 = char1
 
-charTest0 = 'A'
-charTest1 = 'B'
-charTest2 = charTest1
+	intArray[0] = 30
+	intArray[1] + 15
+	intArray[0] - int1
+	intArray[1] / 5
+	intArray[0] * intArray[1]
+	intArray[7] = TEST_INT_CONSTANT
 
-intTest[0] = 30
-intTest[1] + 15
-intTest[0] - intTest1
-intTest[1] / 5
-intTest[0] * intTest[1]
-intTest[7] = TEST_INT_CONSTANT
+	fixedArray[0] = 60.5
+	fixedArray[1] + 15
+	fixedArray[0] - fixed1
+	fixedArray[1] / 5
+	fixedArray[0] * fixedArray[1]
+	fixedArray[2] =- 10
+	fixedArray[3] =+ fixedArray[2]
+	fixedArray[4] =! fixedArray[3]
+	fixedArray[5] = TEST_FIXED_CONSTANT
 
-fixedTest[0] = 60.5
-fixedTest[1] + 15
-fixedTest[0] - fixedTest1
-fixedTest[1] / 5
-fixedTest[0] * fixedTest[1]
-fixedTest[2] =- 10
-fixedTest[3] =+ fixedTest[2]
-fixedTest[4] =! fixedTest[3]
-fixedTest[5] = TEST_FIXED_CONSTANT
+	boolArray[9] = bool0
+	boolArray[10] = true
+	boolArray[11] = boolArray[10]
+	boolArray[2] =- true
+	boolArray[3] =+ boolArray[2]
+	boolArray[4] =! boolArray[3]
+	boolArray[5] = TEST_BOOL_CONSTANT
 
-boolTest[9] = boolTest0
-boolTest[10] = true
-boolTest[11] = boolTest[10]
-boolTest[2] =- true
-boolTest[3] =+ boolTest[2]
-boolTest[4] =! boolTest[3]
-boolTest[5] = TEST_BOOL_CONSTANT
+	charArray[9] = char0
+	charArray[10] = 'C'
+	charArray[11] = charArray[10]
+	charArray[0] = TEST_CHAR_CONSTANT
 
-charTest[9] = charTest0
-charTest[10] = 'C'
-charTest[11] = charTest[10]
-charTest[0] = TEST_CHAR_CONSTANT
+	if int0 == 18
+		correctIfs + 1
+		if int1 == 6
+			correctIfs + 1
+		else
+			correctIfs + 2
+		endIf
+		correctIfs + 1
+	else
+		correctIfs + 2
+	endIf
 
-if intTest0 == 18
-ifTest + 1
+	if bool0 == false
+		correctIfs + 1
+	elseIf bool0 == true
+		correctIfs + 2
+	endIf
 
-if intTest1 == 6
-ifTest + 1
-else
-ifTest + 2
-endIf
+	if int0 != int1
+		correctIfs + 1
+	else
+		correctIfs + 2
+	endIf
 
-ifTest + 1
+	intArray[2] = 100
+	if int0 < intArray[2]
+		correctIfs + 1
+	else
+		correctIfs + 2
+	endIf
 
-else
-ifTest + 2
-endIf
+	if intArray[2] > int0
+		correctIfs + 1
+	else
+		correctIfs + 2
+	endIf
 
-if boolTest0 == false
-ifTest + 1
-elseIf boolTest0 == true
-ifTest + 2
-endIf
+	if int0 <= intArray[2]
+		correctIfs + 1
+	else
+		correctIfs + 2
+	endIf
 
-if intTest0 != intTest1
-ifTest + 1
-else
-ifTest + 2
-endIf
+	if intArray[2] >= int0
+		correctIfs + 1
+	else
+		correctIfs + 2
+	endIf
 
-intTest[2] = 100
-if intTest0 < intTest[2]
-ifTest + 1
-else
-ifTest + 2
-endIf
+	intArray[3] = intArray[2]
+	if intArray[2] >= intArray[3]
+		correctIfs + 1
+	else
+		correctIfs + 2
+	endIf
 
-if intTest[2] > intTest0
-ifTest + 1
-else
-ifTest + 2
-endIf
+	if intArray[2] <= intArray[3]
+		correctIfs + 1
+	else
+		correctIfs + 2
+	endIf
 
-if intTest0 <= intTest[2]
-ifTest + 1
-else
-ifTest + 2
-endIf
+	call Function int0 intArray
+	call Library_Function intArray
+	call DirectoryLibrary_Function intArray
 
-if intTest[2] >= intTest0
-ifTest + 1
-else
-ifTest + 2
-endIf
+	bool bool0
+	bool bool1 = true
+	bool bool2 = false
 
-intTest[3] = intTest[2]
-if intTest[2] >= intTest[3]
-ifTest + 1
-else
-ifTest + 2
-endIf
+	char char0
+	char char1 = 'A'
+	char char2 = 'C'
 
-if intTest[2] <= intTest[3]
-ifTest + 1
-else
-ifTest + 2
-endIf
-
-call FunctionTest: intTest0: intTest
-call TestLibrary_FunctionTest: intTest
-call TestDirectoryLibrary_FunctionTest: intTest
-
-bool boolTest0
-bool boolTest1 = true
-bool boolTest2 = false
-
-char charTest0
-char charTest1 = 'A'
-char charTest2 = 'C'
-
-bool[15] boolTest
-char[13] charTest
-
+	bool[15] boolArray
+	char[13] charArray
 endFunction
 
-function FunctionTest: int _paramTest0: int[] _paramTest1
+function Function int _param0 int[] _param1
+	fixed1 + 25
+	if fixed1 <= 80
+		repeatFunction
+	endIf
 
-fixedTest1 + 25
-if fixedTest1 <= 80
-repeatFunction
-endIf
+	_param0 + 100
+	_param1[5] = _param0
+	_param1[4] = _param1[5]
+	_param0 + _param1[4]
+	_param1[int1] = int1
+	_param0 - _param1[int1]
 
-_paramTest0 + 100
-_paramTest1[5] = _paramTest0
-_paramTest1[4] = _paramTest1[5]
-_paramTest0 + _paramTest1[4]
-_paramTest1[intTest1] = intTest1
-_paramTest0 - _paramTest1[intTest1]
-
-if _paramTest0 < _paramTest1[5]
-ifTest + 1
-else
-ifTest + 2
-endIf
-
+	if _param0 < _param1[5]
+		correctIfs + 1
+	else
+		correctIfs + 2
+	endIf
 endFunction 

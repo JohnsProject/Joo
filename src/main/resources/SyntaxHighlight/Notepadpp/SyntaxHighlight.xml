@@ -26,7 +26,7 @@
             <Keywords name="Folders in comment, close"></Keywords>
             <Keywords name="Keywords1">&quot;function&quot; &quot;endFunction&quot; &quot;repeatFunction&quot; &quot;include&quot; &quot;import&quot; &quot;define&quot;</Keywords>
             <Keywords name="Keywords2">&quot;call&quot;</Keywords>
-            <Keywords name="Keywords3">&quot;if&quot; &quot;endIf&quot; &quot;else&quot;</Keywords>
+            <Keywords name="Keywords3">&quot;if&quot; &quot;elseIf&quot; &quot;else&quot; &quot;endIf&quot;</Keywords>
             <Keywords name="Keywords4">&quot;int&quot; &quot;bool&quot; &quot;fixed&quot; &quot;char&quot; &quot;true&quot; &quot;false&quot;</Keywords>
             <Keywords name="Keywords5"></Keywords>
             <Keywords name="Keywords6"></Keywords>
