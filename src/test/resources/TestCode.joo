@@ -14,8 +14,8 @@ int int1 = 10
 fixed fixed0
 fixed fixed1 = 100.5
 
-int[10] intArray
-fixed[5] fixedArray
+int:10 intArray
+fixed:5 fixedArray
 
 int correctIfs
 
@@ -40,35 +40,35 @@ function Start
 	char1 = 'B'
 	char2 = char1
 
-	intArray[0] = 30
-	intArray[1] + 15
-	intArray[0] - int1
-	intArray[1] / 5
-	intArray[0] * intArray[1]
-	intArray[7] = TEST_INT_CONSTANT
+	intArray:0 = 30
+	intArray:1 + 15
+	intArray:0 - int1
+	intArray:1 / 5
+	intArray:0 * intArray:1
+	intArray:7 = TEST_INT_CONSTANT
 
-	fixedArray[0] = 60.5
-	fixedArray[1] + 15
-	fixedArray[0] - fixed1
-	fixedArray[1] / 5
-	fixedArray[0] * fixedArray[1]
-	fixedArray[2] =- 10
-	fixedArray[3] =+ fixedArray[2]
-	fixedArray[4] =! fixedArray[3]
-	fixedArray[5] = TEST_FIXED_CONSTANT
+	fixedArray:0 = 60.5
+	fixedArray:1 + 15
+	fixedArray:0 - fixed1
+	fixedArray:1 / 5
+	fixedArray:0 * fixedArray:1
+	fixedArray:2 =- 10
+	fixedArray:3 =+ fixedArray:2
+	fixedArray:4 =! fixedArray:3
+	fixedArray:5 = TEST_FIXED_CONSTANT
 
-	boolArray[9] = bool0
-	boolArray[10] = true
-	boolArray[11] = boolArray[10]
-	boolArray[2] =- true
-	boolArray[3] =+ boolArray[2]
-	boolArray[4] =! boolArray[3]
-	boolArray[5] = TEST_BOOL_CONSTANT
+	boolArray:9 = bool0
+	boolArray:10 = true
+	boolArray:11 = boolArray:10
+	boolArray:2 =- true
+	boolArray:3 =+ boolArray:2
+	boolArray:4 =! boolArray:3
+	boolArray:5 = TEST_BOOL_CONSTANT
 
-	charArray[9] = char0
-	charArray[10] = 'C'
-	charArray[11] = charArray[10]
-	charArray[0] = TEST_CHAR_CONSTANT
+	charArray:9 = char0
+	charArray:10 = 'C'
+	charArray:11 = charArray:10
+	charArray:0 = TEST_CHAR_CONSTANT
 
 	if int0 == 18
 		correctIfs + 1
@@ -94,39 +94,39 @@ function Start
 		correctIfs + 2
 	endIf
 
-	intArray[2] = 100
-	if int0 < intArray[2]
+	intArray:2 = 100
+	if int0 < intArray:2
 		correctIfs + 1
 	else
 		correctIfs + 2
 	endIf
 
-	if intArray[2] > int0
+	if intArray:2 > int0
 		correctIfs + 1
 	else
 		correctIfs + 2
 	endIf
 
-	if int0 <= intArray[2]
+	if int0 <= intArray:2
 		correctIfs + 1
 	else
 		correctIfs + 2
 	endIf
 
-	if intArray[2] >= int0
+	if intArray:2 >= int0
 		correctIfs + 1
 	else
 		correctIfs + 2
 	endIf
 
-	intArray[3] = intArray[2]
-	if intArray[2] >= intArray[3]
+	intArray:3 = intArray:2
+	if intArray:2 >= intArray:3
 		correctIfs + 1
 	else
 		correctIfs + 2
 	endIf
 
-	if intArray[2] <= intArray[3]
+	if intArray:2 <= intArray:3
 		correctIfs + 1
 	else
 		correctIfs + 2
@@ -144,24 +144,24 @@ function Start
 	char char1 = 'A'
 	char char2 = 'C'
 
-	bool[15] boolArray
-	char[13] charArray
+	bool:15 boolArray
+	char:13 charArray
 endFunction
 
-function Function int _param0 int[] _param1
+function Function int _param0 int: _param1
 	fixed1 + 25
 	if fixed1 <= 80
 		repeatFunction
 	endIf
 
 	_param0 + 100
-	_param1[5] = _param0
-	_param1[4] = _param1[5]
-	_param0 + _param1[4]
-	_param1[int1] = int1
-	_param0 - _param1[int1]
+	_param1:5 = _param0
+	_param1:4 = _param1:5
+	_param0 + _param1:4
+	_param1:int1 = int1
+	_param0 - _param1:int1
 
-	if _param0 < _param1[5]
+	if _param0 < _param1:5
 		correctIfs + 1
 	else
 		correctIfs + 2

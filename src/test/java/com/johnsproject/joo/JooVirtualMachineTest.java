@@ -98,7 +98,7 @@ public class JooVirtualMachineTest {
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[fixedArrayIndex + 0] + 2], -2550);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[fixedArrayIndex + 0] + 3], 2550);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[fixedArrayIndex + 0] + 4], -2550);
-		assertEquals(jooVM.getArrays()[jooVM.getComponents()[fixedArrayIndex + 0] + 5], 6396);
+		assertEquals(jooVM.getArrays()[jooVM.getComponents()[fixedArrayIndex + 0] + 5], 6439);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[boolArrayIndex + 0] + 9], 1);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[boolArrayIndex + 0] + 10], 1);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[boolArrayIndex + 0] + 11], 1);

@@ -189,16 +189,20 @@ public class JooVirtualMachine {
 	}
 	
 	int parseNumber(int codeIndex) {
-		if((code[codeIndex] >= NUMBER_0) && (code[codeIndex] <= NUMBER_9)) {
+		if(isNumberChar(code[codeIndex])) {
 			int result = 0;
 			int index = 100000;
-			for (int i = codeIndex; code[i] != LINE_BREAK; i++) {
+			for (int i = codeIndex; isNumberChar(code[i]); i++) {
 				index /= 10;
 				result += (code[i] - NUMBER_0) * index;
 			}
 			return result / index;
 		}
 		return -1;
+	}
+	
+	boolean isNumberChar(char value) {
+		return (value >= NUMBER_0) && (value <= NUMBER_9);
 	}
 	
 	void interpretFunction(char functionIndex) {

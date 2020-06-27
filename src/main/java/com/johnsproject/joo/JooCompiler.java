@@ -1,6 +1,7 @@
 package com.johnsproject.joo;
 
 import java.io.File;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,6 +21,21 @@ public class JooCompiler {
 	// change to a license that needs to buy a license in case of commercial use
 	// add make types extencible like operators
 	// joo is a game development programming language
+	
+	/*
+	 Change joo project directory structure to
+	 
+	 -> ProjectName/
+	 --> JooCompilerSettings.jcs
+	 --> Source/
+	 ---> Main.joo
+	 ---> Other joo files
+	 --> Build/
+	 ---> ProjectName.cjoo
+	 
+	 Only the project folder path is passed and the compiler will search for
+	 the Main.joo and the JooCompilerSettings.jcs file and compile it into the Build folder.
+	*/
 
 	public static final String KEYWORD_INCLUDE = "include";
 	/*
@@ -46,29 +62,32 @@ public class JooCompiler {
 	public static final String KEYWORD_FALSE = "false";
 	public static final String KEYWORD_PARAMETER = ":";
 	public static final String KEYWORD_COMMENT = "#";
-	public static final String KEYWORD_ARRAY_START = "[";
-	public static final String KEYWORD_ARRAY_END = "]";
+	public static final String KEYWORD_ARRAY = ":";
 	public static final String KEYWORD_CHAR = "'";
 	public static final String KEYWORD_VARIABLE_ASSIGN = "=";
-	// used in joo compiler config only
+	// used in joo compiler settings only
 	public static final String KEYWORD_TYPE_SEPARATOR = "|";
 
-	public static final String TYPE_PARAMETER = "parameter";
-	public static final String TYPE_FUNCTION = "function";
+	public static final String TYPE_INSTRUCTION = "INSTRUCTION";	
+	public static final String TYPE_PARAMETER = "PARAMETER";
+	public static final String TYPE_OPERATOR = "OPERATOR";
+	public static final String TYPE_FUNCTION = "FUNCTION";
+	public static final String TYPE_ARRAY_SIZE = "ARRAY_SIZE";
 	public static final String TYPE_INT = "int";
 	public static final String TYPE_FIXED = "fixed";
 	public static final String TYPE_BOOL = "bool";
 	public static final String TYPE_CHAR = "char";
-	public static final String TYPE_ARRAY_INT = TYPE_INT + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END;
-	public static final String TYPE_ARRAY_FIXED = TYPE_FIXED + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END;
-	public static final String TYPE_ARRAY_BOOL = TYPE_BOOL + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END;
-	public static final String TYPE_ARRAY_CHAR = TYPE_CHAR + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END;
+	public static final String TYPE_ARRAY_INT = TYPE_INT + KEYWORD_ARRAY;
+	public static final String TYPE_ARRAY_FIXED = TYPE_FIXED + KEYWORD_ARRAY;
+	public static final String TYPE_ARRAY_BOOL = TYPE_BOOL + KEYWORD_ARRAY;
+	public static final String TYPE_ARRAY_CHAR = TYPE_CHAR + KEYWORD_ARRAY;
 	
 	public static final String LINE_BREAK = "\n";
 	
 	public static final int FIXED_POINT = 255;
 	
-	public static final String PATH_COMPILER_CONFIG = "JooCompilerConfig.jcc";
+	public static final String PATH_COMPILER_SETTINGS = "JooCompilerSettings.jcs";
+	public static final String SETTINGS_TYPE_DECLARATION = "@";
 	
 	public static final char[] VM_TYPES = new char[] {
 			JooVirtualMachine.TYPE_INT,
@@ -81,22 +100,20 @@ public class JooCompiler {
 			JooVirtualMachine.TYPE_ARRAY_CHAR,
 	};
 	
-	private char name;
 	private List<Operator> operators;
 	private List<NativeFunction> nativeFunctions;
 	private Map<String, Variable>[] variables;
 	private Map<String, Function> functions;
+	private byte uniqueByteCodeName;
+	private String settingType;
+	private Settings settings;
+	private Code code;
 	
-	public JooCompiler() {
-		name = JooVirtualMachine.COMPONENTS_START;
-	}
-
-	public Map<String, Variable>[] getVariables() {
-		return variables;
-	}
-
-	public Map<String, Function> getFunctions() {
-		return functions;
+	
+	public JooCompiler() { }
+	
+	void setSettings(Settings settings) {
+		this.settings = settings;
 	}
 
 	/**
@@ -108,23 +125,38 @@ public class JooCompiler {
 	 */
 	@SuppressWarnings("unchecked")
 	public String compile(final String path) {
-		name = JooVirtualMachine.COMPONENTS_START;
-		operators = new ArrayList<>();
-		nativeFunctions = new ArrayList<>();
-		variables = new Map[VM_TYPES.length];
-		functions = new LinkedHashMap<String, Function>();
-		String directoryPath = getDirectoryPath(path);
-		parseConfig(directoryPath);
-		// remove all tabs they are not needed at all
-		String code = FileUtil.read(path).replaceAll("\t", "");
-		code = includeIncludes(directoryPath, code);
-		code = replaceDefines(code);
-		final String[] codeLines = getLines(code);		
-		parseVariables(codeLines);
-		parseFunctions(codeLines);
+		final String directoryPath = getDirectoryPath(path);
+
+		try {
+			
+			final String settingsPath = directoryPath + PATH_COMPILER_SETTINGS;
+			final String settingsData = FileUtil.read(settingsPath);
+			settings = parseSettings(settingsData);
+			
+			final String codePath = path;
+			final String codeData = FileUtil.read(codePath);
+			code = parseCode(codeData);
+			
+		} catch (ParseException e) {
+			System.err.println(e.getMessage() + ", Line: " + e.getErrorOffset());
+		}
+		
+//		parseConfig(directoryPath);
+		
+//		operators = new ArrayList<>();
+//		nativeFunctions = new ArrayList<>();
+//		variables = new Map[VM_TYPES.length];
+//		functions = new LinkedHashMap<String, Function>();
+//		// remove all tabs they are not needed at all
+//		String code = FileUtil.read(path).replaceAll("\t", "");
+//		code = includeIncludes(directoryPath, code);
+//		code = replaceDefines(code);
+//		final String[] codeLines = getLines(code);		
+//		parseVariables(codeLines);
+//		parseFunctions(codeLines);
 		String compiledJooCode = "";
-		compiledJooCode = writeVariablesAndFunctions(compiledJooCode);
-		compiledJooCode = writeFunctionsAndInstructions(compiledJooCode);
+//		compiledJooCode = writeVariablesAndFunctions(compiledJooCode);
+//		compiledJooCode = writeFunctionsAndInstructions(compiledJooCode);
 		return compiledJooCode;
 	}
 	
@@ -135,6 +167,435 @@ public class JooCompiler {
 			codeDirectoryPath += pathPieces[i] + File.separator;
 		}
 		return codeDirectoryPath;
+	}
+	
+	Settings parseSettings(String settingsData) throws ParseException {
+		final String[] settingsLines = getLines(settingsData);
+		final Settings settings = new Settings();
+		for (int i = 0; i < settingsLines.length; i++) {
+			String line = settingsLines[i];
+			if(line.contains(SETTINGS_TYPE_DECLARATION)) {
+				settingType = line.replace(SETTINGS_TYPE_DECLARATION, "").replace(" ", "");
+			} else {
+				Setting setting = parseSetting(line, i);
+				if (settings.hasSettingWithName(setting.getName())) {
+					throw new ParseException("Duplicate compiler setting, Name: " + setting.getName(), i);	
+				} else {
+					settings.addSetting(setting);
+				}
+			}
+		}
+		return settings;
+	}
+	
+	private Setting parseSetting(String line, int lineIndex) throws ParseException {
+		final String[] lineData = line.split(" ");
+		if(lineData.length < 2)
+			throw new ParseException("Invalid setting declaration", lineIndex);
+		final String name = lineData[1];
+		final byte byteCodeName;
+		final String type = settingType;
+		try {
+			byteCodeName = Byte.parseByte(lineData[0]);
+		} catch(NumberFormatException e) {
+			throw new ParseException("Invalid byte code name, Name: " + lineData[0], lineIndex);
+		}
+		Setting setting = new Setting(name, byteCodeName, type);
+		if(settingType.equals(TYPE_OPERATOR)) {
+			parseOperatorSetting(setting, lineData, lineIndex);
+		}
+		else if(settingType.equals(TYPE_FUNCTION)) {
+			parseFunctionSetting(setting, lineData, lineIndex);		
+		}
+		return setting;
+	}
+	
+	private void parseOperatorSetting(Setting setting, String[] operatorData, int lineIndex) throws ParseException {
+		if(operatorData.length != 3) {
+			throw new ParseException("Invalid operator declaration", lineIndex);
+		}
+		parseTypeSetting(setting, operatorData[2], lineIndex);
+	}
+	
+	private void parseFunctionSetting(Setting setting, String[] functionData, int lineIndex) throws ParseException {
+		if(functionData.length == 2)
+			return;
+		for (int i = 2; i < functionData.length; i++) {
+			// -2 so it starts at 0
+			final String paramName = "param" + (i - 2);
+			// -1 because byte code names start at 1
+			final byte paramByteCodeName = (byte) (i - 1);
+			final String paramType = TYPE_PARAMETER;
+			Setting paramSetting = new Setting(paramName, paramByteCodeName, paramType);
+			parseTypeSetting(paramSetting, functionData[i], lineIndex);
+			setting.addSetting(paramSetting);
+		}	
+	}
+	
+	private void parseTypeSetting(Setting setting, String supportedType, int lineIndex) throws ParseException {
+		final String[] supportedTypes;
+		if(supportedType.contains(KEYWORD_TYPE_SEPARATOR)) {
+			supportedTypes = supportedType.split(Pattern.quote(KEYWORD_TYPE_SEPARATOR));
+		} else {
+			supportedTypes = new String[] {supportedType};
+		}	
+		for (int i = 0; i < supportedTypes.length; i++) {
+			String type = supportedTypes[i];
+			if(typeExists(type)) {
+				Setting typeSetting = new Setting(type, toByteCodeType(type), type);
+				setting.addSetting(typeSetting);
+			} else {
+				throw new ParseException("Invalid supported type, Type: " + type, lineIndex);
+			}
+		}
+	}
+	
+	Code parseCode(String codeData) throws ParseException {
+		final String[] codeLines = getLines(codeData);
+		final Code code = new Code();
+		for (int i = 0; i < codeLines.length; i++) {
+			parseCodeComponent(code, codeLines[i], i);
+		}
+		return code;
+	}
+	
+	private void parseCodeComponent(Code code, String line, int lineIndex) throws ParseException {
+		final String[] lineData = line.split(" ");
+		boolean parsed = false;
+		if(!parsed)
+			parsed = parseVariableComponent(code, lineData, lineIndex);
+		if(!parsed)
+			parsed = parseFunctionComponent(code, lineData, lineIndex);
+		if(!parsed)
+			parsed = parseConditionComponent(code, lineData, lineIndex);
+		if(!parsed)
+			parsed = parseOperationComponent(code, lineData, lineIndex);
+		if(!parsed)
+			throw new ParseException("Invalid instruction", lineIndex);
+	}
+	
+	boolean parseVariableComponent(Code code, String[] lineData, int lineIndex) throws ParseException {
+		final String typeData = lineData[0];
+		if (typeExists(typeData)) {
+			if((lineData.length != 2) && (lineData.length != 4))
+				throw new ParseException("Invalid variable declaration", lineIndex);
+			final String name = lineData[1];
+			final byte byteCodeName = getUniqueByteCodeName();
+			final String type = toType(typeData);
+			final byte byteCodeType = toByteCodeType(type);
+			CodeComponent variable = new CodeComponent(name, byteCodeName, type, byteCodeType);
+			boolean parsed = false;
+			if(!parsed)
+				parsed = parseVariableDeclarationWithoutValue(variable, lineData, lineIndex);
+			if(!parsed)
+				parsed = parseVariableDeclarationWithValue(variable, lineData, lineIndex); 
+			code.addComponent(variable);
+		} else {
+			return false;
+		}
+		return true;
+	}
+	
+	private boolean parseVariableDeclarationWithoutValue(CodeComponent variable, String[] lineData, int lineIndex) throws ParseException {
+		if(lineData.length == 2) {
+			if(variable.getType().contains(KEYWORD_ARRAY)) {
+				final String[] typeData = lineData[0].split(KEYWORD_ARRAY);
+				final String size = typeData[1];
+				final byte byteCodeSize;
+				try {
+					byteCodeSize = (byte) (Byte.parseByte(size) + JooVirtualMachine.COMPONENTS_START);
+				} catch (NumberFormatException e) {
+					throw new ParseException("Invalid array size declaration, Size: " + size, lineIndex);
+				}
+				final CodeComponent arraySizeComponent = new CodeComponent(size, byteCodeSize, TYPE_ARRAY_SIZE, (byte)0);
+				variable.addComponent(arraySizeComponent);
+			}
+		} else {
+			return false;
+		}
+		return true;
+	}
+	
+	private boolean parseVariableDeclarationWithValue(CodeComponent variable, String[] lineData, int lineIndex) throws ParseException {
+		if(lineData.length == 4) {
+			if(variable.getType().contains(KEYWORD_ARRAY))
+				throw new ParseException("Invalid array declaration. Value can't be assigned to array", lineIndex);
+			if(lineData[2].equals(KEYWORD_VARIABLE_ASSIGN)) {
+				final CodeComponent variableValueComponent = parseValueComponent(lineData[3], variable.getType(), lineIndex);
+				variable.addComponent(variableValueComponent);
+			} else {
+				throw new ParseException("Invalid assignment operator, Operator: " + lineData[2], lineIndex);					
+			}
+		} else {
+			return false;
+		}
+		return true;
+	}
+	
+	boolean parseFunctionComponent(Code code, String[] lineData, int lineIndex) throws ParseException {
+		final String keyword = lineData[0];
+		if (keyword.equals(KEYWORD_FUNCTION)) {
+			parseFunctionDeclaration(code, lineData, lineIndex);
+		}
+		else if (keyword.equals(KEYWORD_FUNCTION_CALL)) {
+			parseFunctionCall(code, lineData, lineIndex);
+		}
+		else if (keyword.equals(KEYWORD_FUNCTION_REPEAT)) {
+			parseKeywordComponent(code, lineData, lineIndex, KEYWORD_FUNCTION_REPEAT, (byte)JooVirtualMachine.KEYWORD_FUNCTION_REPEAT);
+		}
+		else if (keyword.equals(KEYWORD_FUNCTION_END)) {
+			parseKeywordComponent(code, lineData, lineIndex, KEYWORD_FUNCTION_END, (byte)JooVirtualMachine.KEYWORD_FUNCTION);
+		} else {
+			return false;
+		}
+		return true;
+	}
+	
+	private void parseFunctionDeclaration(Code code, String[] lineData, int lineIndex) throws ParseException {
+		if(lineData.length < 2)
+			throw new ParseException("Invalid function declaration", lineIndex);
+		final String name = lineData[1];
+		final byte byteCodeName = getUniqueByteCodeName();
+		final String type = TYPE_FUNCTION;
+		final byte byteCodeType = (byte)JooVirtualMachine.KEYWORD_FUNCTION;
+		CodeComponent function = new CodeComponent(name, byteCodeName, type, byteCodeType);
+		for (int i = 2; i < lineData.length; i += 2) {
+			try {
+				final String paramName = lineData[i + 1];
+				final byte paramByteCodeName = (byte) (((i - 2) / 2) + JooVirtualMachine.COMPONENTS_START);
+				final String paramType = lineData[i];
+				final byte paramByteCodeType = toByteCodeType(paramType);
+				if(!typeExists(paramType))
+					throw new ParseException("Invalid parameter type declaration, Type: " + paramType, lineIndex);
+				CodeComponent parameter = new CodeComponent(paramName, paramByteCodeName, paramType, paramByteCodeType);
+				function.addComponent(parameter);
+			} catch(ArrayIndexOutOfBoundsException e) {
+				throw new ParseException("Invalid parameter declaration", lineIndex);
+			}
+		}
+		code.addComponent(function);
+	}
+	
+	private void parseFunctionCall(Code code, String[] lineData, int lineIndex) throws ParseException {
+		if(lineData.length < 2)
+			throw new ParseException("Invalid function call", lineIndex);
+		final String name = lineData[1];
+		final String type = KEYWORD_FUNCTION_CALL;
+		final byte byteCodeType = (byte)JooVirtualMachine.KEYWORD_FUNCTION_CALL;
+		CodeComponent functionCall = new CodeComponent(name, (byte) 0, type, byteCodeType);
+		for (int i = 2; i < lineData.length; i++) {
+			final String argumentName = lineData[i];
+			final byte argumentByteCodeName = (byte) ((i - 2) + JooVirtualMachine.COMPONENTS_START);
+			final CodeComponent variable = getVariableWithName(argumentName, code, lineIndex);
+			final String argumentType = variable.getType();
+			final byte argumentByteCodeType = variable.getByteCodeType();
+			CodeComponent argument = new CodeComponent(argumentName, argumentByteCodeName, argumentType, argumentByteCodeType);
+			functionCall.addComponent(argument);
+		}
+		code.addComponent(functionCall);
+	}
+	
+	boolean parseConditionComponent(Code code, String[] lineData, int lineIndex) throws ParseException {
+		final String keyword = lineData[0];
+		if(keyword.equals(KEYWORD_IF) || keyword.equals(KEYWORD_ELSE_IF)) {
+			parseCondition(code, lineData, lineIndex);
+		}
+		else if (keyword.equals(KEYWORD_ELSE)) {
+			parseKeywordComponent(code, lineData, lineIndex, KEYWORD_ELSE, (byte)JooVirtualMachine.KEYWORD_ELSE);
+		}
+		else if (keyword.equals(KEYWORD_IF_END)) {
+			parseKeywordComponent(code, lineData, lineIndex, KEYWORD_IF_END, (byte)JooVirtualMachine.KEYWORD_IF);
+		} else {
+			return false;
+		}
+		return true;
+	}
+	
+	private void parseCondition(Code code, String[] lineData, int lineIndex) throws ParseException {
+		if(lineData.length != 4)
+			throw new ParseException("Invalid condition declaration", lineIndex);
+		final String name = lineData[2];
+		if(!settings.hasSettingWithName(name))
+			throw new ParseException("Invalid comparison operator, Operator: " + name, lineIndex);				
+		final byte byteCodeName = settings.getSettingWithName(name).getByteCodeName();
+		final String type = lineData[0];
+		final byte byteCodeType = (byte) (type.equals(KEYWORD_IF) ? JooVirtualMachine.KEYWORD_IF : JooVirtualMachine.KEYWORD_ELSE_IF);
+		CodeComponent condition = new CodeComponent(name, byteCodeName, type, byteCodeType);
+		final String variable0Data = lineData[1];
+		final CodeComponent variable0 = parseVariableComponent(variable0Data, code, lineIndex);
+		condition.addComponent(variable0);
+		final String variable1Data = lineData[3];
+		try {
+			final CodeComponent variable1 = parseVariableComponent(variable1Data, code, lineIndex);
+			condition.addComponent(variable1);
+		} catch (ParseException e) { // if a exception is thrown it's not a variable so it has to be a value
+			final CodeComponent value = parseValueComponent(variable1Data, variable0.getType(), lineIndex);
+			condition.addComponent(value);
+		}
+		code.addComponent(condition);
+	}
+	
+	boolean parseOperationComponent(Code code, String[] lineData, int lineIndex) throws ParseException {
+		if (lineData.length == 3) {
+			final String name = lineData[1];
+			if(!settings.hasSettingWithName(name))
+				throw new ParseException("Invalid operator, Operator: " + name, lineIndex);				
+			final byte byteCodeName = settings.getSettingWithName(name).getByteCodeName();
+			final String type = TYPE_OPERATOR;
+			CodeComponent operation = new CodeComponent(name, byteCodeName, type, (byte) 0);
+			final String variable0Data = lineData[0];
+			final CodeComponent variable0 = parseVariableComponent(variable0Data, code, lineIndex);
+			operation.addComponent(variable0);
+			final String variable1Data = lineData[2];
+			try {
+				final CodeComponent variable1 = parseVariableComponent(variable1Data, code, lineIndex);
+				operation.addComponent(variable1);
+			} catch (ParseException e) { // if a exception is thrown it's not a variable so it has to be a value
+				final CodeComponent value = parseValueComponent(variable1Data, variable0.getType(), lineIndex);
+				operation.addComponent(value);
+			}
+			code.addComponent(operation);
+		} else {
+			return false;
+		}
+		return true;
+	}
+	
+	private void parseKeywordComponent(Code code, String[] lineData, int lineIndex, String name, byte byteCodeName) throws ParseException {
+		if(lineData.length > 1)
+			throw new ParseException("Invalid instruction", lineIndex);
+		CodeComponent keyword = new CodeComponent(name, byteCodeName, name, byteCodeName);
+		code.addComponent(keyword);
+	}
+	
+	private CodeComponent parseVariableComponent(String data, Code code, int lineIndex) throws ParseException {
+		String name = data;
+		CodeComponent arrayIndex = null;
+		if(data.contains(KEYWORD_ARRAY)) {
+			final String[] arrayData = data.split(KEYWORD_ARRAY);
+			final String index = arrayData[1];
+			name = arrayData[0];
+			try {
+				final byte byteCodeIndex = (byte) (Byte.parseByte(index) + JooVirtualMachine.COMPONENTS_START);
+				arrayIndex = new CodeComponent(index, byteCodeIndex, KEYWORD_ARRAY, (byte)0);
+			} catch (NumberFormatException e1) {
+				try {
+					arrayIndex = getVariableWithName(index, code, lineIndex);
+				} catch (ParseException e2) {
+					throw new ParseException("Invalid array index, Index: " + index, lineIndex);					
+				}
+			}
+		}
+		final CodeComponent declaredVariable = getVariableWithName(name, code, lineIndex);
+		final CodeComponent variable = declaredVariable.clone();
+		if(arrayIndex != null) {
+			if(!isArray(declaredVariable.getType()))
+				throw new ParseException("A variable that is not of type array has an index, Name: " + name, lineIndex);
+			variable.addComponent(arrayIndex);
+		}
+		return variable;
+	}
+	
+	private CodeComponent getVariableWithName(String name, Code code, int lineIndex) throws ParseException {
+		CodeComponent variable = null;
+		if(code.hasComponentWithName(name)) {
+			variable = code.getComponentWithName(name);
+		} else {
+			for (CodeComponent instruction : code.getComponents()) {
+				if(instruction.hasType(TYPE_FUNCTION)) {
+					if(instruction.hasComponentWithName(name)) {
+						variable = instruction.getComponentWithName(name);
+					}
+				}
+			}
+		}
+		if(variable == null)
+			throw new ParseException("Invalid variable, Name: " + name, lineIndex);		
+		return variable;
+	}
+	
+	private CodeComponent parseValueComponent(String rawValue, String type, int lineIndex) throws ParseException {
+		String value = "";
+		String valueType = "";
+		if(rawValue.contains(KEYWORD_CHAR)) {
+			valueType = TYPE_CHAR;
+			char[] valueData = rawValue.toCharArray();
+			if(valueData.length != 3)
+				throw new ParseException("Invalid char value declaration", lineIndex);
+			value = "" + (int)valueData[1];
+		}
+		else if(rawValue.equals(KEYWORD_TRUE) || rawValue.equals(KEYWORD_FALSE)) {
+			valueType = TYPE_BOOL;
+			value = rawValue.equals(KEYWORD_TRUE) ? "1" : "0";
+		} else {
+			try {
+				valueType = type;
+				double number = Double.parseDouble(rawValue);
+				if(type.equals(TYPE_FIXED))
+					number *= FIXED_POINT;
+				value = "" + Math.round(number);
+			} catch (NumberFormatException e) {
+				throw new ParseException("The declared value type doesn't match the variable type", lineIndex);					
+			}
+		}
+		final byte byteCodeValueType = toByteCodeType(valueType);
+		return new CodeComponent(value, (byte)0, valueType, byteCodeValueType);
+	}
+	
+	private byte getUniqueByteCodeName() {
+		return (byte) ((uniqueByteCodeName++) + JooVirtualMachine.COMPONENTS_START);
+	}
+	
+	private boolean typeExists(String type) {
+		type = toType(type);
+		return type.equals(TYPE_INT) || type.equals(TYPE_FIXED)
+				|| type.equals(TYPE_BOOL) || type.equals(TYPE_CHAR)
+				|| type.equals(TYPE_ARRAY_INT) || type.equals(TYPE_ARRAY_FIXED)
+				|| type.equals(TYPE_ARRAY_BOOL) || type.equals(TYPE_ARRAY_CHAR);
+	}
+	
+	private boolean isArray(String type) {
+		type = toType(type);
+		return type.equals(TYPE_ARRAY_INT) || type.equals(TYPE_ARRAY_FIXED)
+				|| type.equals(TYPE_ARRAY_BOOL) || type.equals(TYPE_ARRAY_CHAR);
+	}
+	
+	private byte toByteCodeType(String type) {
+		type = toType(type);
+		if(type.equals(TYPE_INT)) {
+			return JooVirtualMachine.TYPE_INT;
+		}
+		else if(type.equals(TYPE_FIXED)) {
+			return JooVirtualMachine.TYPE_FIXED;
+		}
+		else if(type.equals(TYPE_BOOL)) {
+			return JooVirtualMachine.TYPE_BOOL;
+		}
+		else if(type.equals(TYPE_CHAR)) {
+			return JooVirtualMachine.TYPE_CHAR;
+		}
+		else if(type.equals(TYPE_ARRAY_INT)) {
+			return JooVirtualMachine.TYPE_ARRAY_INT;
+		}
+		else if(type.equals(TYPE_ARRAY_FIXED)) {
+			return JooVirtualMachine.TYPE_ARRAY_FIXED;
+		}
+		else if(type.equals(TYPE_ARRAY_BOOL)) {
+			return JooVirtualMachine.TYPE_ARRAY_BOOL;
+		}
+		else if(type.equals(TYPE_ARRAY_CHAR)) {
+			return JooVirtualMachine.TYPE_ARRAY_CHAR;
+		}
+		return -1;
+	}
+	
+	private String toType(String type) {
+		// Remove the number after the array keyword if there is one
+		if(type.contains(KEYWORD_ARRAY)) {
+			return type.split(KEYWORD_ARRAY)[0] + KEYWORD_ARRAY;
+		} else {
+			return type;
+		}
 	}
 	
 	String includeIncludes(String directoryPath, String code) {
@@ -187,12 +648,12 @@ public class JooCompiler {
 	}
 	
 	void parseConfig(String directoryPath) {
-		directoryPath += PATH_COMPILER_CONFIG;
+		directoryPath += PATH_COMPILER_SETTINGS;
 		final String config;
 		if(FileUtil.fileExists(directoryPath)) {
 			config = FileUtil.read(directoryPath);
 		} else {
-			config = FileUtil.read(PATH_COMPILER_CONFIG);
+			config = FileUtil.read(PATH_COMPILER_SETTINGS);
 		}
 		final String[] configLines = getLines(config);
 		int currentType = -1;
@@ -263,9 +724,47 @@ public class JooCompiler {
 	 * @param code
 	 * @return string array of code lines. 
 	 */
-	String[] getLines(final String code) {
-		return code.replace("\r", "").split(LINE_BREAK);
+	String[] getLines(String code) {
+		code = code.replace("\t", "");
+		code = code.replace("\r", "");
+		String[] rawCodeLines = code.split(LINE_BREAK);
+		List<String> codeLines = new ArrayList<String>();
+		for (String line : rawCodeLines) {
+			if(!line.isEmpty()) {
+				if(line.contains(KEYWORD_COMMENT)) {
+					String[] lineData = line.split(KEYWORD_COMMENT);
+					if(lineData[0].isEmpty()) { // does this line only contain a comment?
+						continue;
+					} else { // extract the code before the comment
+						line = lineData[0];
+					}
+				}
+				codeLines.add(line);
+			}
+		}
+		return codeLines.toArray(new String[0]);
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	/**
 	 * This method parses variables and arrays of all types in the joo code lines. 
@@ -934,7 +1433,7 @@ public class JooCompiler {
 	
 	private String toVirtualMachineNumber(String value) {
 		// replace default number characters with other virtual machine ones
-		for (int i = 0; i < 9; i++) {
+		for (int i = 0; i <= 9; i++) {
 			value = value.replace((char)('0' + i), (char)(JooVirtualMachine.NUMBER_0 + i));
 		}
 		return value;

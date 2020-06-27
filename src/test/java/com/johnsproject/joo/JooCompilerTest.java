@@ -1,14 +1,641 @@
 package com.johnsproject.joo;
 
+import java.text.ParseException;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+
+import com.johnsproject.joo.util.FileUtil;
 
 import static com.johnsproject.joo.JooCompiler.*;
 import static org.junit.Assert.assertEquals;
 
 public class JooCompilerTest {
 
+	@Test
+	public void parseSettingsTest() throws Exception {
+		final String settingsData = FileUtil.read(PATH_COMPILER_SETTINGS);
+		final JooCompiler compiler = new JooCompiler();
+		final Settings settings = compiler.parseSettings(settingsData);
+		assert(settings.hasSettingWithName("<="));
+		assert(settings.getSettingWithName("<=").hasName((byte)1));
+		assert(settings.getSettingWithName("<=").hasSettingWithType(TYPE_INT));
+		assert(settings.getSettingWithName("<=").hasSettingWithType(TYPE_FIXED));
+		assert(settings.hasSettingWithName("=="));
+		assert(settings.getSettingWithName("==").hasName((byte)5));
+		assert(settings.getSettingWithName("==").hasSettingWithType(TYPE_INT));
+		assert(settings.getSettingWithName("==").hasSettingWithType(TYPE_FIXED));
+		assert(settings.getSettingWithName("==").hasSettingWithType(TYPE_BOOL));
+		assert(settings.getSettingWithName("==").hasSettingWithType(TYPE_CHAR));
+		assert(settings.hasSettingWithName("%"));
+		assert(settings.getSettingWithName("%").hasName((byte)15));
+		assert(settings.getSettingWithName("%").hasSettingWithType(TYPE_INT));
+
+		assert(settings.hasSettingWithName("Graphics_HasOutputSupport"));
+		assert(settings.getSettingWithName("Graphics_HasOutputSupport").hasName((byte)1));
+		assert(settings.getSettingWithName("Graphics_HasOutputSupport").getSettingWithName("param0").hasSettingWithType(TYPE_BOOL));
+		assert(settings.hasSettingWithName("Graphics_SetColor"));
+		assert(settings.getSettingWithName("Graphics_SetColor").hasName((byte)2));
+		assert(settings.getSettingWithName("Graphics_SetColor").getSettingWithName("param0").hasSettingWithType(TYPE_INT));
+		assert(settings.getSettingWithName("Graphics_SetColor").getSettingWithName("param1").hasSettingWithType(TYPE_INT));
+		assert(settings.getSettingWithName("Graphics_SetColor").getSettingWithName("param2").hasSettingWithType(TYPE_INT));
+		assert(settings.hasSettingWithName("Math_Max"));
+		assert(settings.getSettingWithName("Math_Max").hasName((byte)22));
+		assert(settings.getSettingWithName("Math_Max").getSettingWithName("param0").hasSettingWithType(TYPE_INT));
+		assert(settings.getSettingWithName("Math_Max").getSettingWithName("param0").hasSettingWithType(TYPE_FIXED));
+		assert(settings.getSettingWithName("Math_Max").getSettingWithName("param1").hasSettingWithType(TYPE_INT));
+		assert(settings.getSettingWithName("Math_Max").getSettingWithName("param1").hasSettingWithType(TYPE_FIXED));
+		assert(settings.getSettingWithName("Math_Max").getSettingWithName("param2").hasSettingWithType(TYPE_INT));
+		assert(settings.getSettingWithName("Math_Max").getSettingWithName("param2").hasSettingWithType(TYPE_FIXED));
+		assert(settings.hasSettingWithName("Storage_Clear"));
+		assert(settings.getSettingWithName("Storage_Clear").hasName((byte)35));
+		assert(!settings.getSettingWithName("Storage_Clear").hasSettingWithName("param0"));
+		
+		ParseException exception = null;
+		try {
+			final String testSettings = "@OPERATOR" + "\n"
+										+ "01 + int|fixed" + "\n"
+										+ "02 + int|fixed";
+			compiler.parseSettings(testSettings);
+		} catch (ParseException e) {
+			// if the assert is here the test will pass if no exception is thrown
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Duplicate compiler setting, Name: +");
+		
+		try {
+			final String testSettings = "@FUNCTION" + "\n"
+										+ "MyFunction";
+			compiler.parseSettings(testSettings);
+		} catch (ParseException e) {
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid setting declaration");
+		
+		try {
+			final String testSettings = "@OPERATOR" + "\n"
+										+ "0A + int|fixed";
+			compiler.parseSettings(testSettings);
+		} catch (ParseException e) {
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid byte code name, Name: 0A");
+		
+		try {
+			final String testSettings = "@OPERATOR" + "\n"
+										+ "01 + int|fixed A";
+			compiler.parseSettings(testSettings);
+		} catch (ParseException e) {
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid operator declaration");
+		
+		try {
+			final String testSettings = "@FUNCTION" + "\n"
+										+ "01 MyFunction bug";
+			compiler.parseSettings(testSettings);
+		} catch (ParseException e) {
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid supported type, Type: bug");
+	}
+	
+	@Test
+	public void parseVariableComponentTest() throws Exception {
+		final JooCompiler compiler = new JooCompiler();
+		String[] testCode;
+		Code code;
+		
+		testCode = new String[] {"int", "test", "=", "10"};
+		code = new Code();
+		compiler.parseVariableComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("test"));
+		assert(code.getComponentWithName("test").hasName((byte) 1));
+		assert(code.getComponentWithName("test").hasType(TYPE_INT));
+		assert(code.getComponentWithName("test").hasComponentWithName("10"));
+		assert(code.getComponentWithName("test").getComponentWithName("10").hasType(TYPE_INT));
+		
+		testCode = new String[] {"fixed", "test", "=", "20.5"};
+		code = new Code();
+		compiler.parseVariableComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("test"));
+		assert(code.getComponentWithName("test").hasName((byte) 2));
+		assert(code.getComponentWithName("test").hasType(TYPE_FIXED));
+		assert(code.getComponentWithName("test").hasComponentWithName("5228"));
+		assert(code.getComponentWithName("test").getComponentWithName("5228").hasType(TYPE_FIXED));
+		
+		testCode = new String[] {"bool", "test", "=", "true"};
+		code = new Code();
+		compiler.parseVariableComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("test"));
+		assert(code.getComponentWithName("test").hasName((byte) 3));
+		assert(code.getComponentWithName("test").hasType(TYPE_BOOL));
+		assert(code.getComponentWithName("test").hasComponentWithName("1"));
+		assert(code.getComponentWithName("test").getComponentWithName("1").hasType(TYPE_BOOL));
+		
+		testCode = new String[] {"bool", "test", "=", "false"};
+		code = new Code();
+		compiler.parseVariableComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("test"));
+		assert(code.getComponentWithName("test").hasName((byte) 4));
+		assert(code.getComponentWithName("test").hasType(TYPE_BOOL));
+		assert(code.getComponentWithName("test").hasComponentWithName("0"));
+		assert(code.getComponentWithName("test").getComponentWithName("0").hasType(TYPE_BOOL));
+		
+		testCode = new String[] {"char", "test", "=", "'A'"};
+		code = new Code();
+		compiler.parseVariableComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("test"));
+		assert(code.getComponentWithName("test").hasName((byte) 5));
+		assert(code.getComponentWithName("test").hasType(TYPE_CHAR));
+		assert(code.getComponentWithName("test").hasComponentWithName("65"));
+		assert(code.getComponentWithName("test").getComponentWithName("65").hasType(TYPE_CHAR));
+		
+		testCode = new String[] {"int", "test"};
+		code = new Code();
+		compiler.parseVariableComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("test"));
+		assert(code.getComponentWithName("test").hasName((byte) 6));
+		assert(code.getComponentWithName("test").hasType(TYPE_INT));
+		assert(!code.getComponentWithName("test").hasComponentWithName("10"));
+		
+		testCode = new String[] {"int:10", "test"};
+		code = new Code();
+		compiler.parseVariableComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("test"));
+		assert(code.getComponentWithName("test").hasName((byte) 7));
+		assert(code.getComponentWithName("test").hasType(TYPE_ARRAY_INT));
+		assert(code.getComponentWithName("test").hasComponentWithName("10"));
+		assert(code.getComponentWithName("test").getComponentWithName("10").hasType(TYPE_ARRAY_SIZE));
+		
+		ParseException exception = null;
+		try {
+			testCode = new String[] {"int", "test", "="};
+			compiler.parseVariableComponent(code, testCode, 0);
+		} catch (ParseException e) {
+			// if the assert is here the test will pass if no exception is thrown
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid variable declaration");
+		
+		try {
+			testCode = new String[] {"int:A", "test"};
+			compiler.parseVariableComponent(code, testCode, 0);
+		} catch (ParseException e) {
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid array size declaration, Size: A");
+		
+		try {
+			testCode = new String[] {"int:15", "test", "=", "10"};
+			compiler.parseVariableComponent(code, testCode, 0);
+		} catch (ParseException e) {
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid array declaration. Value can't be assigned to array");
+		
+		try {
+			testCode = new String[] {"int", "test", "-", "10"};
+			compiler.parseVariableComponent(code, testCode, 0);
+		} catch (ParseException e) {
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid assignment operator, Operator: -");
+		
+		try {
+			testCode = new String[] {"char", "test", "=", "'A''"};
+			compiler.parseVariableComponent(code, testCode, 0);
+		} catch (ParseException e) {
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid char value declaration");
+		
+		try {
+			testCode = new String[] {"int", "test", "=", "A"};
+			compiler.parseVariableComponent(code, testCode, 0);
+		} catch (ParseException e) {
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "The declared value type doesn't match the variable type");
+	}
+	
+	@Test
+	public void parseFunctionComponentTest() throws Exception {
+		final JooCompiler compiler = new JooCompiler();
+		String[] testCode;
+		Code code;
+		
+		testCode = new String[] {"repeatFunction"};
+		code = new Code();
+		compiler.parseFunctionComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("repeatFunction"));
+		assert(code.getComponentWithName("repeatFunction").hasType(KEYWORD_FUNCTION_REPEAT));
+		
+		testCode = new String[] {"endFunction"};
+		code = new Code();
+		compiler.parseFunctionComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("endFunction"));
+		assert(code.getComponentWithName("endFunction").hasType(KEYWORD_FUNCTION_END));
+		
+		testCode = new String[] {"function", "Test"};
+		code = new Code();
+		compiler.parseFunctionComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("Test"));
+		assert(code.getComponentWithName("Test").hasName((byte) 1));
+		assert(code.getComponentWithName("Test").hasType(TYPE_FUNCTION));
+		
+		testCode = new String[] {"function", "Test", "int", "param0", "fixed", "param1"};
+		code = new Code();
+		compiler.parseFunctionComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("Test"));
+		assert(code.getComponentWithName("Test").hasName((byte) 2));
+		assert(code.getComponentWithName("Test").hasType(TYPE_FUNCTION));
+		assert(code.getComponentWithName("Test").hasComponentWithName("param0"));
+		assert(code.getComponentWithName("Test").getComponentWithName("param0").hasName((byte) 1));
+		assert(code.getComponentWithName("Test").getComponentWithName("param0").hasType(TYPE_INT));
+		assert(code.getComponentWithName("Test").hasComponentWithName("param1"));
+		assert(code.getComponentWithName("Test").getComponentWithName("param1").hasName((byte) 2));
+		assert(code.getComponentWithName("Test").getComponentWithName("param1").hasType(TYPE_FIXED));
+		
+		testCode = new String[] {"call", "Test"};
+		code = new Code();
+		compiler.parseFunctionComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("Test"));
+		assert(code.getComponentWithName("Test").hasType(KEYWORD_FUNCTION_CALL));
+		
+		testCode = new String[] {"call", "Test", "variable0", "variable1"};
+		code = new Code();
+		code.addComponent(new CodeComponent("variable0", (byte) 1, TYPE_INT, (byte )JooVirtualMachine.TYPE_INT));
+		code.addComponent(new CodeComponent("variable1", (byte) 2, TYPE_FIXED, (byte )JooVirtualMachine.TYPE_FIXED));
+		compiler.parseFunctionComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("Test"));
+		assert(code.getComponentWithName("Test").hasType(KEYWORD_FUNCTION_CALL));
+		assert(code.getComponentWithName("Test").hasComponentWithName("variable0"));
+		assert(code.getComponentWithName("Test").getComponentWithName("variable0").hasName((byte) 1));
+		assert(code.getComponentWithName("Test").getComponentWithName("variable0").hasType(TYPE_INT));
+		assert(code.getComponentWithName("Test").hasComponentWithName("variable1"));
+		assert(code.getComponentWithName("Test").getComponentWithName("variable1").hasName((byte) 2));
+		assert(code.getComponentWithName("Test").getComponentWithName("variable1").hasType(TYPE_FIXED));
+		
+		ParseException exception = null;
+		try {
+			testCode = new String[] {"function"};
+			compiler.parseFunctionComponent(code, testCode, 0);
+		} catch (ParseException e) {
+			// if the assert is here the test will pass if no exception is thrown
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid function declaration");
+		
+		try {
+			testCode = new String[] {"function", "Test", "a", "param0", "fixed", "param1"};
+			compiler.parseFunctionComponent(code, testCode, 0);
+		} catch (ParseException e) {
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid parameter type declaration, Type: a");
+		
+		try {
+			testCode = new String[] {"function", "Test", "int", "param0", "param1"};
+			compiler.parseFunctionComponent(code, testCode, 0);
+		} catch (ParseException e) {
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid parameter declaration");
+		
+		try {
+			testCode = new String[] {"call"};
+			compiler.parseFunctionComponent(code, testCode, 0);
+		} catch (ParseException e) {
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid function call");
+		
+		try {
+			// if argument is a unknown variable
+			testCode = new String[] {"call", "Test", "variable2"};
+			compiler.parseFunctionComponent(code, testCode, 0);
+		} catch (ParseException e) {
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid variable, Name: variable2");
+	}
+	
+	@Test
+	public void parseConditionComponentTest() throws Exception {
+		final String settingsData = FileUtil.read(PATH_COMPILER_SETTINGS);
+		final JooCompiler compiler = new JooCompiler();
+		final Settings settings = compiler.parseSettings(settingsData);
+		String[] testCode;
+		Code code;
+		
+		compiler.setSettings(settings);
+		
+		testCode = new String[] {"else"};
+		code = new Code();
+		compiler.parseConditionComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("else"));
+		assert(code.getComponentWithName("else").hasType(KEYWORD_ELSE));
+		
+		testCode = new String[] {"endIf"};
+		code = new Code();
+		compiler.parseConditionComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("endIf"));
+		assert(code.getComponentWithName("endIf").hasType(KEYWORD_IF_END));
+		
+		testCode = new String[] {"elseIf", "variable0", "==", "variable1"};
+		code = new Code();
+		code.addComponent(new CodeComponent("variable0", (byte) 1, TYPE_INT, (byte )JooVirtualMachine.TYPE_INT));
+		code.addComponent(new CodeComponent("variable1", (byte) 2, TYPE_FIXED, (byte )JooVirtualMachine.TYPE_FIXED));
+		compiler.parseConditionComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("=="));
+		assert(code.getComponentWithName("==").hasName((byte) 5));
+		assert(code.getComponentWithName("==").hasType(KEYWORD_ELSE_IF));
+		assert(code.getComponentWithName("==").hasComponentWithName("variable0"));
+		assert(code.getComponentWithName("==").getComponentWithName("variable0").hasName((byte) 1));
+		assert(code.getComponentWithName("==").getComponentWithName("variable0").hasType(TYPE_INT));
+		assert(code.getComponentWithName("==").hasComponentWithName("variable1"));
+		assert(code.getComponentWithName("==").getComponentWithName("variable1").hasName((byte) 2));
+		assert(code.getComponentWithName("==").getComponentWithName("variable1").hasType(TYPE_FIXED));
+		
+		testCode = new String[] {"if", "variable0", "==", "variable1"};
+		code = new Code();
+		code.addComponent(new CodeComponent("variable0", (byte) 1, TYPE_INT, (byte )JooVirtualMachine.TYPE_INT));
+		code.addComponent(new CodeComponent("variable1", (byte) 2, TYPE_FIXED, (byte )JooVirtualMachine.TYPE_FIXED));
+		compiler.parseConditionComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("=="));
+		assert(code.getComponentWithName("==").hasName((byte) 5));
+		assert(code.getComponentWithName("==").hasType(KEYWORD_IF));
+		assert(code.getComponentWithName("==").hasComponentWithName("variable0"));
+		assert(code.getComponentWithName("==").getComponentWithName("variable0").hasName((byte) 1));
+		assert(code.getComponentWithName("==").getComponentWithName("variable0").hasType(TYPE_INT));
+		assert(code.getComponentWithName("==").hasComponentWithName("variable1"));
+		assert(code.getComponentWithName("==").getComponentWithName("variable1").hasName((byte) 2));
+		assert(code.getComponentWithName("==").getComponentWithName("variable1").hasType(TYPE_FIXED));
+		
+		testCode = new String[] {"if", "variable0:10", "==", "variable1:5"};
+		code = new Code();
+		code.addComponent(new CodeComponent("variable0", (byte) 1, TYPE_ARRAY_INT, (byte )JooVirtualMachine.TYPE_ARRAY_INT));
+		code.addComponent(new CodeComponent("variable1", (byte) 2, TYPE_ARRAY_FIXED, (byte )JooVirtualMachine.TYPE_ARRAY_FIXED));
+		compiler.parseConditionComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("=="));
+		assert(code.getComponentWithName("==").hasName((byte) 5));
+		assert(code.getComponentWithName("==").hasType(KEYWORD_IF));
+		assert(code.getComponentWithName("==").hasComponentWithName("variable0"));
+		assert(code.getComponentWithName("==").getComponentWithName("variable0").hasName((byte) 1));
+		assert(code.getComponentWithName("==").getComponentWithName("variable0").hasType(TYPE_ARRAY_INT));
+		assert(code.getComponentWithName("==").getComponentWithName("variable0").hasComponentWithName("10"));
+		assert(code.getComponentWithName("==").getComponentWithName("variable0").hasComponentWithName((byte) 11));
+		assert(code.getComponentWithName("==").hasComponentWithName("variable1"));
+		assert(code.getComponentWithName("==").getComponentWithName("variable1").hasName((byte) 2));
+		assert(code.getComponentWithName("==").getComponentWithName("variable1").hasType(TYPE_ARRAY_FIXED));
+		assert(code.getComponentWithName("==").getComponentWithName("variable1").hasComponentWithName("5"));
+		assert(code.getComponentWithName("==").getComponentWithName("variable1").hasComponentWithName((byte) 6));
+		
+		testCode = new String[] {"if", "variable0:variable1", "==", "150"};
+		code = new Code();
+		code.addComponent(new CodeComponent("variable0", (byte) 1, TYPE_ARRAY_INT, (byte )JooVirtualMachine.TYPE_ARRAY_INT));
+		code.addComponent(new CodeComponent("variable1", (byte) 2, TYPE_INT, (byte )JooVirtualMachine.TYPE_INT));
+		compiler.parseConditionComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("=="));
+		assert(code.getComponentWithName("==").hasName((byte) 5));
+		assert(code.getComponentWithName("==").hasType(KEYWORD_IF));
+		assert(code.getComponentWithName("==").hasComponentWithName("variable0"));
+		assert(code.getComponentWithName("==").getComponentWithName("variable0").hasName((byte) 1));
+		assert(code.getComponentWithName("==").getComponentWithName("variable0").hasType(TYPE_ARRAY_INT));
+		assert(code.getComponentWithName("==").getComponentWithName("variable0").hasComponentWithName("variable1"));
+		assert(code.getComponentWithName("==").getComponentWithName("variable0").hasComponentWithName((byte) 2));
+		assert(code.getComponentWithName("==").hasComponentWithName("150"));
+		assert(code.getComponentWithName("==").getComponentWithName("150").hasType(TYPE_ARRAY_INT));
+	
+		ParseException exception = null;
+		try {
+			testCode = new String[] {"if", "variable0", "==", "variable1", "A"};
+			compiler.parseConditionComponent(code, testCode, 0);
+		} catch (ParseException e) {
+			// if the assert is here the test will pass if no exception is thrown
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid condition declaration");
+		
+		try {
+			testCode = new String[] {"if", "variable0", "A", "variable1"};
+			compiler.parseConditionComponent(code, testCode, 0);
+		} catch (ParseException e) {
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid comparison operator, Operator: A");
+		
+		try {
+			testCode = new String[] {"if", "variable0:a", "==", "variable1"};
+			compiler.parseConditionComponent(code, testCode, 0);
+		} catch (ParseException e) {
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid array index, Index: a");
+		
+		try {
+			testCode = new String[] {"if", "variable1:5", "==", "variable0"};
+			compiler.parseConditionComponent(code, testCode, 0);
+		} catch (ParseException e) {
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "A variable that is not of type array has an index, Name: variable1");
+	}
+	
+	@Test
+	public void parseOperationComponentTest() throws Exception {
+		final String settingsData = FileUtil.read(PATH_COMPILER_SETTINGS);
+		final JooCompiler compiler = new JooCompiler();
+		final Settings settings = compiler.parseSettings(settingsData);
+		String[] testCode;
+		Code code;
+		
+		compiler.setSettings(settings);
+		
+		// no need to test every possibility here as it's already tested in parseConditionComponent
+		testCode = new String[] {"variable0", "=", "variable1"};
+		code = new Code();
+		code.addComponent(new CodeComponent("variable0", (byte) 1, TYPE_INT, (byte )JooVirtualMachine.TYPE_INT));
+		code.addComponent(new CodeComponent("variable1", (byte) 2, TYPE_FIXED, (byte )JooVirtualMachine.TYPE_FIXED));
+		compiler.parseOperationComponent(code, testCode, 0);
+		assert(code.hasComponentWithName("="));
+		assert(code.getComponentWithName("=").hasName((byte) 7));
+		assert(code.getComponentWithName("=").hasType(TYPE_OPERATOR));
+		assert(code.getComponentWithName("=").hasComponentWithName("variable0"));
+		assert(code.getComponentWithName("=").getComponentWithName("variable0").hasName((byte) 1));
+		assert(code.getComponentWithName("=").getComponentWithName("variable0").hasType(TYPE_INT));
+		assert(code.getComponentWithName("=").hasComponentWithName("variable1"));
+		assert(code.getComponentWithName("=").getComponentWithName("variable1").hasName((byte) 2));
+		assert(code.getComponentWithName("=").getComponentWithName("variable1").hasType(TYPE_FIXED));
+	
+		ParseException exception = null;
+		try {
+			testCode = new String[] {"variable0", "a", "variable1"};
+			compiler.parseOperationComponent(code, testCode, 0);
+		} catch (ParseException e) {
+			// if the assert is here the test will pass if no exception is thrown
+			exception = e;
+		}
+		assertEquals(exception.getMessage(), "Invalid operator, Operator: a");
+	}
+	
+	@Test
+	public void parseCodeTest() throws Exception {
+		final String settingsData = FileUtil.read(PATH_COMPILER_SETTINGS);
+		final JooCompiler compiler = new JooCompiler();
+		final Settings settings = compiler.parseSettings(settingsData);
+		
+		compiler.setSettings(settings);
+		
+		final String testCode = 
+				"	# This is a comment			" + "\n" +
+				"	int int0 = 10 # comment		" + "\n" +
+				"	fixed fixed0 = 10.5			" + "\n" +
+				"	bool bool0 = true			" + "\n" +
+				"	char char0 = 'a'			" + "\n" +
+				"	int:10 intArray				" + "\n" +
+				"	fixed:15 fixedArray			" + "\n" +
+				"	bool:5 boolArray			" + "\n" +
+				"	char:7 charArray			" + "\n" +
+				"	function Start				" + "\n" +
+				"		if int0 == 5			" + "\n" +
+				"			int0 + 5			" + "\n" +
+				"		elseIf fixed0 == 10.5	" + "\n" +
+				"			fixed0 + 1.5		" + "\n" +
+				"		else					" + "\n" +
+				"			bool0 = false		" + "\n" +
+				"		endIf					" + "\n" +
+				"	endFunction					" + "\n"
+		;
+		
+		final Code code = compiler.parseCode(testCode);
+		
+		int line = 0;
+		assert(code.getComponent(line).hasName("int0"));
+		assert(code.getComponent(line).hasName((byte) 1));
+		assert(code.getComponent(line).hasType(TYPE_INT));
+		assert(code.getComponent(line).hasComponentWithName("10"));
+		assert(code.getComponent(line).getComponentWithName("10").hasType(TYPE_INT));
+
+		line++;
+		assert(code.getComponent(line).hasName("fixed0"));
+		assert(code.getComponent(line).hasName((byte) 2));
+		assert(code.getComponent(line).hasType(TYPE_FIXED));
+		assert(code.getComponent(line).hasComponentWithName("2678"));
+		assert(code.getComponent(line).getComponentWithName("2678").hasType(TYPE_FIXED));
+
+		line++;
+		assert(code.getComponent(line).hasName("bool0"));
+		assert(code.getComponent(line).hasName((byte) 3));
+		assert(code.getComponent(line).hasType(TYPE_BOOL));
+		assert(code.getComponent(line).hasComponentWithName("1"));
+		assert(code.getComponent(line).getComponentWithName("1").hasType(TYPE_BOOL));
+
+		line++;
+		assert(code.getComponent(line).hasName("char0"));
+		assert(code.getComponent(line).hasName((byte) 4));
+		assert(code.getComponent(line).hasType(TYPE_CHAR));
+		assert(code.getComponent(line).hasComponentWithName("97"));
+		assert(code.getComponent(line).getComponentWithName("97").hasType(TYPE_CHAR));
+
+		line++;
+		assert(code.getComponent(line).hasName("intArray"));
+		assert(code.getComponent(line).hasName((byte) 5));
+		assert(code.getComponent(line).hasType(TYPE_ARRAY_INT));
+		assert(code.getComponent(line).hasComponentWithName("10"));
+		assert(code.getComponent(line).getComponentWithName("10").hasType(TYPE_ARRAY_SIZE));
+
+		line++;
+		assert(code.getComponent(line).hasName("fixedArray"));
+		assert(code.getComponent(line).hasName((byte) 6));
+		assert(code.getComponent(line).hasType(TYPE_ARRAY_FIXED));
+		assert(code.getComponent(line).hasComponentWithName("15"));
+		assert(code.getComponent(line).getComponentWithName("15").hasType(TYPE_ARRAY_SIZE));
+
+		line++;
+		assert(code.getComponent(line).hasName("boolArray"));
+		assert(code.getComponent(line).hasName((byte) 7));
+		assert(code.getComponent(line).hasType(TYPE_ARRAY_BOOL));
+		assert(code.getComponent(line).hasComponentWithName("5"));
+		assert(code.getComponent(line).getComponentWithName("5").hasType(TYPE_ARRAY_SIZE));
+
+		line++;
+		assert(code.getComponent(line).hasName("charArray"));
+		assert(code.getComponent(line).hasName((byte) 8));
+		assert(code.getComponent(line).hasType(TYPE_ARRAY_CHAR));
+		assert(code.getComponent(line).hasComponentWithName("7"));
+		assert(code.getComponent(line).getComponentWithName("7").hasType(TYPE_ARRAY_SIZE));
+
+		line++;
+		assert(code.getComponent(line).hasName("Start"));
+		assert(code.getComponent(line).hasName((byte) 9));
+		assert(code.getComponent(line).hasType(TYPE_FUNCTION));
+		
+		line++;
+		assert(code.getComponent(line).hasName("=="));
+		assert(code.getComponent(line).hasName((byte) 5)); // byte code name from compiler settings
+		assert(code.getComponent(line).hasType(KEYWORD_IF));
+		assert(code.getComponent(line).hasComponentWithName("int0"));
+		assert(code.getComponent(line).getComponentWithName("int0").hasName((byte) 1));
+		assert(code.getComponent(line).getComponentWithName("int0").hasType(TYPE_INT));
+		assert(code.getComponent(line).hasComponentWithName("5"));
+		assert(code.getComponent(line).getComponentWithName("5").hasType(TYPE_INT));
+		
+		line++;
+		assert(code.getComponent(line).hasName("+"));
+		assert(code.getComponent(line).hasName((byte) 11));
+		assert(code.getComponent(line).hasType(TYPE_OPERATOR));
+		assert(code.getComponent(line).hasComponentWithName("int0"));
+		assert(code.getComponent(line).getComponentWithName("int0").hasName((byte) 1));
+		assert(code.getComponent(line).getComponentWithName("int0").hasType(TYPE_INT));
+		assert(code.getComponent(line).hasComponentWithName("5"));
+		assert(code.getComponent(line).getComponentWithName("5").hasType(TYPE_INT));
+		
+		line++;
+		assert(code.getComponent(line).hasName("=="));
+		assert(code.getComponent(line).hasName((byte) 5));
+		assert(code.getComponent(line).hasType(KEYWORD_ELSE_IF));
+		assert(code.getComponent(line).hasComponentWithName("fixed0"));
+		assert(code.getComponent(line).getComponentWithName("fixed0").hasName((byte) 2));
+		assert(code.getComponent(line).getComponentWithName("fixed0").hasType(TYPE_FIXED));
+		assert(code.getComponent(line).hasComponentWithName("2678"));
+		assert(code.getComponent(line).getComponentWithName("2678").hasType(TYPE_FIXED));
+		
+		line++;
+		assert(code.getComponent(line).hasName("+"));
+		assert(code.getComponent(line).hasName((byte) 11));
+		assert(code.getComponent(line).hasType(TYPE_OPERATOR));
+		assert(code.getComponent(line).hasComponentWithName("fixed0"));
+		assert(code.getComponent(line).getComponentWithName("fixed0").hasName((byte) 2));
+		assert(code.getComponent(line).getComponentWithName("fixed0").hasType(TYPE_FIXED));
+		assert(code.getComponent(line).hasComponentWithName("383"));
+		assert(code.getComponent(line).getComponentWithName("383").hasType(TYPE_FIXED));
+		
+		line++;
+		assert(code.getComponent(line).hasName("else"));
+		assert(code.getComponent(line).hasType(KEYWORD_ELSE));
+		
+		line++;
+		assert(code.getComponent(line).hasName("="));
+		assert(code.getComponent(line).hasName((byte) 7));
+		assert(code.getComponent(line).hasType(TYPE_OPERATOR));
+		assert(code.getComponent(line).hasComponentWithName("bool0"));
+		assert(code.getComponent(line).getComponentWithName("bool0").hasName((byte) 3));
+		assert(code.getComponent(line).getComponentWithName("bool0").hasType(TYPE_BOOL));
+		assert(code.getComponent(line).hasComponentWithName("0"));
+		assert(code.getComponent(line).getComponentWithName("0").hasType(TYPE_BOOL));
+		
+		line++;
+		assert(code.getComponent(line).hasName("endIf"));
+		assert(code.getComponent(line).hasType(KEYWORD_IF_END));
+
+		line++;
+		assert(code.getComponent(line).hasName("endFunction"));
+		assert(code.getComponent(line).hasType(KEYWORD_FUNCTION_END));
+	}
+	
 	@Test
 	public void compileTest() throws Exception {
 		final JooCompiler jooCompiler = new JooCompiler();
@@ -187,721 +814,6 @@ public class JooCompilerTest {
 	}
 	
 	@Test
-	public void parseVariablesTest() throws Exception {
-		final JooCompiler jooCompiler = new JooCompiler();
-		jooCompiler.compile("TestCode.joo");
-		final Map<String, Variable>[] variables = jooCompiler.getVariables();
-		
-		int type = 0;
-		assert(variables[type].get("int0").getByteCodeName() == 1);
-		assert(variables[type].get("int1").getByteCodeName() == 2);
-		assert(variables[type].get("correctIfs").getByteCodeName() == 3);
-		assertEquals(variables[type].get("int0").getValue(), "");
-		assertEquals(variables[type].get("int1").getValue(), "10");
-		assertEquals(variables[type].get("correctIfs").getValue(), "");
-		type++;
-		assert(variables[type].get("fixed0").getByteCodeName() == 4);
-		assert(variables[type].get("fixed1").getByteCodeName() == 5);
-		assertEquals(variables[type].get("fixed0").getValue(), "");
-		assertEquals(variables[type].get("fixed1").getValue(), "" + Math.round(100.5f * 255));
-		type++;
-		assert(variables[type].get("bool0").getByteCodeName() == 6);
-		assert(variables[type].get("bool1").getByteCodeName() == 7);
-		assert(variables[type].get("bool2").getByteCodeName() == 8);
-		assertEquals(variables[type].get("bool0").getValue(), "");
-		assertEquals(variables[type].get("bool1").getValue(), "1");
-		assertEquals(variables[type].get("bool2").getValue(), "0");
-		type++;
-		assert(variables[type].get("char0").getByteCodeName() == 9);
-		assert(variables[type].get("char1").getByteCodeName() == 10);
-		assert(variables[type].get("char2").getByteCodeName() == 11);
-		assertEquals(variables[type].get("char0").getValue(), "");
-		assertEquals(variables[type].get("char1").getValue(), "A");	
-		assertEquals(variables[type].get("char2").getValue(), "C");	
-		type++;
-		assert(variables[type].get("intArray").getByteCodeName() == 12);
-		assertEquals(variables[type].get("intArray").getValue(), "10");
-		type++;
-		assert(variables[type].get("fixedArray").getByteCodeName() == 13);
-		assertEquals(variables[type].get("fixedArray").getValue(), "5");
-		type++;
-		assert(variables[type].get("boolArray").getByteCodeName() == 14);
-		assertEquals(variables[type].get("boolArray").getValue(), "15");
-		type++;
-		assert(variables[type].get("charArray").getByteCodeName() == 15);
-		assertEquals(variables[type].get("charArray").getValue(), "13");			
-	}
-	
-	@Test
-	public void parseFunctionsTest() throws Exception {
-		final JooCompiler jooCompiler = new JooCompiler();
-		jooCompiler.compile("TestCode.joo");
-		final Map<String, Function> functions = jooCompiler.getFunctions();
-		
-		final Function start = functions.get("Start");
-		final Function function = functions.get("Function");
-		
-		assert(start.getByteCodeName() == 16);
-		assertEquals(start.getParameters().size(), 0);
-		
-		assert(function.getByteCodeName() == 17);
-		assert(function.getParameters().containsKey("_param0"));
-		assert(function.getParameters().containsKey("_param1"));
-		assertEquals(function.getParameters().get("_param0"), "" + TYPE_INT);
-		assertEquals(function.getParameters().get("_param1"), "" + TYPE_ARRAY_INT);
-		
-		int currentInstructionIndex = 0;
-		Instruction currentInstruction = null;
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "int0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "100");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "int0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
-		assertEquals(currentInstruction.getVariable1Name(), "int1");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "int0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_MULTIPLY);
-		assertEquals(currentInstruction.getValue(), "2");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "int0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_DIVIDE);
-		assertEquals(currentInstruction.getValue(), "10");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "int1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getValue(), "6");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "fixed0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getVariable1Name(), "fixed1");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "fixed0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
-		assertEquals(currentInstruction.getValue(), "" + Math.round(0.5 * 255));
-		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "fixed0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_MULTIPLY);
-		assertEquals(currentInstruction.getValue(), "" + Math.round(2.5 * 255));
-		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "fixed0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_DIVIDE);
-		assertEquals(currentInstruction.getValue(), "" + Math.round(5 * 255));
-		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "fixed1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getValue(), "" + Math.round(50 * 255));
-		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "bool0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "bool1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getValue(), "0");
-		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "bool2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getVariable1Name(), "bool1");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "char0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getValue(), "A");
-		assertEquals(currentInstruction.getValueType(), TYPE_CHAR);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "char1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getValue(), "B");
-		assertEquals(currentInstruction.getValueType(), TYPE_CHAR);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "char2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getVariable1Name(), "char1");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "intArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getValue(), "30");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "intArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "15");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "intArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
-		assertEquals(currentInstruction.getVariable1Name(), "int1");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "intArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_DIVIDE);
-		assertEquals(currentInstruction.getValue(), "5");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "intArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_MULTIPLY);
-		assertEquals(currentInstruction.getVariable1Name(), "intArray");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "1");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "intArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "7");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getValue(), "25");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getValue(),  "" + Math.round(60.5 * 255));
-		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(),  "" + Math.round(15 * 255));
-		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
-		assertEquals(currentInstruction.getVariable1Name(), "fixed1");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_DIVIDE);
-		assertEquals(currentInstruction.getValue(),  "" + Math.round(5 * 255));
-		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_MULTIPLY);
-		assertEquals(currentInstruction.getVariable1Name(), "fixedArray");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "1");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_NEGATIVE);
-		assertEquals(currentInstruction.getValue(),  "" + Math.round(10 * 255));
-		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "3");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_POSITIVE);
-		assertEquals(currentInstruction.getVariable1Name(), "fixedArray");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "2");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "4");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_INVERSE);
-		assertEquals(currentInstruction.getVariable1Name(), "fixedArray");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "3");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "5");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getValue(),  "" + Math.round(25.25 * 255));
-		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "boolArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "9");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getVariable1Name(), "bool0");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "boolArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "10");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "boolArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "11");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getVariable1Name(), "boolArray");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "10");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "boolArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_NEGATIVE);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "boolArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "3");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_POSITIVE);
-		assertEquals(currentInstruction.getVariable1Name(), "boolArray");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "2");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "boolArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "4");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_INVERSE);
-		assertEquals(currentInstruction.getVariable1Name(), "boolArray");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "3");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "boolArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "5");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "charArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "9");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getVariable1Name(), "char0");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "charArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "10");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getValue(), "C");
-		assertEquals(currentInstruction.getValueType(), TYPE_CHAR);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "charArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "11");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getVariable1Name(), "charArray");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "10");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "charArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getValue(), "d");
-		assertEquals(currentInstruction.getValueType(), TYPE_CHAR);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.isCondition(), true);
-		assertEquals(currentInstruction.getVariable0Name(), "int0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_EQUALS);
-		assertEquals(currentInstruction.getValue(), "18");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.isCondition(), true);
-		assertEquals(currentInstruction.getVariable0Name(), "int1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_EQUALS);
-		assertEquals(currentInstruction.getValue(), "6");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
-
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "2");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
-
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "2");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.isCondition(), true);
-		assertEquals(currentInstruction.getConditionType(), KEYWORD_IF);
-		assertEquals(currentInstruction.getVariable0Name(), "bool0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_EQUALS);
-		assertEquals(currentInstruction.getValue(), "0");
-		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.isCondition(), true);
-		assertEquals(currentInstruction.getConditionType(), KEYWORD_ELSE_IF);
-		assertEquals(currentInstruction.getVariable0Name(), "bool0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_EQUALS);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
-
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "2");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.isCondition(), true);
-		assertEquals(currentInstruction.getVariable0Name(), "int0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_NOT_EQUALS);
-		assertEquals(currentInstruction.getVariable1Name(), "int1");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
-
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "2");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "intArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getValue(), "100");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.isCondition(), true);
-		assertEquals(currentInstruction.getVariable0Name(), "int0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER);
-		assertEquals(currentInstruction.getVariable1Name(), "intArray");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "2");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
-
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "2");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.isCondition(), true);
-		assertEquals(currentInstruction.getVariable0Name(), "intArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_BIGGER);
-		assertEquals(currentInstruction.getVariable1Name(), "int0");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
-
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "2");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.isCondition(), true);
-		assertEquals(currentInstruction.getVariable0Name(), "int0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER_EQUALS);
-		assertEquals(currentInstruction.getVariable1Name(), "intArray");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "2");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
-
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "2");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.isCondition(), true);
-		assertEquals(currentInstruction.getVariable0Name(), "intArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_BIGGER_EQUALS);
-		assertEquals(currentInstruction.getVariable1Name(), "int0");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
-
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "2");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "intArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "3");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getVariable1Name(), "intArray");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "2");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.isCondition(), true);
-		assertEquals(currentInstruction.getVariable0Name(), "intArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_BIGGER_EQUALS);
-		assertEquals(currentInstruction.getVariable1Name(), "intArray");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "3");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
-
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "2");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.isCondition(), true);
-		assertEquals(currentInstruction.getVariable0Name(), "intArray");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER_EQUALS);
-		assertEquals(currentInstruction.getVariable1Name(), "intArray");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "3");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
-
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "2");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.isFunctionCall(), true);
-		assertEquals(currentInstruction.getFunctionName(), "Function");
-		assertEquals(currentInstruction.getParameters().get(0), "int0");
-		assertEquals(currentInstruction.getParameters().get(1), "intArray");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.isFunctionCall(), true);
-		assertEquals(currentInstruction.getFunctionName(), "Library_Function");
-		assertEquals(currentInstruction.getParameters().get(0), "intArray");
-		
-		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.isFunctionCall(), true);
-		assertEquals(currentInstruction.getFunctionName(), "DirectoryLibrary_Function");
-		assertEquals(currentInstruction.getParameters().get(0), "intArray");
-		
-		currentInstructionIndex = 0;
-		
-		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "fixed1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "" + Math.round(25 * 255));
-		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
-		
-		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.isCondition(), true);
-		assertEquals(currentInstruction.getVariable0Name(), "fixed1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER_EQUALS);
-		assertEquals(currentInstruction.getValue(),  "" + Math.round(80 * 255));
-		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
-		
-		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_FUNCTION_REPEAT);
-		
-		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
-		
-		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "_param0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "100");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "_param1");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "5");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getVariable1Name(), "_param0");
-		
-		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "_param1");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "4");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getVariable1Name(), "_param1");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "5");
-		
-		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "_param0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getVariable1Name(), "_param1");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "4");
-		
-		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "_param1");
-		assertEquals(currentInstruction.getVariable0ArrayIndex(), "int1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
-		assertEquals(currentInstruction.getVariable1Name(), "int1");
-		
-		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "_param0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
-		assertEquals(currentInstruction.getVariable1Name(), "_param1");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "int1");
-		
-		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.isCondition(), true);
-		assertEquals(currentInstruction.getVariable0Name(), "_param0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER);
-		assertEquals(currentInstruction.getVariable1Name(), "_param1");
-		assertEquals(currentInstruction.getVariable1ArrayIndex(), "5");
-		
-		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "1");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_ELSE);
-
-		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
-		assertEquals(currentInstruction.getValue(), "2");
-		assertEquals(currentInstruction.getValueType(), TYPE_INT);
-		
-		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.KEYWORD_IF);
-	}
-	
-	@Test
 	public void splitStringTest() throws Exception {
 		String string = "This is a test string";
 		String[] stringComponents = new JooCompiler().splitCodeLine(string);
@@ -917,7 +829,7 @@ public class JooCompilerTest {
 	}
 	
 	private String toBytecodeNumber(String value) {
-		for (int i = 0; i < 9; i++) {
+		for (int i = 0; i <= 9; i++) {
 			value = value.replace((char)('0' + i), (char)(JooVirtualMachine.NUMBER_0 + i));
 		}
 		return value;
