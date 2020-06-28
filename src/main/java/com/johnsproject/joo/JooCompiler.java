@@ -116,14 +116,6 @@ public class JooCompiler {
 		this.settings = settings;
 	}
 
-	/**
-	 * This method compiles the human readable joo code in the code string
-	 * to joo virtual machine readable joo code.
-	 * 
-	 * @param path human readable joo code path.
-	 * @return joo virtual machine readable joo code.
-	 */
-	@SuppressWarnings("unchecked")
 	public String compile(final String path) {
 		final String directoryPath = getDirectoryPath(path);
 
@@ -350,7 +342,7 @@ public class JooCompiler {
 		}
 		return true;
 	}
-	
+
 	private void parseFunctionDeclaration(Code code, String[] lineData, int lineIndex) throws ParseException {
 		if(lineData.length < 2)
 			throw new ParseException("Invalid function declaration", lineIndex);
@@ -375,7 +367,7 @@ public class JooCompiler {
 		}
 		code.addComponent(function);
 	}
-	
+
 	private void parseFunctionCall(Code code, String[] lineData, int lineIndex) throws ParseException {
 		if(lineData.length < 2)
 			throw new ParseException("Invalid function call", lineIndex);
@@ -394,7 +386,7 @@ public class JooCompiler {
 		}
 		code.addComponent(functionCall);
 	}
-	
+
 	boolean parseConditionComponent(Code code, String[] lineData, int lineIndex) throws ParseException {
 		final String keyword = lineData[0];
 		if(keyword.equals(KEYWORD_IF) || keyword.equals(KEYWORD_ELSE_IF)) {
@@ -410,7 +402,7 @@ public class JooCompiler {
 		}
 		return true;
 	}
-	
+
 	private void parseCondition(Code code, String[] lineData, int lineIndex) throws ParseException {
 		if(lineData.length != 4)
 			throw new ParseException("Invalid condition declaration", lineIndex);
@@ -461,18 +453,39 @@ public class JooCompiler {
 		return true;
 	}
 	
-	private void parseKeywordComponent(Code code, String[] lineData, int lineIndex, String name, byte byteCodeName) throws ParseException {
+	/**
+	 * Creates a new {@link CodeComponent} for the keyword and adds it to the {@link Code}.
+	 * The code line should only contain one keyword like "functionEnd".
+	 * 
+	 * @param code to add the keyword component to.
+	 * @param lineData the code line with the keyword.
+	 * @param lineIndex the index of the code line.
+	 * @param keyword to add to the code.
+	 * @param byteCodeKeyword the byte code representation of the keyword.
+	 * @throws ParseException If the length of the code line is > 1.
+	 */
+	private void parseKeywordComponent(Code code, String[] lineData, int lineIndex, String keyword, byte byteCodeKeyword) throws ParseException {
 		if(lineData.length > 1)
 			throw new ParseException("Invalid instruction", lineIndex);
-		CodeComponent keyword = new CodeComponent(name, byteCodeName, name, byteCodeName);
-		code.addComponent(keyword);
+		final CodeComponent keywordComponent = new CodeComponent(keyword, byteCodeKeyword, keyword, byteCodeKeyword);
+		code.addComponent(keywordComponent);
 	}
 	
-	private CodeComponent parseVariableComponent(String data, Code code, int lineIndex) throws ParseException {
-		String name = data;
+	/**
+	 * Parses the specified variable access and returns a {@link CodeComponent} with the access data. 
+	 * 
+	 * @param name name of the variable, can contain array index.
+	 * @param code that contains the code parsed until this line.
+	 * @param lineIndex the code line that contains the specified variable access.
+	 * @return A CodeComponent with the access data.
+	 * @throws ParseException If the variable with the specified name doesn't exist.
+	 * If it contains the array keyword but the array index can't be parsed.
+	 * If a variable that is not of type array has an index.
+	 */
+	private CodeComponent parseVariableComponent(String name, Code code, int lineIndex) throws ParseException {
 		CodeComponent arrayIndex = null;
-		if(data.contains(KEYWORD_ARRAY)) {
-			final String[] arrayData = data.split(KEYWORD_ARRAY);
+		if(name.contains(KEYWORD_ARRAY)) {
+			final String[] arrayData = name.split(KEYWORD_ARRAY);
 			final String index = arrayData[1];
 			name = arrayData[0];
 			try {
@@ -496,6 +509,15 @@ public class JooCompiler {
 		return variable;
 	}
 	
+	/**
+	 * Returns the variable or function parameter with the specified name.
+	 * 
+	 * @param name to search for.
+	 * @param code that contains the code parsed until this line.
+	 * @param lineIndex the code line that contains the specified name.
+	 * @return The variable or function parameter with the specified name.
+	 * @throws ParseException If the variable doesn't exist.
+	 */
 	private CodeComponent getVariableWithName(String name, Code code, int lineIndex) throws ParseException {
 		CodeComponent variable = null;
 		if(code.hasComponentWithName(name)) {
@@ -514,6 +536,16 @@ public class JooCompiler {
 		return variable;
 	}
 	
+	/**
+	 * Parses a value of any type and returns a {@link CodeComponent} with the value's data.
+	 * 
+	 * @param rawValue the value to parse.
+	 * @param type the type of the variable this value is compared or assigned to.
+	 * @param lineIndex the code line that contains this value.
+	 * @return A CodeComponent that contains the data of the specified value.
+	 * @throws ParseException If the value type doesn't match the specified variable type.
+	 * If the value is a char value with wrong declaration.
+	 */
 	private CodeComponent parseValueComponent(String rawValue, String type, int lineIndex) throws ParseException {
 		String value = "";
 		String valueType = "";
@@ -542,10 +574,21 @@ public class JooCompiler {
 		return new CodeComponent(value, (byte)0, valueType, byteCodeValueType);
 	}
 	
+	/**
+	 * Returns a unique byte code name.
+	 * 
+	 * @return Unique byte code name.
+	 */
 	private byte getUniqueByteCodeName() {
 		return (byte) ((uniqueByteCodeName++) + JooVirtualMachine.COMPONENTS_START);
 	}
 	
+	/**
+	 * Does the specified type exist?
+	 * 
+	 * @param type to check.
+	 * @return If the specified type exists or not.
+	 */
 	private boolean typeExists(String type) {
 		type = toType(type);
 		return type.equals(TYPE_INT) || type.equals(TYPE_FIXED)
@@ -554,12 +597,24 @@ public class JooCompiler {
 				|| type.equals(TYPE_ARRAY_BOOL) || type.equals(TYPE_ARRAY_CHAR);
 	}
 	
+	/**
+	 * Is the specified type a array type?
+	 * 
+	 * @param type to check.
+	 * @return If the specified type is a array type or not.
+	 */
 	private boolean isArray(String type) {
 		type = toType(type);
 		return type.equals(TYPE_ARRAY_INT) || type.equals(TYPE_ARRAY_FIXED)
 				|| type.equals(TYPE_ARRAY_BOOL) || type.equals(TYPE_ARRAY_CHAR);
 	}
 	
+	/**
+	 * Converts the specified type to it's byte code representation.
+	 * 
+	 * @param type to convert.
+	 * @return The byte code representation of type.
+	 */
 	private byte toByteCodeType(String type) {
 		type = toType(type);
 		if(type.equals(TYPE_INT)) {
@@ -589,6 +644,14 @@ public class JooCompiler {
 		return -1;
 	}
 	
+	/**
+	 * Returns the type of the declaration.
+	 * If type contains a array keyword the array size is removed and type is returned.
+	 * Else type is returned without changes.
+	 * 
+	 * @param type declaration.
+	 * @return The type of the declaration.
+	 */
 	private String toType(String type) {
 		// Remove the number after the array keyword if there is one
 		if(type.contains(KEYWORD_ARRAY)) {
@@ -597,6 +660,53 @@ public class JooCompiler {
 			return type;
 		}
 	}
+	
+	/**
+	 * This method splits up the code to a array of code lines. 
+	 * It removes unnecessary characters like '\t' and '\r' and splits the code at 
+	 * the '\n' characters. It also filters comment and empty lines and removes 
+	 * the comments in the lines that also contain code.
+	 *  
+	 * @param code to get lines from.
+	 * @return Array of code lines. 
+	 */
+	String[] getLines(String code) {
+		code = code.replace("\t", "");
+		code = code.replace("\r", "");
+		String[] rawCodeLines = code.split(LINE_BREAK);
+		List<String> codeLines = new ArrayList<String>();
+		for (String line : rawCodeLines) {
+			if(!line.isEmpty()) {
+				if(line.contains(KEYWORD_COMMENT)) {
+					String[] lineData = line.split(KEYWORD_COMMENT);
+					if(lineData[0].isEmpty()) { // does this line only contain a comment?
+						continue;
+					} else { // remove the comment, only code is needed
+						line = lineData[0];
+					}
+				}
+				codeLines.add(line);
+			}
+		}
+		return codeLines.toArray(new String[0]);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	String includeIncludes(String directoryPath, String code) {
 		final String[] codeLines = getLines(code);
@@ -715,56 +825,7 @@ public class JooCompiler {
 		} else {
 			nativeFunction.addParameterType(parameterIndex, parameter);
 		}
-	}
-	
-	/**
-	 * This method splits up the code string to a string array of code lines. 
-	 * It's a new method be cause it's also used by unit tests.
-	 * 
-	 * @param code
-	 * @return string array of code lines. 
-	 */
-	String[] getLines(String code) {
-		code = code.replace("\t", "");
-		code = code.replace("\r", "");
-		String[] rawCodeLines = code.split(LINE_BREAK);
-		List<String> codeLines = new ArrayList<String>();
-		for (String line : rawCodeLines) {
-			if(!line.isEmpty()) {
-				if(line.contains(KEYWORD_COMMENT)) {
-					String[] lineData = line.split(KEYWORD_COMMENT);
-					if(lineData[0].isEmpty()) { // does this line only contain a comment?
-						continue;
-					} else { // extract the code before the comment
-						line = lineData[0];
-					}
-				}
-				codeLines.add(line);
-			}
-		}
-		return codeLines.toArray(new String[0]);
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	}	
 	
 	/**
 	 * This method parses variables and arrays of all types in the joo code lines. 

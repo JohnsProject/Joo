@@ -37,7 +37,7 @@ class Code {
 	 * <br><br>
 	 * This method does not search in the component lists of this CodeComponent's components.
 	 * 
-	 * @param name Name of the component.
+	 * @param name of the component.
 	 * @return The component with the specified name.
 	 */
 	public CodeComponent getComponentWithName(String name) {
@@ -47,7 +47,14 @@ class Code {
 		}
 		return null;
 	}
-	
+	/**
+	 * Does this {@link CodeCompoent} have a component with the specified name?
+	 * <br><br>
+	 * This method does not search in the component lists of this CodeComponent's components.
+	 * 
+	 * @param name of the component.
+	 * @return If there is a component with the specified name.
+	 */
 	public boolean hasComponentWithName(String name) {
 		return getComponentWithName(name) != null;
 	}
@@ -69,6 +76,14 @@ class Code {
 		return null;
 	}
 	
+	/**
+	 * Does this {@link CodeCompoent} have a component with the specified byte code name?
+	 * <br><br>
+	 * This method does not search in the component lists of this CodeComponent's components.
+	 * 
+	 * @param name Byte code name of the component.
+	 * @return If there is a component with the specified name.
+	 */
 	public boolean hasComponentWithName(byte name) {
 		return getComponentWithName(name) != null;
 	}
