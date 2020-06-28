@@ -14,7 +14,7 @@ class Setting extends Settings {
 		this.type = type;
 	}
 	
-	public Setting(String name, byte byteCodeName, String type, List<Setting> settings) {
+	private Setting(String name, byte byteCodeName, String type, List<Setting> settings) {
 		super(settings);
 		this.name = name;
 		this.byteCodeName = byteCodeName;

@@ -47,6 +47,42 @@ class Code {
 		}
 		return null;
 	}
+	
+	/**
+	 * Returns the number of {@link CodeCompoent} with the specified name.
+	 * <br><br>
+	 * This method does not search in the component lists of this CodeComponent's components.
+	 * 
+	 * @param name of the component.
+	 * @return The number of components with the specified name.
+	 */
+	public int getComponentCount(String name) {
+		int count = 0;
+		for (CodeComponent component : components) {
+			if(component.hasName(name))
+				count++;
+		}
+		return count;
+	}
+	
+	/**
+	 * Returns the number of {@link CodeCompoent} with the specified name and type.
+	 * <br><br>
+	 * This method does not search in the component lists of this CodeComponent's components.
+	 * 
+	 * @param name of the component.
+	 * @param type of the component.
+	 * @return The number of components with the specified name and type.
+	 */
+	public int getComponentCount(String name, String type) {
+		int count = 0;
+		for (CodeComponent component : components) {
+			if(component.hasName(name) && component.hasType(type))
+				count++;
+		}
+		return count;
+	}
+	
 	/**
 	 * Does this {@link CodeCompoent} have a component with the specified name?
 	 * <br><br>

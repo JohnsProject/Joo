@@ -1,4 +1,4 @@
-@OPERATOR
+@operator
 01 <= int|fixed
 02 >= int|fixed
 03 < int|fixed
@@ -21,7 +21,7 @@
 20 << int
 21 >> int
 
-@FUNCTION
+@function
 # The Standard Native Library is a set of platform independent functions
 # that aims to help developing joo applications
 

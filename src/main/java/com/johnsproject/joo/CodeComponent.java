@@ -8,20 +8,23 @@ class CodeComponent extends Code {
 	private final byte byteCodeName;
 	private final String type;
 	private final byte byteCodeType;
+	private final int lineIndex;
 	
-	public CodeComponent(String name, byte byteCodeName, String type, byte byteCodeType) {
+	public CodeComponent(String name, byte byteCodeName, String type, byte byteCodeType, int lineIndex) {
 		this.name = name;
 		this.byteCodeName = byteCodeName;
 		this.type = type;
 		this.byteCodeType = byteCodeType;
+		this.lineIndex = lineIndex;
 	}
 	
-	public CodeComponent(String name, byte byteCodeName, String type, byte byteCodeType, List<CodeComponent> components) {
+	private CodeComponent(String name, byte byteCodeName, String type, byte byteCodeType, int lineIndex, List<CodeComponent> components) {
 		super(components);
 		this.name = name;
 		this.byteCodeName = byteCodeName;
 		this.type = type;
 		this.byteCodeType = byteCodeType;
+		this.lineIndex = lineIndex;
 	}
 
 	public String getName() {
@@ -56,6 +59,10 @@ class CodeComponent extends Code {
 		return byteCodeType == type;
 	}
 
+	public int getLineIndex() {
+		return lineIndex;
+	}
+
 	@Override
 	public String toString() {
 		return "CodeComponent [name=" + name + ", byteCodeName=" + byteCodeName + ", type=" + type +
@@ -65,6 +72,6 @@ class CodeComponent extends Code {
 	@Override
 	protected CodeComponent clone() {
 		final Code clonedCode = super.clone();
-		return new CodeComponent(name, byteCodeName, type, byteCodeType, clonedCode.getComponents());
+		return new CodeComponent(name, byteCodeName, type, byteCodeType, lineIndex, clonedCode.getComponents());
 	}
 }
