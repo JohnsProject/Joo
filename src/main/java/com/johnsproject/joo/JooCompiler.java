@@ -69,6 +69,8 @@ public class JooCompiler {
 
 	public static final String KEYWORD_PARAMETER = "parameter";
 	public static final String KEYWORD_OPERATOR = "operator";
+	public static final String KEYWORD_TYPE_REGISTRY = "typeRegistry";
+	
 	
 	public static final String TYPE_INT = "int";
 	public static final String TYPE_FIXED = "fixed";
@@ -103,9 +105,10 @@ public class JooCompiler {
 	private List<NativeFunction> nativeFunctions;
 	private Map<String, Variable>[] variables;
 	private Map<String, Function> functions;
-	private byte uniqueByteCodeName;
 	private String settingType;
 	private Settings settings;
+	private int[] typeRegistry;
+	private int[] byteCodeRegistry;
 	private Code code;
 	
 	
@@ -114,23 +117,31 @@ public class JooCompiler {
 	void setSettings(Settings settings) {
 		this.settings = settings;
 	}
+	
+	void setTypeRegistry(int[] registry) {
+		typeRegistry = registry;
+		byteCodeRegistry = typeRegistry.clone();
+	}
 
-	public String compile(final String path) {
+	public String compile(String path) {
 		final String directoryPath = getDirectoryPath(path);
-
+		String byteCode = "";
 		try {
-			
 			final String settingsPath = directoryPath + PATH_COMPILER_SETTINGS;
 			final String settingsData = FileUtil.read(settingsPath);
 			settings = parseSettings(settingsData);
-			
 			final String codePath = path;
 			final String codeData = FileUtil.read(codePath);
+			typeRegistry = createTypeRegistry(codeData); // used to store how many component of each type exists
+			byteCodeRegistry = typeRegistry.clone(); // used to store the unique byte code names for each type
 			code = parseCode(codeData);
-			
+			analyseCode(code);
+			byteCode = toByteCode(code);
 		} catch (ParseException e) {
-			System.err.println(e.getMessage() + ", Line: " + e.getErrorOffset());
+			// text editors usually begin at line 1
+			System.err.println(e.getMessage() + ", Line: " + (e.getErrorOffset() + 1));
 		}
+		return byteCode;
 		
 //		parseConfig(directoryPath);
 		
@@ -145,10 +156,10 @@ public class JooCompiler {
 //		final String[] codeLines = getLines(code);		
 //		parseVariables(codeLines);
 //		parseFunctions(codeLines);
-		String compiledJooCode = "";
+//		String compiledJooCode = "";
 //		compiledJooCode = writeVariablesAndFunctions(compiledJooCode);
 //		compiledJooCode = writeFunctionsAndInstructions(compiledJooCode);
-		return compiledJooCode;
+//		return compiledJooCode;
 	}
 	
 	private String getDirectoryPath(String path) {
@@ -243,6 +254,28 @@ public class JooCompiler {
 		}
 	}
 	
+	int[] createTypeRegistry(String codeData) {
+		final String[] codeLines = getLines(codeData);
+		int[] typeRegistry = new int[9];
+		for (int i = 0; i < codeLines.length; i++) {
+			final String line = codeLines[i];
+			if(line.isEmpty())
+				continue;
+			final String[] lineData = line.split(" ");
+			final byte type = toByteCodeType(lineData[0]);
+			// toByteCodeType returns -1 if type doens't exist
+			if(type > 0) {
+				final int typeIndex = (JooVirtualMachine.TYPE_INT - type) + 1;
+				if(typeIndex < typeRegistry.length)
+					typeRegistry[typeIndex]++;
+			}
+		}
+		for (int i = 1; i < typeRegistry.length; i++) {
+			typeRegistry[i] += typeRegistry[i - 1];
+		}
+		return typeRegistry;
+	} 
+	
 	Code parseCode(String codeData) throws ParseException {
 		final String[] codeLines = getLines(codeData);
 		final Code code = new Code();
@@ -276,8 +309,8 @@ public class JooCompiler {
 			if((lineData.length != 2) && (lineData.length != 4))
 				throw new ParseException("Invalid variable declaration", lineIndex);
 			final String name = lineData[1];
-			final byte byteCodeName = getUniqueByteCodeName();
 			final String type = toType(typeData);
+			final byte byteCodeName = getUniqueByteCodeName(type);
 			final byte byteCodeType = toByteCodeType(type);
 			CodeComponent variable = new CodeComponent(name, byteCodeName, type, byteCodeType, lineIndex);
 			boolean parsed = false;
@@ -299,7 +332,7 @@ public class JooCompiler {
 				final String size = typeData[1];
 				final byte byteCodeSize;
 				try {
-					byteCodeSize = (byte) (Byte.parseByte(size) + JooVirtualMachine.COMPONENTS_START);
+					byteCodeSize = (byte) Byte.parseByte(size);
 				} catch (NumberFormatException e) {
 					throw new ParseException("Invalid array size declaration, Size: " + size, lineIndex);
 				}
@@ -351,8 +384,8 @@ public class JooCompiler {
 		if(lineData.length < 2)
 			throw new ParseException("Invalid function declaration", lineIndex);
 		final String name = lineData[1];
-		final byte byteCodeName = getUniqueByteCodeName();
 		final String type = KEYWORD_FUNCTION;
+		final byte byteCodeName = getUniqueByteCodeName(type);
 		final byte byteCodeType = (byte)JooVirtualMachine.KEYWORD_FUNCTION;
 		CodeComponent function = new CodeComponent(name, byteCodeName, type, byteCodeType, lineIndex);
 		for (int i = 2; i < lineData.length; i += 2) {
@@ -579,12 +612,19 @@ public class JooCompiler {
 	}
 	
 	/**
-	 * Returns a unique byte code name.
+	 * Returns a unique variable or function byte code name.
 	 * 
+	 * @param type of the component that will use the name.
 	 * @return Unique byte code name.
 	 */
-	private byte getUniqueByteCodeName() {
-		return (byte) ((uniqueByteCodeName++) + JooVirtualMachine.COMPONENTS_START);
+	private byte getUniqueByteCodeName(String type) {
+		int byteCodeName = 0;
+		final int byteCodeType = toByteCodeType(type);
+		if(byteCodeType >= 0) {
+			final int typeIndex = JooVirtualMachine.TYPE_INT - byteCodeType;
+			byteCodeName = byteCodeRegistry[typeIndex]++;
+		}
+		return (byte) (byteCodeName + JooVirtualMachine.COMPONENTS_START);
 	}
 	
 	/**
@@ -645,6 +685,9 @@ public class JooCompiler {
 		}
 		else if(type.equals(TYPE_ARRAY_CHAR)) {
 			return JooVirtualMachine.TYPE_ARRAY_CHAR;
+		}
+		else if(type.equals(KEYWORD_FUNCTION)) {
+			return JooVirtualMachine.TYPE_FUNCTION;
 		}
 		return -1;
 	}
@@ -723,7 +766,7 @@ public class JooCompiler {
 		else if(!name.matches(REGEX_ALPHANUMERIC)) {
 			throw new ParseException("Variable names should contain only alphanumeric characters, Name: " + name, lineIndex);
 		}
-		else if(code.getComponentCount(name) > 1) {
+		else if(code.getComponentWithNameCount(name) > 1) {
 			throw new ParseException("Duplicate variable, Name: " + name, lineIndex);			
 		}
 	}
@@ -765,7 +808,7 @@ public class JooCompiler {
 		else if(!name.substring(1).matches(REGEX_ALPHANUMERIC)) {
 			throw new ParseException("Parameter names should contain only alphanumeric characters, Name: " + name, lineIndex);
 		}
-		else if(function.getComponentCount(name) > 1) {
+		else if(function.getComponentWithNameCount(name) > 1) {
 			throw new ParseException("Duplicate parameter, Name: " + name, lineIndex);			
 		}
 	}
@@ -777,6 +820,69 @@ public class JooCompiler {
 			throw new ParseException("Invalid function, Name: " + name, lineIndex);			
 		}
 	}
+	
+	String toByteCode(Code code) {
+		String byteCode = "";
+		byteCode += writeComponentsIndex(code);
+		for (CodeComponent component : code.getComponents()) {
+			
+		}
+		return byteCode;
+	}
+	
+	private String writeComponentsIndex(Code code) {
+		String componentsIndex = "";
+		componentsIndex += writeComponentIndex(code, TYPE_INT);
+		componentsIndex += writeComponentIndex(code, TYPE_FIXED);
+		componentsIndex += writeComponentIndex(code, TYPE_BOOL);
+		componentsIndex += writeComponentIndex(code, TYPE_CHAR);
+		componentsIndex += writeComponentIndex(code, TYPE_ARRAY_INT);
+		componentsIndex += writeComponentIndex(code, TYPE_ARRAY_FIXED);
+		componentsIndex += writeComponentIndex(code, TYPE_ARRAY_BOOL);
+		componentsIndex += writeComponentIndex(code, TYPE_ARRAY_CHAR);
+		componentsIndex += writeComponentIndex(code, KEYWORD_FUNCTION);
+		return componentsIndex;
+	}
+	
+	private String writeComponentIndex(Code code, String type) {
+		String componentIndex = "" + (char)toByteCodeType(type) + (char)code.getComponentWithTypeCount(type);
+		for (CodeComponent component : code.getComponents()) {
+			if(component.hasType(type)) {
+				componentIndex += "" + (char)component.getByteCodeName();
+				if(component.hasComponentWithType(type)) { // does this variable have a value assigned to?
+					final CodeComponent value = component.getComponentWithType(type);
+					componentIndex += toByteCodeNumber(value.getName());
+				}
+				else if(component.hasComponentWithType(KEYWORD_ARRAY)) { // is this variable a array?
+					final CodeComponent arraySize = component.getComponentWithType(KEYWORD_ARRAY);
+					componentIndex += "" + (char)arraySize.getByteCodeName();
+				}
+				// only write function names, the function start index will be added after the code is written
+			}
+		}
+		return componentIndex;
+	}
+	
+	/**
+	 * Converts the value with default number characters to a number with byte code number characters.
+	 * 
+	 * @param value to convert.
+	 * @return The byte code representation of the specified value.
+	 */
+	String toByteCodeNumber(String value) {
+		for (int i = 0; i <= 9; i++) {
+			final char codeNumber = (char)('0' + i);
+			final char byteCodeNumber = (char)(JooVirtualMachine.NUMBER_0 + i);
+			value = value.replace(codeNumber, byteCodeNumber);
+		}
+		return value;
+	}
+	
+	
+	
+	
+	
+	
 	
 	
 	

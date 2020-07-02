@@ -1,12 +1,12 @@
 # This is a example code used to test the joo programming language
 
-include TestLibrary.joo
-include TestLibraries/TestDirectoryLibrary.joo
+#include TestLibrary.joo
+#include TestLibraries/TestDirectoryLibrary.joo
 
-define TEST_INT_CONSTANT = 25
-define TEST_FIXED_CONSTANT = 25.25
-define TEST_BOOL_CONSTANT = true
-define TEST_CHAR_CONSTANT = 'd'
+#define TEST_INT_CONSTANT = 25
+#define TEST_FIXED_CONSTANT = 25.25
+#define TEST_BOOL_CONSTANT = true
+#define TEST_CHAR_CONSTANT = 'd'
 
 int int0
 int int1 = 10
@@ -18,6 +18,17 @@ int:10 intArray
 fixed:5 fixedArray
 
 int correctIfs
+
+bool bool0
+bool bool1 = true
+bool bool2 = false
+
+char char0
+char char1 = 'A'
+char char2 = 'C'
+
+bool:15 boolArray
+char:13 charArray
 
 function Start
 	int0 + 100
@@ -45,7 +56,7 @@ function Start
 	intArray:0 - int1
 	intArray:1 / 5
 	intArray:0 * intArray:1
-	intArray:7 = TEST_INT_CONSTANT
+#	intArray:7 = TEST_INT_CONSTANT
 
 	fixedArray:0 = 60.5
 	fixedArray:1 + 15
@@ -55,7 +66,7 @@ function Start
 	fixedArray:2 =- 10
 	fixedArray:3 =+ fixedArray:2
 	fixedArray:4 =! fixedArray:3
-	fixedArray:5 = TEST_FIXED_CONSTANT
+#	fixedArray:5 = TEST_FIXED_CONSTANT
 
 	boolArray:9 = bool0
 	boolArray:10 = true
@@ -63,12 +74,12 @@ function Start
 	boolArray:2 =- true
 	boolArray:3 =+ boolArray:2
 	boolArray:4 =! boolArray:3
-	boolArray:5 = TEST_BOOL_CONSTANT
+#	boolArray:5 = TEST_BOOL_CONSTANT
 
 	charArray:9 = char0
 	charArray:10 = 'C'
 	charArray:11 = charArray:10
-	charArray:0 = TEST_CHAR_CONSTANT
+#	charArray:0 = TEST_CHAR_CONSTANT
 
 	if int0 == 18
 		correctIfs + 1
@@ -133,19 +144,8 @@ function Start
 	endIf
 
 	call Function int0 intArray
-	call Library_Function intArray
-	call DirectoryLibrary_Function intArray
-
-	bool bool0
-	bool bool1 = true
-	bool bool2 = false
-
-	char char0
-	char char1 = 'A'
-	char char2 = 'C'
-
-	bool:15 boolArray
-	char:13 charArray
+#	call Library_Function intArray
+#	call DirectoryLibrary_Function intArray
 endFunction
 
 function Function int _param0 int: _param1
