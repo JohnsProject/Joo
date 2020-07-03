@@ -107,8 +107,6 @@ public class JooCompiler {
 	private Map<String, Function> functions;
 	private String settingType;
 	private Settings settings;
-	private int[] typeRegistry;
-	private int[] byteCodeRegistry;
 	private Code code;
 	
 	
@@ -116,11 +114,6 @@ public class JooCompiler {
 	
 	void setSettings(Settings settings) {
 		this.settings = settings;
-	}
-	
-	void setTypeRegistry(int[] registry) {
-		typeRegistry = registry;
-		byteCodeRegistry = typeRegistry.clone();
 	}
 
 	public String compile(String path) {
@@ -132,8 +125,6 @@ public class JooCompiler {
 			settings = parseSettings(settingsData);
 			final String codePath = path;
 			final String codeData = FileUtil.read(codePath);
-			typeRegistry = createTypeRegistry(codeData); // used to store how many component of each type exists
-			byteCodeRegistry = typeRegistry.clone(); // used to store the unique byte code names for each type
 			code = parseCode(codeData);
 			analyseCode(code);
 			byteCode = toByteCode(code);
@@ -254,31 +245,10 @@ public class JooCompiler {
 		}
 	}
 	
-	int[] createTypeRegistry(String codeData) {
-		final String[] codeLines = getLines(codeData);
-		int[] typeRegistry = new int[9];
-		for (int i = 0; i < codeLines.length; i++) {
-			final String line = codeLines[i];
-			if(line.isEmpty())
-				continue;
-			final String[] lineData = line.split(" ");
-			final byte type = toByteCodeType(lineData[0]);
-			// toByteCodeType returns -1 if type doens't exist
-			if(type > 0) {
-				final int typeIndex = (JooVirtualMachine.TYPE_INT - type) + 1;
-				if(typeIndex < typeRegistry.length)
-					typeRegistry[typeIndex]++;
-			}
-		}
-		for (int i = 1; i < typeRegistry.length; i++) {
-			typeRegistry[i] += typeRegistry[i - 1];
-		}
-		return typeRegistry;
-	} 
-	
 	Code parseCode(String codeData) throws ParseException {
 		final String[] codeLines = getLines(codeData);
 		final Code code = new Code();
+		createTypeRegistry(code, codeLines);
 		for (int i = 0; i < codeLines.length; i++) {
 			final String line = codeLines[i];
 			if(line.isEmpty())
@@ -287,6 +257,33 @@ public class JooCompiler {
 		}
 		return code;
 	}
+	
+	void createTypeRegistry(Code code, String[] codeLines) {
+		final CodeComponent typeRegistry = new CodeComponent(KEYWORD_TYPE_REGISTRY, (byte) 0, KEYWORD_TYPE_REGISTRY, (byte) 0, 0);
+		int[] typeCountBuffer = new int[9];
+		for (int i = 0; i < codeLines.length; i++) {
+			final String line = codeLines[i];
+			if(line.isEmpty())
+				continue;
+			final String[] lineData = line.split(" ");
+			final byte type = toByteCodeType(lineData[0]);
+			// toByteCodeType returns -1 if type doens't exist
+			if(type > 0) {
+				final int typeIndex = JooVirtualMachine.TYPE_INT - type;
+				typeCountBuffer[typeIndex]++;
+			}
+		}
+		for (int i = 0; i < typeCountBuffer.length; i++) {
+			if(i > 0)
+				typeCountBuffer[i] += typeCountBuffer[i - 1];
+			final byte typeCount = (byte) typeCountBuffer[i];
+			final byte byteCodeType = (byte) (JooVirtualMachine.TYPE_INT - i);
+			final String type = toType(byteCodeType); 
+			final CodeComponent typeComponent = new CodeComponent("" + typeCount, typeCount, type, byteCodeType, 0);
+			typeRegistry.addComponent(typeComponent);
+		}
+		code.addComponent(typeRegistry);
+	} 
 	
 	private void parseCodeComponent(Code code, String line, int lineIndex) throws ParseException {
 		final String[] lineData = line.split(" ");
@@ -310,7 +307,7 @@ public class JooCompiler {
 				throw new ParseException("Invalid variable declaration", lineIndex);
 			final String name = lineData[1];
 			final String type = toType(typeData);
-			final byte byteCodeName = getUniqueByteCodeName(type);
+			final byte byteCodeName = getUniqueByteCodeName(code, type);
 			final byte byteCodeType = toByteCodeType(type);
 			CodeComponent variable = new CodeComponent(name, byteCodeName, type, byteCodeType, lineIndex);
 			boolean parsed = false;
@@ -385,7 +382,7 @@ public class JooCompiler {
 			throw new ParseException("Invalid function declaration", lineIndex);
 		final String name = lineData[1];
 		final String type = KEYWORD_FUNCTION;
-		final byte byteCodeName = getUniqueByteCodeName(type);
+		final byte byteCodeName = getUniqueByteCodeName(code, type);
 		final byte byteCodeType = (byte)JooVirtualMachine.KEYWORD_FUNCTION;
 		CodeComponent function = new CodeComponent(name, byteCodeName, type, byteCodeType, lineIndex);
 		for (int i = 2; i < lineData.length; i += 2) {
@@ -614,15 +611,25 @@ public class JooCompiler {
 	/**
 	 * Returns a unique variable or function byte code name.
 	 * 
+	 * @param code of the component that will use the name.
 	 * @param type of the component that will use the name.
 	 * @return Unique byte code name.
 	 */
-	private byte getUniqueByteCodeName(String type) {
-		int byteCodeName = 0;
-		final int byteCodeType = toByteCodeType(type);
-		if(byteCodeType >= 0) {
+	private byte getUniqueByteCodeName(Code code, String type) {
+		byte byteCodeName = 0;
+		final byte byteCodeType = toByteCodeType(type);
+		// toByteCodeType returns -1 if type doens't exist
+		if(byteCodeType > 0) {
+			CodeComponent typeRegistry = code.getComponentWithType(KEYWORD_TYPE_REGISTRY);
+			CodeComponent registry = typeRegistry.getComponentWithType(type);
 			final int typeIndex = JooVirtualMachine.TYPE_INT - byteCodeType;
-			byteCodeName = byteCodeRegistry[typeIndex]++;
+			int previousTypeCount = 0; 
+			if(typeIndex > 0) {
+				previousTypeCount = typeRegistry.getComponent(typeIndex - 1).getByteCodeName(); 
+			}
+			byteCodeName = (byte) (registry.getComponentWithTypeCount(type) + previousTypeCount);
+			final CodeComponent assignedName = new CodeComponent("" + byteCodeName, byteCodeName, type, byteCodeType, 0);	
+			registry.addComponent(assignedName);
 		}
 		return (byte) (byteCodeName + JooVirtualMachine.COMPONENTS_START);
 	}
@@ -658,9 +665,9 @@ public class JooCompiler {
 	 * Converts the specified type to it's byte code representation.
 	 * 
 	 * @param type to convert.
-	 * @return The byte code representation of type.
+	 * @return The byte code representation of type. -1 if the type is unknown.
 	 */
-	private byte toByteCodeType(String type) {
+	byte toByteCodeType(String type) {
 		type = toType(type);
 		if(type.equals(TYPE_INT)) {
 			return JooVirtualMachine.TYPE_INT;
@@ -693,6 +700,43 @@ public class JooCompiler {
 	}
 	
 	/**
+	 * Converts the specified byte code type to it's code representation.
+	 * 
+	 * @param type to convert.
+	 * @return The code representation of type. Empty string if the type is unknown.
+	 */
+	String toType(byte type) {
+		if(type == JooVirtualMachine.TYPE_INT) {
+			return TYPE_INT;
+		}
+		else if(type == JooVirtualMachine.TYPE_FIXED) {
+			return TYPE_FIXED;
+		}
+		else if(type == JooVirtualMachine.TYPE_BOOL) {
+			return TYPE_BOOL;
+		}
+		else if(type == JooVirtualMachine.TYPE_CHAR) {
+			return TYPE_CHAR;
+		}
+		else if(type == JooVirtualMachine.TYPE_ARRAY_INT) {
+			return TYPE_ARRAY_INT;
+		}
+		else if(type == JooVirtualMachine.TYPE_ARRAY_FIXED) {
+			return TYPE_ARRAY_FIXED;
+		}
+		else if(type == JooVirtualMachine.TYPE_ARRAY_BOOL) {
+			return TYPE_ARRAY_BOOL;
+		}
+		else if(type == JooVirtualMachine.TYPE_ARRAY_CHAR) {
+			return TYPE_ARRAY_CHAR;
+		}
+		else if(type == JooVirtualMachine.TYPE_FUNCTION) {
+			return KEYWORD_FUNCTION;
+		}
+		return "";
+	}
+	
+	/**
 	 * Returns the type of the declaration.
 	 * If type contains a array keyword the array size is removed and type is returned.
 	 * Else type is returned without changes.
@@ -720,7 +764,7 @@ public class JooCompiler {
 	 * @param code to get lines from.
 	 * @return Array of code lines. 
 	 */
-	private String[] getLines(String code) {
+	String[] getLines(String code) {
 		code = code.replace("\t", "");
 		code = code.replace("\r", "");
 		String[] codeLines = code.split(LINE_BREAK);

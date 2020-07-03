@@ -1,8 +1,6 @@
 package com.johnsproject.joo;
 
 import java.text.ParseException;
-import java.util.List;
-import java.util.Map;
 
 import org.junit.Test;
 
@@ -107,10 +105,9 @@ public class JooCompilerTest {
 		String[] testCode;
 		Code code;
 		
-		compiler.setTypeRegistry(new int[9]);
-		
 		testCode = new String[] {"int", "test", "=", "10"};
 		code = new Code();
+		createTypeRegistry(code);
 		compiler.parseVariableComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("test"));
 		assert(code.getComponentWithName("test").hasName((byte) 1));
@@ -120,6 +117,7 @@ public class JooCompilerTest {
 		
 		testCode = new String[] {"fixed", "test", "=", "20.5"};
 		code = new Code();
+		createTypeRegistry(code);
 		compiler.parseVariableComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("test"));
 		assert(code.getComponentWithName("test").hasName((byte) 1));
@@ -129,6 +127,7 @@ public class JooCompilerTest {
 		
 		testCode = new String[] {"bool", "test", "=", "true"};
 		code = new Code();
+		createTypeRegistry(code);
 		compiler.parseVariableComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("test"));
 		assert(code.getComponentWithName("test").hasName((byte) 1));
@@ -138,15 +137,17 @@ public class JooCompilerTest {
 		
 		testCode = new String[] {"bool", "test", "=", "false"};
 		code = new Code();
+		createTypeRegistry(code);
 		compiler.parseVariableComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("test"));
-		assert(code.getComponentWithName("test").hasName((byte) 2));
+		assert(code.getComponentWithName("test").hasName((byte) 1));
 		assert(code.getComponentWithName("test").hasType(TYPE_BOOL));
 		assert(code.getComponentWithName("test").hasComponentWithName("0"));
 		assert(code.getComponentWithName("test").getComponentWithName("0").hasType(TYPE_BOOL));
 		
 		testCode = new String[] {"char", "test", "=", "'A'"};
 		code = new Code();
+		createTypeRegistry(code);
 		compiler.parseVariableComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("test"));
 		assert(code.getComponentWithName("test").hasName((byte) 1));
@@ -156,14 +157,16 @@ public class JooCompilerTest {
 		
 		testCode = new String[] {"int", "test"};
 		code = new Code();
+		createTypeRegistry(code);
 		compiler.parseVariableComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("test"));
-		assert(code.getComponentWithName("test").hasName((byte) 2));
+		assert(code.getComponentWithName("test").hasName((byte) 1));
 		assert(code.getComponentWithName("test").hasType(TYPE_INT));
 		assert(!code.getComponentWithName("test").hasComponentWithName("10"));
 		
 		testCode = new String[] {"int:10", "test"};
 		code = new Code();
+		createTypeRegistry(code);
 		compiler.parseVariableComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("test"));
 		assert(code.getComponentWithName("test").hasName((byte) 1));
@@ -227,23 +230,24 @@ public class JooCompilerTest {
 		final JooCompiler compiler = new JooCompiler();
 		String[] testCode;
 		Code code;
-
-		compiler.setTypeRegistry(new int[9]);
 		
 		testCode = new String[] {"repeatFunction"};
 		code = new Code();
+		createTypeRegistry(code);
 		compiler.parseFunctionComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("repeatFunction"));
 		assert(code.getComponentWithName("repeatFunction").hasType(KEYWORD_FUNCTION_REPEAT));
 		
 		testCode = new String[] {"endFunction"};
 		code = new Code();
+		createTypeRegistry(code);
 		compiler.parseFunctionComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("endFunction"));
 		assert(code.getComponentWithName("endFunction").hasType(KEYWORD_FUNCTION_END));
 		
 		testCode = new String[] {"function", "Test"};
 		code = new Code();
+		createTypeRegistry(code);
 		compiler.parseFunctionComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("Test"));
 		assert(code.getComponentWithName("Test").hasName((byte) 1));
@@ -251,9 +255,10 @@ public class JooCompilerTest {
 		
 		testCode = new String[] {"function", "Test", "int", "param0", "fixed", "param1"};
 		code = new Code();
+		createTypeRegistry(code);
 		compiler.parseFunctionComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("Test"));
-		assert(code.getComponentWithName("Test").hasName((byte) 2));
+		assert(code.getComponentWithName("Test").hasName((byte) 1));
 		assert(code.getComponentWithName("Test").hasType(KEYWORD_FUNCTION));
 		assert(code.getComponentWithName("Test").hasComponentWithName("param0"));
 		assert(code.getComponentWithName("Test").getComponentWithName("param0").hasName((byte) 1));
@@ -264,12 +269,14 @@ public class JooCompilerTest {
 		
 		testCode = new String[] {"call", "Test"};
 		code = new Code();
+		createTypeRegistry(code);
 		compiler.parseFunctionComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("Test"));
 		assert(code.getComponentWithName("Test").hasType(KEYWORD_FUNCTION_CALL));
 		
 		testCode = new String[] {"call", "Test", "variable0", "variable1"};
 		code = new Code();
+		createTypeRegistry(code);
 		code.addComponent(new CodeComponent("variable0", (byte) 1, TYPE_INT, (byte )JooVirtualMachine.TYPE_INT, 0));
 		code.addComponent(new CodeComponent("variable1", (byte) 2, TYPE_FIXED, (byte )JooVirtualMachine.TYPE_FIXED, 0));
 		compiler.parseFunctionComponent(code, testCode, 0);
@@ -514,12 +521,10 @@ public class JooCompilerTest {
 				"	endFunction					" + "\n"
 		;
 		
-		final int[] declarationRegitry = compiler.createTypeRegistry(testCode);
-		compiler.setTypeRegistry(declarationRegitry);
-		
 		final Code code = compiler.parseCode(testCode);
 		
-		int line = 0;
+		// line 0 is the type registry
+		int line = 1;
 		assert(code.getComponent(line).hasName("int0"));
 		assert(code.getComponent(line).hasName((byte) 1));
 		assert(code.getComponent(line).hasType(TYPE_INT));
@@ -794,19 +799,52 @@ public class JooCompilerTest {
 	}
 	
 	@Test
-	public void createDeclarationRegistryTest() throws Exception {
+	public void createTypeRegistryTest() throws Exception {
 		final JooCompiler jooCompiler = new JooCompiler();
-		final String code = FileUtil.read("TestCode.joo");
-		final int[] declarationRegistry = jooCompiler.createTypeRegistry(code);
-		assert(declarationRegistry[0] == 0);
-		assert(declarationRegistry[1] == 3);
-		assert(declarationRegistry[2] == 5);
-		assert(declarationRegistry[3] == 8);
-		assert(declarationRegistry[4] == 11);
-		assert(declarationRegistry[5] == 12);
-		assert(declarationRegistry[6] == 13);
-		assert(declarationRegistry[7] == 14);
-		assert(declarationRegistry[8] == 15);
+		final String codeData = FileUtil.read("TestCode.joo");
+		final String[] codeLines = jooCompiler.getLines(codeData);
+		final Code code = new Code();
+		jooCompiler.createTypeRegistry(code, codeLines);
+		
+		assert(code.hasComponentWithType(KEYWORD_TYPE_REGISTRY));
+		final CodeComponent typeRegistry = code.getComponentWithType(KEYWORD_TYPE_REGISTRY);
+		
+		int type = 0;
+		assert(typeRegistry.getComponent(type).hasType(TYPE_INT));
+		assert(typeRegistry.getComponent(type).hasType((byte) JooVirtualMachine.TYPE_INT));
+		assert(typeRegistry.getComponent(type).hasName("3"));
+		type++;
+		assert(typeRegistry.getComponent(type).hasType(TYPE_FIXED));
+		assert(typeRegistry.getComponent(type).hasType((byte) JooVirtualMachine.TYPE_FIXED));
+		assert(typeRegistry.getComponent(type).hasName("5"));
+		type++;
+		assert(typeRegistry.getComponent(type).hasType(TYPE_BOOL));
+		assert(typeRegistry.getComponent(type).hasType((byte) JooVirtualMachine.TYPE_BOOL));
+		assert(typeRegistry.getComponent(type).hasName("8"));
+		type++;
+		assert(typeRegistry.getComponent(type).hasType(TYPE_CHAR));
+		assert(typeRegistry.getComponent(type).hasType((byte) JooVirtualMachine.TYPE_CHAR));
+		assert(typeRegistry.getComponent(type).hasName("11"));
+		type++;
+		assert(typeRegistry.getComponent(type).hasType(TYPE_ARRAY_INT));
+		assert(typeRegistry.getComponent(type).hasType((byte) JooVirtualMachine.TYPE_ARRAY_INT));
+		assert(typeRegistry.getComponent(type).hasName("12"));
+		type++;
+		assert(typeRegistry.getComponent(type).hasType(TYPE_ARRAY_FIXED));
+		assert(typeRegistry.getComponent(type).hasType((byte) JooVirtualMachine.TYPE_ARRAY_FIXED));
+		assert(typeRegistry.getComponent(type).hasName("13"));
+		type++;
+		assert(typeRegistry.getComponent(type).hasType(TYPE_ARRAY_BOOL));
+		assert(typeRegistry.getComponent(type).hasType((byte) JooVirtualMachine.TYPE_ARRAY_BOOL));
+		assert(typeRegistry.getComponent(type).hasName("14"));
+		type++;
+		assert(typeRegistry.getComponent(type).hasType(TYPE_ARRAY_CHAR));
+		assert(typeRegistry.getComponent(type).hasType((byte) JooVirtualMachine.TYPE_ARRAY_CHAR));
+		assert(typeRegistry.getComponent(type).hasName("15"));
+		type++;
+		assert(typeRegistry.getComponent(type).hasType(KEYWORD_FUNCTION));
+		assert(typeRegistry.getComponent(type).hasType((byte) JooVirtualMachine.TYPE_FUNCTION));
+		assert(typeRegistry.getComponent(type).hasName("17"));
 	}
 	
 	@Test
@@ -999,5 +1037,18 @@ public class JooCompilerTest {
 //		assertEquals(jooLines[line++], "" + param0 + toIndex(0) + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("10"));
 //		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION + directoryLibraryFunction);
 //		assertEquals(jooLines[line++], "" + param0 + toIndex(0) + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("20"));
+	}
+	
+	private void createTypeRegistry(Code code) {
+		final JooCompiler compiler = new JooCompiler();
+		final CodeComponent typeRegistry = new CodeComponent(KEYWORD_TYPE_REGISTRY, (byte) 0, KEYWORD_TYPE_REGISTRY, (byte) 0, 0);
+		for (int i = 0; i <= 9; i++) {
+			final byte typeCount = (byte) 0;
+			final byte byteCodeType = (byte) (JooVirtualMachine.TYPE_INT - i);
+			final String type = compiler.toType(byteCodeType); 
+			final CodeComponent typeComponent = new CodeComponent("" + typeCount, typeCount, type, byteCodeType, 0);
+			typeRegistry.addComponent(typeComponent);
+		}
+		code.addComponent(typeRegistry);
 	}
 }
