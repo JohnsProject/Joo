@@ -857,15 +857,9 @@ public class JooCompilerTest {
 //			humanCompiledByteCode += (int)c + ";";
 //		}
 		
-		String humanByteCode = FileUtil.read("TestByteCode.cjoo");
-		// remove line breaks
-		humanByteCode = humanByteCode.replace("\n", "");
-		humanByteCode = humanByteCode.replace("\r", "");
-		final String[] byteCodeData = humanByteCode.split(";");
-		String byteCode = "";
-		for (String character : byteCodeData) {
-			byteCode += "" + (char)Integer.parseInt(character);
-		}
+		final HumanByteCodeConverter converter = new HumanByteCodeConverter();
+		final String humanByteCode = FileUtil.read("TestByteCode.cjoo");
+		final String byteCode = converter.convert(jooCompiler, humanByteCode);
 		assertEquals(byteCode, compiledByteCode);
 		
 //		final char int0 = 0 + JooVirtualMachine.COMPONENTS_START;

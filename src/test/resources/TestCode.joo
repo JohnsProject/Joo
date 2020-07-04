@@ -1,12 +1,14 @@
 # This is a example code used to test the joo programming language
 
-#include TestLibrary.joo
-#include TestLibraries/TestDirectoryLibrary.joo
+##
+include TestLibrary.joo
+include TestLibraries/TestDirectoryLibrary.joo
 
-#define TEST_INT_CONSTANT = 25
-#define TEST_FIXED_CONSTANT = 25.25
-#define TEST_BOOL_CONSTANT = true
-#define TEST_CHAR_CONSTANT = 'd'
+define TEST_INT_CONSTANT = 25
+define TEST_FIXED_CONSTANT = 25.25
+define TEST_BOOL_CONSTANT = true
+define TEST_CHAR_CONSTANT = 'd'
+##
 
 int int0
 int int1 = 10

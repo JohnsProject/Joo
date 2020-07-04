@@ -1,26 +1,34 @@
-127;3;
-1;
-2;92;91;
-3;
-126;2;
-4;
-5;93;96;97;93;99;
-125;3;
-6;
-7;92;
-8;91;
-124;3;
-9;
-10;97;96;
-11;97;98;
-123;1;
-12;10;
-122;1;
-13;5;
-121;1;
-14;15;
-120;1;
-15;13;
-119;2;
-16;
-17;
+int 3c
+int0
+int1 10n
+correctIfs
+
+fixed 2c
+fixed0
+fixed1 25628n
+
+bool 3c
+bool0
+bool1 1n
+bool2 0n
+
+char 3c
+char0
+char1 65n
+char2 67n
+
+int: 1c
+intArray 10c
+
+fixed: 1c
+fixedArray 5c
+
+bool: 1c
+boolArray 15c
+
+char: 1c
+charArray 13c
+
+function 2c
+Start
+Function

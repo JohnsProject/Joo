@@ -115,6 +115,10 @@ public class JooCompiler {
 	void setSettings(Settings settings) {
 		this.settings = settings;
 	}
+	
+	Code getCode() {
+		return code;
+	}
 
 	public String compile(String path) {
 		final String directoryPath = getDirectoryPath(path);
@@ -307,7 +311,7 @@ public class JooCompiler {
 				throw new ParseException("Invalid variable declaration", lineIndex);
 			final String name = lineData[1];
 			final String type = toType(typeData);
-			final byte byteCodeName = getUniqueByteCodeName(code, type);
+			final byte byteCodeName = getUniqueByteCodeName(code, name, type);
 			final byte byteCodeType = toByteCodeType(type);
 			CodeComponent variable = new CodeComponent(name, byteCodeName, type, byteCodeType, lineIndex);
 			boolean parsed = false;
@@ -382,7 +386,7 @@ public class JooCompiler {
 			throw new ParseException("Invalid function declaration", lineIndex);
 		final String name = lineData[1];
 		final String type = KEYWORD_FUNCTION;
-		final byte byteCodeName = getUniqueByteCodeName(code, type);
+		final byte byteCodeName = getUniqueByteCodeName(code, name, type);
 		final byte byteCodeType = (byte)JooVirtualMachine.KEYWORD_FUNCTION;
 		CodeComponent function = new CodeComponent(name, byteCodeName, type, byteCodeType, lineIndex);
 		for (int i = 2; i < lineData.length; i += 2) {
@@ -611,12 +615,13 @@ public class JooCompiler {
 	/**
 	 * Returns a unique variable or function byte code name.
 	 * 
-	 * @param code of the component that will use the name.
-	 * @param type of the component that will use the name.
+	 * @param code of the component that will use the byte code name.
+	 * @param name of the component that will use the byte code name.
+	 * @param type of the component that will use the byte code name.
 	 * @return Unique byte code name.
 	 */
-	private byte getUniqueByteCodeName(Code code, String type) {
-		byte byteCodeName = 0;
+	private byte getUniqueByteCodeName(Code code, String name, String type) {
+		byte byteCodeName = JooVirtualMachine.COMPONENTS_START;
 		final byte byteCodeType = toByteCodeType(type);
 		// toByteCodeType returns -1 if type doens't exist
 		if(byteCodeType > 0) {
@@ -627,11 +632,11 @@ public class JooCompiler {
 			if(typeIndex > 0) {
 				previousTypeCount = typeRegistry.getComponent(typeIndex - 1).getByteCodeName(); 
 			}
-			byteCodeName = (byte) (registry.getComponentWithTypeCount(type) + previousTypeCount);
-			final CodeComponent assignedName = new CodeComponent("" + byteCodeName, byteCodeName, type, byteCodeType, 0);	
+			byteCodeName += (byte) (registry.getComponentWithTypeCount(type) + previousTypeCount);
+			final CodeComponent assignedName = new CodeComponent(name, byteCodeName, type, byteCodeType, 0);	
 			registry.addComponent(assignedName);
 		}
-		return (byte) (byteCodeName + JooVirtualMachine.COMPONENTS_START);
+		return byteCodeName;
 	}
 	
 	/**
@@ -768,9 +773,17 @@ public class JooCompiler {
 		code = code.replace("\t", "");
 		code = code.replace("\r", "");
 		String[] codeLines = code.split(LINE_BREAK);
+		boolean multiLineComment = false;
 		for (int i = 0; i < codeLines.length; i++) {
 			String line = codeLines[i];
-			if(line.contains(KEYWORD_COMMENT)) {
+			if(line.equals(KEYWORD_COMMENT + KEYWORD_COMMENT)) {
+				multiLineComment = !multiLineComment;
+				codeLines[i] = "";
+			}
+			else if(multiLineComment) {
+				codeLines[i] = "";
+			}
+			else if(line.contains(KEYWORD_COMMENT)) {
 				final String[] lineData = line.split(KEYWORD_COMMENT);
 				final String lineCode = lineData[0];
 				if(lineCode.isEmpty()) {
