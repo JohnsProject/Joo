@@ -8,6 +8,7 @@ import com.johnsproject.joo.util.FileUtil;
 
 import static com.johnsproject.joo.JooCompiler.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class JooCompilerTest {
 
@@ -50,53 +51,52 @@ public class JooCompilerTest {
 		assert(settings.getSettingWithName("Storage_Clear").hasName((byte)35));
 		assert(!settings.getSettingWithName("Storage_Clear").hasSettingWithName("param0"));
 		
-		ParseException exception = null;
 		try {
 			final String testSettings = "@operator" + "\n"
 										+ "01 + int|fixed" + "\n"
 										+ "02 + int|fixed";
 			compiler.parseSettings(testSettings);
+			fail("Duplicate compiler setting exception not thrown");
 		} catch (ParseException e) {
-			// if the assert is here the test will pass if no exception is thrown
-			exception = e;
+			assertEquals(e.getMessage(), "Duplicate compiler setting, Name: +");
 		}
-		assertEquals(exception.getMessage(), "Duplicate compiler setting, Name: +");
+		
 		
 		try {
 			final String testSettings = "@function" + "\n"
 										+ "MyFunction";
 			compiler.parseSettings(testSettings);
+			fail("Invalid setting declaration exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid setting declaration");
 		}
-		assertEquals(exception.getMessage(), "Invalid setting declaration");
 		
 		try {
 			final String testSettings = "@operator" + "\n"
 										+ "0A + int|fixed";
 			compiler.parseSettings(testSettings);
+			fail("Invalid byte code name exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid byte code name, Name: 0A");
 		}
-		assertEquals(exception.getMessage(), "Invalid byte code name, Name: 0A");
 		
 		try {
 			final String testSettings = "@operator" + "\n"
 										+ "01 + int|fixed A";
 			compiler.parseSettings(testSettings);
+			fail("Invalid operator declaration exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid operator declaration");
 		}
-		assertEquals(exception.getMessage(), "Invalid operator declaration");
 		
 		try {
 			final String testSettings = "@function" + "\n"
 										+ "01 MyFunction bug";
 			compiler.parseSettings(testSettings);
+			fail("Invalid supported type exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid supported type, Type: bug");
 		}
-		assertEquals(exception.getMessage(), "Invalid supported type, Type: bug");
 	}
 	
 	@Test
@@ -174,55 +174,53 @@ public class JooCompilerTest {
 		assert(code.getComponentWithName("test").hasComponentWithName("10"));
 		assert(code.getComponentWithName("test").getComponentWithName("10").hasType(KEYWORD_ARRAY));
 		
-		ParseException exception = null;
 		try {
 			testCode = new String[] {"int", "test", "="};
 			compiler.parseVariableComponent(code, testCode, 0);
+			fail("Invalid variable declaration exception not thrown");
 		} catch (ParseException e) {
-			// if the assert is here the test will pass if no exception is thrown
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid variable declaration");
 		}
-		assertEquals(exception.getMessage(), "Invalid variable declaration");
 		
 		try {
 			testCode = new String[] {"int:A", "test"};
 			compiler.parseVariableComponent(code, testCode, 0);
+			fail("Invalid array size declaration exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid array size declaration, Size: A");
 		}
-		assertEquals(exception.getMessage(), "Invalid array size declaration, Size: A");
 		
 		try {
 			testCode = new String[] {"int:15", "test", "=", "10"};
 			compiler.parseVariableComponent(code, testCode, 0);
+			fail("Invalid array declaration exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid array declaration. Value can't be assigned to array");
 		}
-		assertEquals(exception.getMessage(), "Invalid array declaration. Value can't be assigned to array");
 		
 		try {
 			testCode = new String[] {"int", "test", "-", "10"};
 			compiler.parseVariableComponent(code, testCode, 0);
+			fail("Invalid assignment operator exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid assignment operator, Operator: -");
 		}
-		assertEquals(exception.getMessage(), "Invalid assignment operator, Operator: -");
 		
 		try {
 			testCode = new String[] {"char", "test", "=", "'A''"};
 			compiler.parseVariableComponent(code, testCode, 0);
+			fail("Invalid char value declaration exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid char value declaration");
 		}
-		assertEquals(exception.getMessage(), "Invalid char value declaration");
 		
 		try {
 			testCode = new String[] {"int", "test", "=", "A"};
 			compiler.parseVariableComponent(code, testCode, 0);
+			fail("The declared value type doesn't match the variable type exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "The declared value type doesn't match the variable type");
 		}
-		assertEquals(exception.getMessage(), "The declared value type doesn't match the variable type");
 	}
 	
 	@Test
@@ -289,48 +287,46 @@ public class JooCompilerTest {
 		assert(code.getComponentWithName("Test").getComponentWithName("variable1").hasName((byte) 2));
 		assert(code.getComponentWithName("Test").getComponentWithName("variable1").hasType(TYPE_FIXED));
 		
-		ParseException exception = null;
 		try {
 			testCode = new String[] {"function"};
 			compiler.parseFunctionComponent(code, testCode, 0);
+			fail("Invalid function declaration exception not thrown");
 		} catch (ParseException e) {
-			// if the assert is here the test will pass if no exception is thrown
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid function declaration");
 		}
-		assertEquals(exception.getMessage(), "Invalid function declaration");
 		
 		try {
 			testCode = new String[] {"function", "Test", "a", "param0", "fixed", "param1"};
 			compiler.parseFunctionComponent(code, testCode, 0);
+			fail("Invalid parameter type declaration exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid parameter type declaration, Type: a");
 		}
-		assertEquals(exception.getMessage(), "Invalid parameter type declaration, Type: a");
 		
 		try {
 			testCode = new String[] {"function", "Test", "int", "param0", "param1"};
 			compiler.parseFunctionComponent(code, testCode, 0);
+			fail("Invalid parameter declaration exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid parameter declaration");
 		}
-		assertEquals(exception.getMessage(), "Invalid parameter declaration");
 		
 		try {
 			testCode = new String[] {"call"};
 			compiler.parseFunctionComponent(code, testCode, 0);
+			fail("Invalid function call exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid function call");
 		}
-		assertEquals(exception.getMessage(), "Invalid function call");
 		
 		try {
 			// if argument is a unknown variable
 			testCode = new String[] {"call", "Test", "variable2"};
 			compiler.parseFunctionComponent(code, testCode, 0);
+			fail("Invalid variable exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid variable, Name: variable2");
 		}
-		assertEquals(exception.getMessage(), "Invalid variable, Name: variable2");
 	}
 	
 	@Test
@@ -420,39 +416,37 @@ public class JooCompilerTest {
 		assert(code.getComponentWithName("==").hasComponentWithName("150"));
 		assert(code.getComponentWithName("==").getComponentWithName("150").hasType(TYPE_ARRAY_INT));
 	
-		ParseException exception = null;
 		try {
 			testCode = new String[] {"if", "variable0", "==", "variable1", "A"};
 			compiler.parseConditionComponent(code, testCode, 0);
+			fail("Invalid condition not thrown");
 		} catch (ParseException e) {
-			// if the assert is here the test will pass if no exception is thrown
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid condition declaration");
 		}
-		assertEquals(exception.getMessage(), "Invalid condition declaration");
 		
 		try {
 			testCode = new String[] {"if", "variable0", "A", "variable1"};
 			compiler.parseConditionComponent(code, testCode, 0);
+			fail("Invalid comparison operator not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid comparison operator, Operator: A");
 		}
-		assertEquals(exception.getMessage(), "Invalid comparison operator, Operator: A");
 		
 		try {
 			testCode = new String[] {"if", "variable0:a", "==", "variable1"};
 			compiler.parseConditionComponent(code, testCode, 0);
+			fail("Invalid array index exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid array index, Index: a");
 		}
-		assertEquals(exception.getMessage(), "Invalid array index, Index: a");
 		
 		try {
 			testCode = new String[] {"if", "variable1:5", "==", "variable0"};
 			compiler.parseConditionComponent(code, testCode, 0);
+			fail("A variable that is not of type array has an index exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "A variable that is not of type array has an index, Name: variable1");
 		}
-		assertEquals(exception.getMessage(), "A variable that is not of type array has an index, Name: variable1");
 	}
 	
 	@Test
@@ -481,15 +475,13 @@ public class JooCompilerTest {
 		assert(code.getComponentWithName("=").getComponentWithName("variable1").hasName((byte) 2));
 		assert(code.getComponentWithName("=").getComponentWithName("variable1").hasType(TYPE_FIXED));
 	
-		ParseException exception = null;
 		try {
 			testCode = new String[] {"variable0", "a", "variable1"};
 			compiler.parseOperationComponent(code, testCode, 0);
+			fail("Invalid operator exception not thrown");
 		} catch (ParseException e) {
-			// if the assert is here the test will pass if no exception is thrown
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid operator, Operator: a");
 		}
-		assertEquals(exception.getMessage(), "Invalid operator, Operator: a");
 	}
 	
 	@Test
@@ -656,81 +648,79 @@ public class JooCompilerTest {
 		
 		compiler.setSettings(settings);
 		
-		ParseException exception = null;
 		try {
 			Code code = new Code();
 			code.addComponent(new CodeComponent("0variable", (byte) 1, TYPE_INT, (byte) 0, 0));
 			compiler.analyseCode(code);
+			fail("Variable names should start with a alphabetic character exception not thrown");
 		} catch (ParseException e) {
-			// if the assert is here the test will pass if no exception is thrown
-			exception = e;
+			assertEquals(e.getMessage(), "Variable names should start with a alphabetic character, Name: 0variable");
 		}
-		assertEquals(exception.getMessage(), "Variable names should start with a alphabetic character, Name: 0variable");
 		
 		try {
 			Code code = new Code();
 			code.addComponent(new CodeComponent("Variable", (byte) 1, TYPE_INT, (byte) 0, 0));
 			compiler.analyseCode(code);
+			fail("Variable names should start with a lowercase character exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Variable names should start with a lowercase character, Name: Variable");
 		}
-		assertEquals(exception.getMessage(), "Variable names should start with a lowercase character, Name: Variable");
 		
 		try {
 			Code code = new Code();
 			code.addComponent(new CodeComponent("my_variable", (byte) 1, TYPE_INT, (byte) 0, 0));
 			compiler.analyseCode(code);
+			fail("Variable names should contain only alphanumeric characters exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Variable names should contain only alphanumeric characters, Name: my_variable");
 		}
-		assertEquals(exception.getMessage(), "Variable names should contain only alphanumeric characters, Name: my_variable");
 		
 		try {
 			Code code = new Code();
 			code.addComponent(new CodeComponent("variable", (byte) 1, TYPE_INT, (byte) 0, 0));
 			code.addComponent(new CodeComponent("variable", (byte) 2, TYPE_INT, (byte) 0, 0));
 			compiler.analyseCode(code);
+			fail("Duplicate variable exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Duplicate variable, Name: variable");
 		}
-		assertEquals(exception.getMessage(), "Duplicate variable, Name: variable");
 		
 		try {
 			Code code = new Code();
 			code.addComponent(new CodeComponent("0Function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0));
 			compiler.analyseCode(code);
+			fail("Function names should start with a alphabetic character exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Function names should start with a alphabetic character, Name: 0Function");
 		}
-		assertEquals(exception.getMessage(), "Function names should start with a alphabetic character, Name: 0Function");
 		
 		try {
 			Code code = new Code();
 			code.addComponent(new CodeComponent("function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0));
 			compiler.analyseCode(code);
+			fail("Function names should start with a uppercase character exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Function names should start with a uppercase character, Name: function");
 		}
-		assertEquals(exception.getMessage(), "Function names should start with a uppercase character, Name: function");
 		
 		try {
 			Code code = new Code();
 			code.addComponent(new CodeComponent("My_Function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0));
 			compiler.analyseCode(code);
+			fail("Function names should contain only alphanumeric characters exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Function names should contain only alphanumeric characters, Name: My_Function");
 		}
-		assertEquals(exception.getMessage(), "Function names should contain only alphanumeric characters, Name: My_Function");
 		
 		try {
 			Code code = new Code();
 			code.addComponent(new CodeComponent("Function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0));
 			code.addComponent(new CodeComponent("Function", (byte) 2, KEYWORD_FUNCTION, (byte) 0, 0));
 			compiler.analyseCode(code);
+			fail("Duplicate function exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Duplicate function, Name: Function");
 		}
-		assertEquals(exception.getMessage(), "Duplicate function, Name: Function");
 		
 		try {
 			Code code = new Code();
@@ -738,10 +728,10 @@ public class JooCompilerTest {
 			function.addComponent(new CodeComponent("parameter", (byte) 1, KEYWORD_PARAMETER, (byte) 0, 0));
 			code.addComponent(function);
 			compiler.analyseCode(code);
+			fail("Parameter names should start with a _ exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Parameter names should start with a _, Name: parameter");
 		}
-		assertEquals(exception.getMessage(), "Parameter names should start with a _, Name: parameter");
 		
 		try {
 			Code code = new Code();
@@ -749,10 +739,10 @@ public class JooCompilerTest {
 			function.addComponent(new CodeComponent("_0parameter", (byte) 1, KEYWORD_PARAMETER, (byte) 0, 0));
 			code.addComponent(function);
 			compiler.analyseCode(code);
+			fail("Parameter names should start with a alphabetic character exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Parameter names should start with a alphabetic character, Name: _0parameter");
 		}
-		assertEquals(exception.getMessage(), "Parameter names should start with a alphabetic character, Name: _0parameter");
 		
 		try {
 			Code code = new Code();
@@ -760,10 +750,10 @@ public class JooCompilerTest {
 			function.addComponent(new CodeComponent("_Parameter", (byte) 1, KEYWORD_PARAMETER, (byte) 0, 0));
 			code.addComponent(function);
 			compiler.analyseCode(code);
+			fail("Parameter names should start with a lowercase character exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Parameter names should start with a lowercase character, Name: _Parameter");
 		}
-		assertEquals(exception.getMessage(), "Parameter names should start with a lowercase character, Name: _Parameter");
 		
 		try {
 			Code code = new Code();
@@ -771,10 +761,10 @@ public class JooCompilerTest {
 			function.addComponent(new CodeComponent("_my_parameter", (byte) 1, KEYWORD_PARAMETER, (byte) 0, 0));
 			code.addComponent(function);
 			compiler.analyseCode(code);
+			fail("Parameter names should contain only alphanumeric characters exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Parameter names should contain only alphanumeric characters, Name: _my_parameter");
 		}
-		assertEquals(exception.getMessage(), "Parameter names should contain only alphanumeric characters, Name: _my_parameter");
 		
 		try {
 			Code code = new Code();
@@ -783,19 +773,19 @@ public class JooCompilerTest {
 			function.addComponent(new CodeComponent("_parameter", (byte) 2, KEYWORD_PARAMETER, (byte) 0, 0));
 			code.addComponent(function);
 			compiler.analyseCode(code);
+			fail("Duplicate parameter");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Duplicate parameter, Name: _parameter");
 		}
-		assertEquals(exception.getMessage(), "Duplicate parameter, Name: _parameter");
 		
 		try {
 			Code code = new Code();
 			code.addComponent(new CodeComponent("Function", (byte) 1, KEYWORD_FUNCTION_CALL, (byte) 0, 0));
 			compiler.analyseCode(code);
+			fail("Invalid function exception not thrown");
 		} catch (ParseException e) {
-			exception = e;
+			assertEquals(e.getMessage(), "Invalid function, Name: Function");
 		}
-		assertEquals(exception.getMessage(), "Invalid function, Name: Function");
 	}
 	
 	@Test
