@@ -841,16 +841,64 @@ public class JooCompilerTest {
 	public void compileTest() throws Exception {
 		final JooCompiler jooCompiler = new JooCompiler();
 		final String compiledByteCode = jooCompiler.compile("TestCode.joo");
-//		final char[] compiledByteCodeChars = compiledByteCode.toCharArray();
-//		String humanCompiledByteCode = "";
-//		for (char c : compiledByteCodeChars) {
-//			humanCompiledByteCode += (int)c + ";";
-//		}
+		final String[] lines = compiledByteCode.split("" + JooVirtualMachine.LINE_BREAK);
 		
-		final HumanByteCodeConverter converter = new HumanByteCodeConverter();
-		final String humanByteCode = FileUtil.read("TestByteCode.cjoo");
-		final String byteCode = converter.convert(jooCompiler, humanByteCode);
-		assertEquals(byteCode, compiledByteCode);
+		// uncomment to print the byte code character as numbers
+		for (int l = 0; l < lines.length; l++) {
+			final char[] line = lines[l].toCharArray();
+			for (int i = 0; i < line.length; i++) {
+				System.out.print((int)line[i] + "|");
+			}
+			System.out.println();
+		}
+		
+		char name = JooVirtualMachine.COMPONENTS_START;
+		final char int0 = name++;
+		final char int1 = name++;
+		final char correctIfs = name++;
+		final char fixed0 = name++;
+		final char fixed1 = name++;
+		final char bool0 = name++;
+		final char bool1 = name++;
+		final char bool2 = name++;
+		final char char0 = name++;
+		final char char1 = name++;
+		final char char2 = name++;
+		final char intArray = name++;
+		final char fixedArray = name++;
+		final char boolArray = name++;
+		final char charArray = name++;
+		final char start = name++;
+		final char function = name++;
+		
+		int line = 0;
+		assertEquals(lines[line++], "" + JooVirtualMachine.TYPE_INT + (char)3);
+		assertEquals(lines[line++], "" + int0);
+		assertEquals(lines[line++], "" + int1 + jooCompiler.toByteCodeNumber("10"));
+		assertEquals(lines[line++], "" + correctIfs);
+		assertEquals(lines[line++], "" + JooVirtualMachine.TYPE_FIXED + (char)2);
+		assertEquals(lines[line++], "" + fixed0);
+		assertEquals(lines[line++], "" + fixed1 + jooCompiler.toByteCodeNumber("" + Math.round(100.5f * 255)));
+		assertEquals(lines[line++], "" + JooVirtualMachine.TYPE_BOOL + (char)3);
+		assertEquals(lines[line++], "" + bool0);
+		assertEquals(lines[line++], "" + bool1 + jooCompiler.toByteCodeNumber("1"));
+		assertEquals(lines[line++], "" + bool2 + jooCompiler.toByteCodeNumber("0"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.TYPE_CHAR + (char)3);
+		assertEquals(lines[line++], "" + char0);
+		assertEquals(lines[line++], "" + char1 + jooCompiler.toByteCodeNumber("65"));
+		assertEquals(lines[line++], "" + char2 + jooCompiler.toByteCodeNumber("67"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.TYPE_ARRAY_INT + (char)1);
+		assertEquals(lines[line++], "" + intArray + (char)10);
+		assertEquals(lines[line++], "" + JooVirtualMachine.TYPE_ARRAY_FIXED + (char)1);
+		assertEquals(lines[line++], "" + fixedArray + (char)5);
+		assertEquals(lines[line++], "" + JooVirtualMachine.TYPE_ARRAY_BOOL + (char)1);
+		assertEquals(lines[line++], "" + boolArray + (char)15);
+		assertEquals(lines[line++], "" + JooVirtualMachine.TYPE_ARRAY_CHAR + (char)1);
+		assertEquals(lines[line++], "" + charArray + (char)13);
+		assertEquals(lines[line++], "" + JooVirtualMachine.TYPE_FUNCTION + (char)2);
+		assertEquals(lines[line++], "" + start);
+		assertEquals(lines[line++], "" + function);
+		
 		
 //		final char int0 = 0 + JooVirtualMachine.COMPONENTS_START;
 //		final char int1 = 1 + JooVirtualMachine.COMPONENTS_START;
