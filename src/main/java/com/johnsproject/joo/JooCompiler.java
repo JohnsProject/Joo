@@ -90,17 +90,6 @@ public class JooCompiler {
 	public static final String PATH_COMPILER_SETTINGS = "JooCompilerSettings.jcs";
 	public static final String SETTINGS_TYPE_DECLARATION = "@";
 	
-	public static final char[] VM_TYPES = new char[] {
-			JooVirtualMachine.TYPE_INT,
-			JooVirtualMachine.TYPE_FIXED,
-			JooVirtualMachine.TYPE_BOOL,
-			JooVirtualMachine.TYPE_CHAR,
-			JooVirtualMachine.TYPE_ARRAY_INT,
-			JooVirtualMachine.TYPE_ARRAY_FIXED,
-			JooVirtualMachine.TYPE_ARRAY_BOOL,
-			JooVirtualMachine.TYPE_ARRAY_CHAR,
-	};
-	
 	private String settingType;
 	private Settings settings;
 	private Code code;
@@ -534,7 +523,10 @@ public class JooCompiler {
 			}
 		}
 		final CodeComponent declaredVariable = getVariableWithName(name, code, lineIndex);
-		final CodeComponent variable = declaredVariable.clone();
+		final byte byteCodeName = declaredVariable.getByteCodeName();
+		final String type = declaredVariable.getType();
+		final byte byteCodeType = declaredVariable.getByteCodeType();
+		final CodeComponent variable = new CodeComponent(name, byteCodeName, type, byteCodeType, lineIndex);
 		if(arrayIndex != null) {
 			if(!isArray(declaredVariable.getType()))
 				throw new ParseException("A variable that is not of type array has an index, Name: " + name, lineIndex);
@@ -597,7 +589,7 @@ public class JooCompiler {
 			try {
 				valueType = type;
 				double number = Double.parseDouble(rawValue);
-				if(type.equals(TYPE_FIXED))
+				if(type.equals(TYPE_FIXED) || type.equals(TYPE_ARRAY_FIXED))
 					number *= FIXED_POINT;
 				value = "" + Math.round(number);
 			} catch (NumberFormatException e) {
@@ -878,10 +870,13 @@ public class JooCompiler {
 		String byteCode = "";
 		byteCode += writeComponentsIndex(code);
 		for (CodeComponent component : code.getComponents()) {
-//			if(component.hasType(KEY)) {
-//				
-//			}
+			String byteCodeLine = "";
+			byteCodeLine += writeFunctionDeclaration(component);
+			byteCodeLine += writeOperation(component);
+			if(!byteCodeLine.isEmpty())
+				byteCode += byteCodeLine + JooVirtualMachine.LINE_BREAK;
 		}
+		
 		return byteCode;
 	}
 	
@@ -910,13 +905,54 @@ public class JooCompiler {
 				}
 				else if(component.hasComponentWithType(KEYWORD_ARRAY)) { // is this variable a array?
 					final CodeComponent arraySize = component.getComponentWithType(KEYWORD_ARRAY);
-					componentIndex += "" + (char)arraySize.getByteCodeName();
+					componentIndex += toByteCodeNumber(arraySize.getName());
 				}
 				componentIndex += "" + JooVirtualMachine.LINE_BREAK;
 				// only write function names, the function start index will be added after the code is written
 			}
 		}
 		return componentIndex;
+	}
+	
+	private String writeFunctionDeclaration(CodeComponent component) {
+		String functionDeclaration = "";
+		if(component.hasType(KEYWORD_FUNCTION)) {
+			// only the function keyword is needed here to know that this is where a function starts, so it can be added to the index later
+			functionDeclaration += (char)component.getByteCodeType();
+		}
+		return functionDeclaration;
+	}
+	
+	private String writeOperation(CodeComponent component) {
+		String operation = "";
+		if(component.hasType(KEYWORD_OPERATOR)) {
+			operation += writeVariable(component.getComponent(0));
+			operation += "" + (char)component.getByteCodeName();
+			operation += writeVariable(component.getComponent(1));
+		}
+		return operation;
+	}
+	
+	/**
+	 * Converts specified variable or value {@link CodeComponent} to it's byte code representation.
+	 * 
+	 * @param component to convert.
+	 * @return The byte code representation of the specified CodeComponent.
+	 */
+	private String writeVariable(CodeComponent component) {
+		String variable = "";
+		final byte byteCodeName = component.getByteCodeName();
+		if(byteCodeName >= JooVirtualMachine.COMPONENTS_START) {
+			variable += "" + (char)byteCodeName;
+			if(component.hasComponentWithType(KEYWORD_ARRAY)) {
+				final String arrayIndex = component.getComponentWithType(KEYWORD_ARRAY).getName();
+				variable += toByteCodeNumber(arrayIndex);
+			}
+		} else { // if byte code name == 0, it's a value
+			final String value = component.getName();
+			variable += "" + toByteCodeNumber(value);
+		}
+		return variable;
 	}
 	
 	/**

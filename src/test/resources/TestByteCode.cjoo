@@ -32,3 +32,135 @@ charArray 13c
 function 2c
 Start
 Function
+
+function Start
+int0 + 100n
+int0 - int1
+int0 * 2n
+int0 / 10n
+int1 = 6c
+fixed0 + fixed1
+fixed0 - 127n
+fixed0 * 639n
+fixed0 / 1275n
+fixed1 = 12750n
+bool0 = 1n
+bool1 = 0n
+bool2 = bool1
+char0 = 65n
+char1 = 67n
+char2 = char1
+intArray 1c = 30n
+intArray 2c + 15n
+intArray 1c - int1
+intArray 2c / 5n
+intArray 1c * intArray 2c
+intArray 8c = 25n
+fixedArray 1c = 15427n
+fixedArray 2c + 3725n
+fixedArray 1c - fixed1
+fixedArray 2c / 1275n
+fixedArray 1c * fixedArray 2c
+fixedArray 3c =- 2550n
+fixedArray 4c =+ fixedArray 3c
+fixedArray 5c =! fixedArray 4c
+fixedArray 6c = 6439n
+boolArray 10c = bool0
+boolArray 11c = 1n
+boolArray 12c = boolArray 11c
+boolArray 3c =- 1n
+boolArray 4c =+ boolArray 3c
+boolArray 5c =! boolArray 4c
+boolArray 6c = 1n
+charArray 10c = char0
+charArray 11c = 67n
+charArray 12c = charArray 11c
+charArray 1c = 100n
+
+if int0 == 18n
+correctIfs + 1n
+
+if int1 == 6n
+correctIfs + 1n
+else
+correctIfs + 2n
+if
+
+correctIfs + 1n
+else
+correctIfs + 2n
+if
+
+if bool0 == 0n
+correctIfs + 1n
+elseIf bool0 == 1n
+correctIfs + 2n
+if
+
+if int0 != int1
+correctIfs + 1n
+else
+correctIfs + 2n
+if
+
+intArray 3c = 100n
+if int0 < intArray 3c
+correctIfs + 1n
+else
+correctIfs + 2n
+if
+
+if intArray 3c > int0
+correctIfs + 1n
+else
+correctIfs + 2n
+if
+
+if int0 <= intArray 3c
+correctIfs + 1n
+else
+correctIfs + 2n
+if
+
+if intArray 3c >= int0
+correctIfs + 1n
+else
+correctIfs + 2n
+if
+
+intArray 4c = intArray 3c
+if intArray 3c >= intArray 4c
+correctIfs + 1n
+else
+correctIfs + 2n
+if
+
+if intArray 3c <= intArray 4c
+correctIfs + 1n
+else
+correctIfs + 2n
+if
+
+Function int0 intArray
+
+function Function
+fixed1 + 6375n
+if fixed1 <= 20400n
+functionRepeat
+if
+
+param0 + 100n
+param1 6c = param0
+param1 5c = param1 6c
+param0 + param1 5c
+param1 int1 = int1
+param0 - param1 int1
+if param0 < param1 6c
+correctIfs + 1n
+else
+correctIfs + 2n
+if
+
+
+
+
