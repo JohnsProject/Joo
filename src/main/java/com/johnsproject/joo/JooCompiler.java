@@ -400,8 +400,8 @@ public class JooCompiler {
 		CodeComponent functionCall = new CodeComponent(name, (byte) 0, type, byteCodeType, lineIndex);
 		for (int i = 2; i < lineData.length; i++) {
 			final String argumentName = lineData[i];
-			final byte argumentByteCodeName = (byte) ((i - 2) + JooVirtualMachine.COMPONENTS_START);
 			final CodeComponent variable = getVariableWithName(argumentName, code, lineIndex);
+			final byte argumentByteCodeName = variable.getByteCodeName();
 			final String argumentType = variable.getType();
 			final byte argumentByteCodeType = variable.getByteCodeType();
 			CodeComponent argument = new CodeComponent(argumentName, argumentByteCodeName, argumentType, argumentByteCodeType, lineIndex);
@@ -871,8 +871,9 @@ public class JooCompiler {
 		byteCode += writeComponentsIndex(code);
 		for (CodeComponent component : code.getComponents()) {
 			String byteCodeLine = "";
-			byteCodeLine += writeFunctionDeclaration(component);
+			byteCodeLine += writeFunction(code, component);
 			byteCodeLine += writeOperation(component);
+			byteCodeLine += writeCondition(component);
 			if(!byteCodeLine.isEmpty())
 				byteCode += byteCodeLine + JooVirtualMachine.LINE_BREAK;
 		}
@@ -914,13 +915,20 @@ public class JooCompiler {
 		return componentIndex;
 	}
 	
-	private String writeFunctionDeclaration(CodeComponent component) {
-		String functionDeclaration = "";
-		if(component.hasType(KEYWORD_FUNCTION)) {
+	private String writeFunction(Code code, CodeComponent component) {
+		String function = "";
+		if(component.hasType(KEYWORD_FUNCTION) || component.hasType(KEYWORD_FUNCTION_REPEAT)) {
+			// the endFunction is not needed as after a function there will always be another function or end of file
 			// only the function keyword is needed here to know that this is where a function starts, so it can be added to the index later
-			functionDeclaration += (char)component.getByteCodeType();
+			function += (char)component.getByteCodeType();
 		}
-		return functionDeclaration;
+		else if(component.hasType(KEYWORD_FUNCTION_CALL)) {
+			final CodeComponent calledFunction = code.getComponent(component.getName(), KEYWORD_FUNCTION);
+			function += (char)calledFunction.getByteCodeName();
+			for (CodeComponent argument : component.getComponents())
+				function += writeVariable(argument);
+		}
+		return function;
 	}
 	
 	private String writeOperation(CodeComponent component) {
@@ -931,6 +939,20 @@ public class JooCompiler {
 			operation += writeVariable(component.getComponent(1));
 		}
 		return operation;
+	}
+	
+	private String writeCondition(CodeComponent component) {
+		String condition = "";
+		if(component.hasType(KEYWORD_IF) || component.hasType(KEYWORD_ELSE_IF)) {
+			condition += (char)component.getByteCodeType();
+			condition += writeVariable(component.getComponent(0));
+			condition += "" + (char)component.getByteCodeName();
+			condition += writeVariable(component.getComponent(1));
+		}
+		else if (component.hasType(KEYWORD_ELSE) || component.hasType(KEYWORD_IF_END)) {
+			condition += (char)component.getByteCodeType();
+		}
+		return condition;
 	}
 	
 	/**
@@ -944,9 +966,13 @@ public class JooCompiler {
 		final byte byteCodeName = component.getByteCodeName();
 		if(byteCodeName >= JooVirtualMachine.COMPONENTS_START) {
 			variable += "" + (char)byteCodeName;
-			if(component.hasComponentWithType(KEYWORD_ARRAY)) {
-				final String arrayIndex = component.getComponentWithType(KEYWORD_ARRAY).getName();
-				variable += toByteCodeNumber(arrayIndex);
+			if(component.getComponents().size() > 0) {
+				final CodeComponent arrayIndex = component.getComponent(0);
+				// if it has KEYWORD_ARRAY type then it's a number index, else it's a variable index
+				if(arrayIndex.hasType(KEYWORD_ARRAY))
+					variable += toByteCodeNumber(arrayIndex.getName());
+				else
+					variable += (char)arrayIndex.getByteCodeName();
 			}
 		} else { // if byte code name == 0, it's a value
 			final String value = component.getName();

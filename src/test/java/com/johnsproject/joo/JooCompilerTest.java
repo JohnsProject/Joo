@@ -234,7 +234,10 @@ public class JooCompilerTest {
 		createTypeRegistry(code);
 		compiler.parseFunctionComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("repeatFunction"));
+		assert(code.getComponentWithName("repeatFunction").hasName(KEYWORD_FUNCTION_REPEAT));
 		assert(code.getComponentWithName("repeatFunction").hasType(KEYWORD_FUNCTION_REPEAT));
+		assert(code.getComponentWithName("repeatFunction").hasName((byte)JooVirtualMachine.KEYWORD_FUNCTION_REPEAT));
+		assert(code.getComponentWithName("repeatFunction").hasType((byte)JooVirtualMachine.KEYWORD_FUNCTION_REPEAT));
 		
 		testCode = new String[] {"endFunction"};
 		code = new Code();
@@ -242,6 +245,9 @@ public class JooCompilerTest {
 		compiler.parseFunctionComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("endFunction"));
 		assert(code.getComponentWithName("endFunction").hasType(KEYWORD_FUNCTION_END));
+		assert(code.getComponentWithName("endFunction").hasType(KEYWORD_FUNCTION_END));
+		assert(code.getComponentWithName("endFunction").hasName((byte)JooVirtualMachine.KEYWORD_FUNCTION));
+		assert(code.getComponentWithName("endFunction").hasType((byte)JooVirtualMachine.KEYWORD_FUNCTION));
 		
 		testCode = new String[] {"function", "Test"};
 		code = new Code();
@@ -353,8 +359,8 @@ public class JooCompilerTest {
 		
 		testCode = new String[] {"elseIf", "variable0", "==", "variable1"};
 		code = new Code();
-		code.addComponent(new CodeComponent("variable0", (byte) 1, TYPE_INT, (byte )JooVirtualMachine.TYPE_INT, 0));
-		code.addComponent(new CodeComponent("variable1", (byte) 2, TYPE_FIXED, (byte )JooVirtualMachine.TYPE_FIXED, 0));
+		code.addComponent(new CodeComponent("variable0", (byte) 1, TYPE_INT, (byte)JooVirtualMachine.TYPE_INT, 0));
+		code.addComponent(new CodeComponent("variable1", (byte) 2, TYPE_FIXED, (byte)JooVirtualMachine.TYPE_FIXED, 0));
 		compiler.parseConditionComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("=="));
 		assert(code.getComponentWithName("==").hasName((byte) 5));
@@ -383,8 +389,8 @@ public class JooCompilerTest {
 		
 		testCode = new String[] {"if", "variable0:10", "==", "variable1:5"};
 		code = new Code();
-		code.addComponent(new CodeComponent("variable0", (byte) 1, TYPE_ARRAY_INT, (byte )JooVirtualMachine.TYPE_ARRAY_INT, 0));
-		code.addComponent(new CodeComponent("variable1", (byte) 2, TYPE_ARRAY_FIXED, (byte )JooVirtualMachine.TYPE_ARRAY_FIXED, 0));
+		code.addComponent(new CodeComponent("variable0", (byte) 1, TYPE_ARRAY_INT, (byte)JooVirtualMachine.TYPE_ARRAY_INT, 0));
+		code.addComponent(new CodeComponent("variable1", (byte) 2, TYPE_ARRAY_FIXED, (byte)JooVirtualMachine.TYPE_ARRAY_FIXED, 0));
 		compiler.parseConditionComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("=="));
 		assert(code.getComponentWithName("==").hasName((byte) 5));
@@ -402,8 +408,8 @@ public class JooCompilerTest {
 		
 		testCode = new String[] {"if", "variable0:variable1", "==", "150"};
 		code = new Code();
-		code.addComponent(new CodeComponent("variable0", (byte) 1, TYPE_ARRAY_INT, (byte )JooVirtualMachine.TYPE_ARRAY_INT, 0));
-		code.addComponent(new CodeComponent("variable1", (byte) 2, TYPE_INT, (byte )JooVirtualMachine.TYPE_INT, 0));
+		code.addComponent(new CodeComponent("variable0", (byte) 1, TYPE_ARRAY_INT, (byte)JooVirtualMachine.TYPE_ARRAY_INT, 0));
+		code.addComponent(new CodeComponent("variable1", (byte) 2, TYPE_INT, (byte)JooVirtualMachine.TYPE_INT, 0));
 		compiler.parseConditionComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("=="));
 		assert(code.getComponentWithName("==").hasName((byte) 5));
@@ -871,10 +877,14 @@ public class JooCompilerTest {
 		final char start = name++;
 		final char function = name++;
 		
+		char parameter = JooVirtualMachine.COMPONENTS_START; // TODO need to start at parameter range
+		final char param0 = parameter++;
+		final char param1 = parameter++;
+		
 		int line = 0;
 		assertEquals(lines[line++], "" + JooVirtualMachine.TYPE_INT + (char)3);
 		assertEquals(lines[line++], "" + int0);
-		assertEquals(lines[line++], "" + int1 + jooCompiler.toByteCodeNumber("10"));
+		assertEquals(lines[line++], "" + int1 + jooCompiler.toByteCodeNumber("10")); // TODO positive and negative signs
 		assertEquals(lines[line++], "" + correctIfs);
 		assertEquals(lines[line++], "" + JooVirtualMachine.TYPE_FIXED + (char)2);
 		assertEquals(lines[line++], "" + fixed0);
@@ -941,6 +951,84 @@ public class JooCompilerTest {
 		assertEquals(lines[line++], "" + charArray + jooCompiler.toByteCodeNumber("10") + JooVirtualMachine.OPERATOR_ASSIGN + jooCompiler.toByteCodeNumber("67"));
 		assertEquals(lines[line++], "" + charArray + jooCompiler.toByteCodeNumber("11") + JooVirtualMachine.OPERATOR_ASSIGN + charArray + jooCompiler.toByteCodeNumber("10"));
 //		assertEquals(lines[line++], "" + charArray + jooCompiler.toByteCodeNumber("0") + JooVirtualMachine.OPERATOR_ASSIGN + JooVirtualMachine.TYPE_CHAR + 'd');
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF + int0 + JooVirtualMachine.COMPARATOR_EQUALS + jooCompiler.toByteCodeNumber("18"));
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("1"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF + int1 + JooVirtualMachine.COMPARATOR_EQUALS + jooCompiler.toByteCodeNumber("6"));
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("1"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("2"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF);
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("1"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("2"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF);
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF + bool0 + JooVirtualMachine.COMPARATOR_EQUALS + jooCompiler.toByteCodeNumber("0"));
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("1"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_ELSE_IF + bool0 + JooVirtualMachine.COMPARATOR_EQUALS + jooCompiler.toByteCodeNumber("1"));
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("2"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF);
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF + int0 + JooVirtualMachine.COMPARATOR_NOT_EQUALS + int1);
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("1"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("2"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF);
+		assertEquals(lines[line++], "" + intArray + jooCompiler.toByteCodeNumber("2") + JooVirtualMachine.OPERATOR_ASSIGN + jooCompiler.toByteCodeNumber("100"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF + int0 + JooVirtualMachine.COMPARATOR_SMALLER + intArray + jooCompiler.toByteCodeNumber("2"));
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("1"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("2"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF);
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF + intArray + jooCompiler.toByteCodeNumber("2") + JooVirtualMachine.COMPARATOR_BIGGER + int0);
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("1"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("2"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF);
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF + int0 + JooVirtualMachine.COMPARATOR_SMALLER_EQUALS + intArray + jooCompiler.toByteCodeNumber("2"));
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("1"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("2"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF);
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF + intArray + jooCompiler.toByteCodeNumber("2") + JooVirtualMachine.COMPARATOR_BIGGER_EQUALS + int0);
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("1"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("2"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF);
+		assertEquals(lines[line++], "" + intArray + jooCompiler.toByteCodeNumber("3") + JooVirtualMachine.OPERATOR_ASSIGN + intArray + jooCompiler.toByteCodeNumber("2"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF + intArray + jooCompiler.toByteCodeNumber("2") + JooVirtualMachine.COMPARATOR_BIGGER_EQUALS + intArray + jooCompiler.toByteCodeNumber("3"));
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("1"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("2"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF);
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF + intArray + jooCompiler.toByteCodeNumber("2") + JooVirtualMachine.COMPARATOR_SMALLER_EQUALS + intArray + jooCompiler.toByteCodeNumber("3"));
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("1"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("2"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF);
+		assertEquals(lines[line++], "" + function + int0 + intArray); // TODO value and indexed array function call test
+//		assertEquals(lines[line++], "" + libraryFunction + JooVirtualMachine.KEYWORD_PARAMETER + intArray);
+//		assertEquals(lines[line++], "" + directoryLibraryFunction + JooVirtualMachine.KEYWORD_PARAMETER + intArray);		
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION);
+		assertEquals(lines[line++], "" + fixed1 + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("" + Math.round(25f * 255)));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF + fixed1 + JooVirtualMachine.COMPARATOR_SMALLER_EQUALS + jooCompiler.toByteCodeNumber("" + Math.round(80f * 255)));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION_REPEAT);
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF);
+		assertEquals(lines[line++], "" + param0 + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("100"));
+		assertEquals(lines[line++], "" + param1 + jooCompiler.toByteCodeNumber("5") + JooVirtualMachine.OPERATOR_ASSIGN + param0);
+		assertEquals(lines[line++], "" + param1 + jooCompiler.toByteCodeNumber("4") + JooVirtualMachine.OPERATOR_ASSIGN + param1 + jooCompiler.toByteCodeNumber("5"));
+		assertEquals(lines[line++], "" + param0 + JooVirtualMachine.OPERATOR_ADD + param1 + jooCompiler.toByteCodeNumber("4"));
+		assertEquals(lines[line++], "" + param1 + int1 + JooVirtualMachine.OPERATOR_ASSIGN + int1);
+		assertEquals(lines[line++], "" + param0 + JooVirtualMachine.OPERATOR_SUBTRACT + param1 + int1);
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF + param0 + JooVirtualMachine.COMPARATOR_SMALLER + param1 + jooCompiler.toByteCodeNumber("5"));
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("1"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
+		assertEquals(lines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("2"));
+		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_IF);		
+//		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION + libraryFunction);
+//		assertEquals(lines[line++], "" + param0 + jooCompiler.toByteCodeNumber("0") + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("10"));
+//		assertEquals(lines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION + directoryLibraryFunction);
+//		assertEquals(lines[line++], "" + param0 + jooCompiler.toByteCodeNumber("0") + JooVirtualMachine.OPERATOR_ADD + jooCompiler.toByteCodeNumber("20"));
+		
+		
 		
 		
 //		final char int0 = 0 + JooVirtualMachine.COMPONENTS_START;
