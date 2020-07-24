@@ -125,14 +125,14 @@ public class JooCompilerTest {
 	public void replaceDefinesTest() throws Exception {
 		final JooCompiler compiler = new JooCompiler();
 		
-		String testCode = "define TEST_CONSTANT = 10" + "\n" +
+		String testCode = "constant TEST_CONSTANT = 10" + "\n" +
 								"int int0 = TEST_CONSTANT";
 		
 		testCode = compiler.replaceDefines(testCode);
 		assertEquals(testCode, "int int0 = 10");
 		
 		try {
-			testCode = "define TEST_CONSTANT = ";
+			testCode = "constant TEST_CONSTANT = ";
 			testCode = compiler.replaceDefines(testCode);
 			fail("Invalid constant declaration exception not thrown");
 		} catch (ParseException e) {
@@ -140,7 +140,7 @@ public class JooCompilerTest {
 		}
 		
 		try {
-			testCode = "define TEST_CONSTANT + 10";
+			testCode = "constant TEST_CONSTANT + 10";
 			testCode = compiler.replaceDefines(testCode);
 			fail("Invalid assignment operator exception not thrown");
 		} catch (ParseException e) {
@@ -148,8 +148,8 @@ public class JooCompilerTest {
 		}
 		
 		try {
-			testCode = "define TEST_CONSTANT = 10" + "\n" +
-					"define TEST_CONSTANT = 5";
+			testCode = "constant TEST_CONSTANT = 10" + "\n" +
+					"constant TEST_CONSTANT = 5";
 			testCode = compiler.replaceDefines(testCode);
 			fail("Duplicate constant exception not thrown");
 		} catch (ParseException e) {

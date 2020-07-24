@@ -12,10 +12,10 @@ include TestLibrary.joo
 include TestLibraries/TestDirectoryLibrary.joo
 ##
 
-define TEST_INT_CONSTANT = 25
-define TEST_FIXED_CONSTANT = 25.25
-define TEST_BOOL_CONSTANT = true
-define TEST_CHAR_CONSTANT = 'A'
+constant TEST_INT_CONSTANT = 25
+constant TEST_FIXED_CONSTANT = 25.25
+constant TEST_BOOL_CONSTANT = true
+constant TEST_CHAR_CONSTANT = 'A'
 
 int int0 # this is also a single line comment
 int int1 = 10

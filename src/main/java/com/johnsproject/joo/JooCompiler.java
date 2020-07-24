@@ -46,7 +46,7 @@ public class JooCompiler {
 	  	call <Native function name>: OtherJooApp
 	 */
 	public static final String KEYWORD_IMPORT = "import";
-	public static final String KEYWORD_DEFINE = "define";
+	public static final String KEYWORD_CONSTANT = "constant";
 	public static final String KEYWORD_IF = "if";
 	public static final String KEYWORD_ELSE_IF = "elseIf";
 	public static final String KEYWORD_ELSE = "else";
@@ -279,7 +279,7 @@ public class JooCompiler {
 			if(line.isEmpty())
 				continue;
 			final String[] lineData = line.split(" ");
-			if(lineData[0].equals(KEYWORD_DEFINE))
+			if(lineData[0].equals(KEYWORD_CONSTANT))
 				codeData = replaceDefine(line, lineData, codeData, constants, i);
 		}
 		return codeData;
