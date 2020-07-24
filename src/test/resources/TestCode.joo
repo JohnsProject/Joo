@@ -1,16 +1,23 @@
 # This is a example code used to test the joo programming language
 
+# this is a single line comment
+
+##
+This is a multi line comment
+with 2 lines
+##
+
 ##
 include TestLibrary.joo
 include TestLibraries/TestDirectoryLibrary.joo
+##
 
 define TEST_INT_CONSTANT = 25
 define TEST_FIXED_CONSTANT = 25.25
 define TEST_BOOL_CONSTANT = true
-define TEST_CHAR_CONSTANT = 'd'
-##
+define TEST_CHAR_CONSTANT = 'A'
 
-int int0
+int int0 # this is also a single line comment
 int int1 = 10
 
 fixed fixed0
@@ -58,7 +65,7 @@ function Start
 	intArray:0 - int1
 	intArray:1 / 5
 	intArray:0 * intArray:1
-#	intArray:7 = TEST_INT_CONSTANT
+	intArray:7 = TEST_INT_CONSTANT
 
 	fixedArray:0 = 60.5
 	fixedArray:1 + 15
@@ -68,7 +75,7 @@ function Start
 	fixedArray:2 =- 10
 	fixedArray:3 =+ fixedArray:2
 	fixedArray:4 =! fixedArray:3
-#	fixedArray:5 = TEST_FIXED_CONSTANT
+	fixedArray:5 = TEST_FIXED_CONSTANT
 
 	boolArray:9 = bool0
 	boolArray:10 = true
@@ -76,12 +83,12 @@ function Start
 	boolArray:2 =- true
 	boolArray:3 =+ boolArray:2
 	boolArray:4 =! boolArray:3
-#	boolArray:5 = TEST_BOOL_CONSTANT
+	boolArray:5 = TEST_BOOL_CONSTANT
 
 	charArray:9 = char0
 	charArray:10 = 'C'
 	charArray:11 = charArray:10
-#	charArray:0 = TEST_CHAR_CONSTANT
+	charArray:0 = TEST_CHAR_CONSTANT
 
 	if int0 == 18
 		correctIfs + 1

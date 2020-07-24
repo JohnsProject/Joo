@@ -122,6 +122,42 @@ public class JooCompilerTest {
 	}
 	
 	@Test
+	public void replaceDefinesTest() throws Exception {
+		final JooCompiler compiler = new JooCompiler();
+		
+		String testCode = "define TEST_CONSTANT = 10" + "\n" +
+								"int int0 = TEST_CONSTANT";
+		
+		testCode = compiler.replaceDefines(testCode);
+		assertEquals(testCode, "int int0 = 10");
+		
+		try {
+			testCode = "define TEST_CONSTANT = ";
+			testCode = compiler.replaceDefines(testCode);
+			fail("Invalid constant declaration exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Invalid constant declaration");
+		}
+		
+		try {
+			testCode = "define TEST_CONSTANT + 10";
+			testCode = compiler.replaceDefines(testCode);
+			fail("Invalid assignment operator exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Invalid assignment operator, Operator: +");
+		}
+		
+		try {
+			testCode = "define TEST_CONSTANT = 10" + "\n" +
+					"define TEST_CONSTANT = 5";
+			testCode = compiler.replaceDefines(testCode);
+			fail("Duplicate constant exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Duplicate constant, Name: TEST_CONSTANT");
+		}
+	}
+	
+	@Test
 	public void parseVariableComponentTest() throws Exception {
 		final JooCompiler compiler = new JooCompiler();
 		String[] testCode;
@@ -954,7 +990,7 @@ public class JooCompilerTest {
 		assertEquals(lines[line++], "" + intArray + compiler.toByteCodeNumber("0") + OPERATOR_SUBTRACT + int1);
 		assertEquals(lines[line++], "" + intArray + compiler.toByteCodeNumber("1") + OPERATOR_DIVIDE + compiler.toByteCodeNumber("5"));
 		assertEquals(lines[line++], "" + intArray + compiler.toByteCodeNumber("0") + OPERATOR_MULTIPLY + intArray + compiler.toByteCodeNumber("1"));
-//		assertEquals(lines[line++], "" + intArray + jooCompiler.toByteCodeNumber("7") + OPERATOR_ASSIGN + jooCompiler.toByteCodeNumber("25"));
+		assertEquals(lines[line++], "" + intArray + compiler.toByteCodeNumber("7") + OPERATOR_ASSIGN + compiler.toByteCodeNumber("25"));
 		assertEquals(lines[line++], "" + fixedArray + compiler.toByteCodeNumber("0") + OPERATOR_ASSIGN + compiler.toByteCodeNumber("" + 60.5f * FIXED_POINT_ONE));
 		assertEquals(lines[line++], "" + fixedArray + compiler.toByteCodeNumber("1") + OPERATOR_ADD + compiler.toByteCodeNumber("" + 15f * FIXED_POINT_ONE));
 		assertEquals(lines[line++], "" + fixedArray + compiler.toByteCodeNumber("0") + OPERATOR_SUBTRACT + fixed1);
@@ -963,18 +999,18 @@ public class JooCompilerTest {
 		assertEquals(lines[line++], "" + fixedArray + compiler.toByteCodeNumber("2") + OPERATOR_ASSIGN_NEGATIVE + compiler.toByteCodeNumber("" + 10f * FIXED_POINT_ONE));
 		assertEquals(lines[line++], "" + fixedArray + compiler.toByteCodeNumber("3") + OPERATOR_ASSIGN_POSITIVE + fixedArray + compiler.toByteCodeNumber("2"));
 		assertEquals(lines[line++], "" + fixedArray + compiler.toByteCodeNumber("4") + OPERATOR_ASSIGN_INVERSE + fixedArray + compiler.toByteCodeNumber("3"));
-//		assertEquals(lines[line++], "" + fixedArray + jooCompiler.toByteCodeNumber("5") + OPERATOR_ASSIGN + jooCompiler.toByteCodeNumber("" + 25.25f * FIXED_POINT_ONE));
+		assertEquals(lines[line++], "" + fixedArray + compiler.toByteCodeNumber("5") + OPERATOR_ASSIGN + compiler.toByteCodeNumber("" + 25.25f * FIXED_POINT_ONE));
 		assertEquals(lines[line++], "" + boolArray + compiler.toByteCodeNumber("9") + OPERATOR_ASSIGN + bool0);
 		assertEquals(lines[line++], "" + boolArray + compiler.toByteCodeNumber("10") + OPERATOR_ASSIGN + compiler.toByteCodeNumber("1"));
 		assertEquals(lines[line++], "" + boolArray + compiler.toByteCodeNumber("11") + OPERATOR_ASSIGN + boolArray + compiler.toByteCodeNumber("10"));
 		assertEquals(lines[line++], "" + boolArray + compiler.toByteCodeNumber("2") + OPERATOR_ASSIGN_NEGATIVE + compiler.toByteCodeNumber("1"));	
 		assertEquals(lines[line++], "" + boolArray + compiler.toByteCodeNumber("3") + OPERATOR_ASSIGN_POSITIVE + boolArray + compiler.toByteCodeNumber("2"));	
 		assertEquals(lines[line++], "" + boolArray + compiler.toByteCodeNumber("4") + OPERATOR_ASSIGN_INVERSE + boolArray + compiler.toByteCodeNumber("3"));	
-//		assertEquals(lines[line++], "" + boolArray + jooCompiler.toByteCodeNumber("5") + OPERATOR_ASSIGN + jooCompiler.toByteCodeNumber("1"));
+		assertEquals(lines[line++], "" + boolArray + compiler.toByteCodeNumber("5") + OPERATOR_ASSIGN + compiler.toByteCodeNumber("1"));
 		assertEquals(lines[line++], "" + charArray + compiler.toByteCodeNumber("9") + OPERATOR_ASSIGN + char0);
 		assertEquals(lines[line++], "" + charArray + compiler.toByteCodeNumber("10") + OPERATOR_ASSIGN + compiler.toByteCodeNumber("67"));
 		assertEquals(lines[line++], "" + charArray + compiler.toByteCodeNumber("11") + OPERATOR_ASSIGN + charArray + compiler.toByteCodeNumber("10"));
-//		assertEquals(lines[line++], "" + charArray + jooCompiler.toByteCodeNumber("0") + VM_OPERATOR_ASSIGN + VM_TYPE_CHAR + 'd');
+		assertEquals(lines[line++], "" + charArray + compiler.toByteCodeNumber("0") + OPERATOR_ASSIGN + compiler.toByteCodeNumber("65"));
 		assertEquals(lines[line++], "" + VM_KEYWORD_IF + int0 + COMPARATOR_EQUALS + compiler.toByteCodeNumber("18"));
 		assertEquals(lines[line++], "" + correctIfs + OPERATOR_ADD + compiler.toByteCodeNumber("1"));
 		assertEquals(lines[line++], "" + VM_KEYWORD_IF + int1 + COMPARATOR_EQUALS + compiler.toByteCodeNumber("6"));

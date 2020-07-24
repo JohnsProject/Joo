@@ -2,6 +2,8 @@ package com.johnsproject.joo;
 
 import java.io.File;
 import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import com.johnsproject.joo.util.FileUtil;
@@ -147,7 +149,8 @@ public class JooCompiler {
 			final String settingsData = FileUtil.read(settingsPath);
 			settings = parseSettings(settingsData);
 			final String codePath = path;
-			final String codeData = FileUtil.read(codePath);
+			String codeData = FileUtil.read(codePath);
+			codeData = replaceDefines(codeData);
 			code = parseCode(codeData);
 			analyseCode(code);
 			byteCode = toByteCode(code);
@@ -266,6 +269,36 @@ public class JooCompiler {
 				throw new ParseException("Invalid supported type, Type: " + type, lineIndex);
 			}
 		}
+	}
+	
+	String replaceDefines(String codeData) throws ParseException {
+		final String[] codeLines = getLines(codeData);
+		final Map<String, String> constants = new HashMap<String, String>();
+		for (int i = 0; i < codeLines.length; i++) {
+			String line = codeLines[i];
+			if(line.isEmpty())
+				continue;
+			final String[] lineData = line.split(" ");
+			if(lineData[0].equals(KEYWORD_DEFINE))
+				codeData = replaceDefine(line, lineData, codeData, constants, i);
+		}
+		return codeData;
+	}
+	
+	private String replaceDefine(String line, String[] lineData, String codeData, Map<String, String> constants, int lineIndex) throws ParseException {
+		if(lineData.length != 4) 
+			throw new ParseException("Invalid constant declaration", lineIndex);
+		if(!lineData[2].equals(KEYWORD_VARIABLE_ASSIGN))
+			throw new ParseException("Invalid assignment operator, Operator: " + lineData[2], lineIndex);
+		
+		final String constantName = lineData[1];
+		final String constantValue = lineData[3];
+		if(constants.containsKey(constantName))
+			throw new ParseException("Duplicate constant, Name: " + constantName, lineIndex);
+		codeData = codeData.replace(line + LINE_BREAK, "");
+		codeData = codeData.replace(constantName, constantValue);
+		constants.put(constantName, constantValue);
+		return codeData;
 	}
 	
 	Code parseCode(String codeData) throws ParseException {
