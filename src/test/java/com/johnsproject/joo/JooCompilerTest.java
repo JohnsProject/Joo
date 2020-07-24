@@ -903,10 +903,12 @@ public class JooCompilerTest {
 		final char param0 = parameter++;
 		final char param1 = parameter++;
 		
+		// TODO unary operators
+		// that can be customized in the compiler settings and will be called to modify the value before applying it to the variable in front of the operator
 		int line = 0;
 		assertEquals(lines[line++], "" + VM_TYPE_INT + (char)3);
 		assertEquals(lines[line++], "" + int0);
-		assertEquals(lines[line++], "" + int1 + compiler.toByteCodeNumber("10")); // TODO positive and negative signs
+		assertEquals(lines[line++], "" + int1 + compiler.toByteCodeNumber("10"));
 		assertEquals(lines[line++], "" + correctIfs);
 		assertEquals(lines[line++], "" + VM_TYPE_FIXED + (char)2);
 		assertEquals(lines[line++], "" + fixed0);
@@ -1026,7 +1028,7 @@ public class JooCompilerTest {
 		assertEquals(lines[line++], "" + VM_KEYWORD_ELSE);
 		assertEquals(lines[line++], "" + correctIfs + OPERATOR_ADD + compiler.toByteCodeNumber("2"));
 		assertEquals(lines[line++], "" + VM_KEYWORD_IF);
-		assertEquals(lines[line++], "" + VM_KEYWORD_ARGUMENT + int0); // TODO value and indexed array function call test
+		assertEquals(lines[line++], "" + VM_KEYWORD_ARGUMENT + int0);
 		assertEquals(lines[line++], "" + VM_KEYWORD_ARGUMENT + intArray);
 		assertEquals(lines[line++], "" + function);
 //		assertEquals(lines[line++], "" + libraryFunction + VM_KEYWORD_PARAMETER + intArray);

@@ -33,6 +33,7 @@ public class JooVirtualMachine {
 	public static final char NUMBER_2 = 103;
 	public static final char NUMBER_1 = 102;
 	public static final char NUMBER_0 = 101;
+	public static final char FIXED_POINT = 8;	
 	
 	public static final byte COMPONENTS_START = 1;
 	public static final byte COMPONENTS_END = 65;
@@ -42,8 +43,6 @@ public class JooVirtualMachine {
 	public static final byte TYPES_END = 127;
 	public static final byte OPERATORS_START = 1;
 	public static final byte NATIVE_FUNCTIONS_START = 1;
-	
-	public static final char FIXED_POINT = 8;	
 
 	// operators need to be in the same order as in JooCompilerConfig.jcc
 	public static final char COMPARATOR_SMALLER_EQUALS = 0 + OPERATORS_START;
