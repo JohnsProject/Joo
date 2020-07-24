@@ -122,18 +122,36 @@ public class JooCompilerTest {
 	}
 	
 	@Test
+	public void addIncludedCodeTest() throws Exception {
+		final JooCompiler compiler = new JooCompiler();
+		
+		String testCode = "include TestLibrary.joo\n";
+		
+		testCode = compiler.addIncludedCode(testCode);
+		assertEquals(testCode, FileUtil.read("TestLibrary.joo"));
+		
+		try {
+			testCode = "include";
+			testCode = compiler.addIncludedCode(testCode);
+			fail("Invalid inclusion declaration exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Invalid inclusion declaration");
+		}
+	}
+	
+	@Test
 	public void replaceDefinesTest() throws Exception {
 		final JooCompiler compiler = new JooCompiler();
 		
 		String testCode = "constant TEST_CONSTANT = 10" + "\n" +
 								"int int0 = TEST_CONSTANT";
 		
-		testCode = compiler.replaceDefines(testCode);
+		testCode = compiler.replaceConstants(testCode);
 		assertEquals(testCode, "int int0 = 10");
 		
 		try {
 			testCode = "constant TEST_CONSTANT = ";
-			testCode = compiler.replaceDefines(testCode);
+			testCode = compiler.replaceConstants(testCode);
 			fail("Invalid constant declaration exception not thrown");
 		} catch (ParseException e) {
 			assertEquals(e.getMessage(), "Invalid constant declaration");
@@ -141,7 +159,7 @@ public class JooCompilerTest {
 		
 		try {
 			testCode = "constant TEST_CONSTANT + 10";
-			testCode = compiler.replaceDefines(testCode);
+			testCode = compiler.replaceConstants(testCode);
 			fail("Invalid assignment operator exception not thrown");
 		} catch (ParseException e) {
 			assertEquals(e.getMessage(), "Invalid assignment operator, Operator: +");
@@ -150,7 +168,7 @@ public class JooCompilerTest {
 		try {
 			testCode = "constant TEST_CONSTANT = 10" + "\n" +
 					"constant TEST_CONSTANT = 5";
-			testCode = compiler.replaceDefines(testCode);
+			testCode = compiler.replaceConstants(testCode);
 			fail("Duplicate constant exception not thrown");
 		} catch (ParseException e) {
 			assertEquals(e.getMessage(), "Duplicate constant, Name: TEST_CONSTANT");
@@ -934,6 +952,8 @@ public class JooCompilerTest {
 		final char charArray = name++;
 		final char start = name++;
 		final char function = name++;
+		final char libraryFunction = name++;
+		final char directoryLibraryFunction = name++;
 		
 		char parameter = VM_PARAMETERS_START;
 		final char param0 = parameter++;
@@ -965,9 +985,11 @@ public class JooCompilerTest {
 		assertEquals(lines[line++], "" + boolArray + compiler.toByteCodeNumber("15"));
 		assertEquals(lines[line++], "" + VM_TYPE_ARRAY_CHAR + (char)1);
 		assertEquals(lines[line++], "" + charArray + compiler.toByteCodeNumber("13"));
-		assertEquals(lines[line++], "" + VM_TYPE_FUNCTION + (char)2);
+		assertEquals(lines[line++], "" + VM_TYPE_FUNCTION + (char)4);
 		assertEquals(lines[line++], "" + start);
 		assertEquals(lines[line++], "" + function);
+		assertEquals(lines[line++], "" + libraryFunction);
+		assertEquals(lines[line++], "" + directoryLibraryFunction);
 		assertEquals(lines[line++], "" + VM_KEYWORD_FUNCTION);
 		assertEquals(lines[line++], "" + int0 + OPERATOR_ADD + compiler.toByteCodeNumber("100"));
 		assertEquals(lines[line++], "" + int0 + OPERATOR_SUBTRACT + int1);
@@ -1067,8 +1089,10 @@ public class JooCompilerTest {
 		assertEquals(lines[line++], "" + VM_KEYWORD_ARGUMENT + int0);
 		assertEquals(lines[line++], "" + VM_KEYWORD_ARGUMENT + intArray);
 		assertEquals(lines[line++], "" + function);
-//		assertEquals(lines[line++], "" + libraryFunction + VM_KEYWORD_PARAMETER + intArray);
-//		assertEquals(lines[line++], "" + directoryLibraryFunction + VM_KEYWORD_PARAMETER + intArray);		
+		assertEquals(lines[line++], "" + VM_KEYWORD_ARGUMENT + intArray);
+		assertEquals(lines[line++], "" + libraryFunction);
+		assertEquals(lines[line++], "" + VM_KEYWORD_ARGUMENT + intArray);
+		assertEquals(lines[line++], "" + directoryLibraryFunction);		
 		assertEquals(lines[line++], "" + VM_KEYWORD_FUNCTION);
 		assertEquals(lines[line++], "" + fixed1 + OPERATOR_ADD + compiler.toByteCodeNumber("" + 25f * FIXED_POINT_ONE));
 		assertEquals(lines[line++], "" + VM_KEYWORD_IF + fixed1 + COMPARATOR_SMALLER_EQUALS + compiler.toByteCodeNumber("" + 80f * FIXED_POINT_ONE));
@@ -1085,10 +1109,10 @@ public class JooCompilerTest {
 		assertEquals(lines[line++], "" + VM_KEYWORD_ELSE);
 		assertEquals(lines[line++], "" + correctIfs + OPERATOR_ADD + compiler.toByteCodeNumber("2"));
 		assertEquals(lines[line++], "" + VM_KEYWORD_IF);		
-//		assertEquals(lines[line++], "" + VM_KEYWORD_FUNCTION + libraryFunction);
-//		assertEquals(lines[line++], "" + param0 + jooCompiler.toByteCodeNumber("0") + VM_OPERATOR_ADD + jooCompiler.toByteCodeNumber("10"));
-//		assertEquals(lines[line++], "" + VM_KEYWORD_FUNCTION + directoryLibraryFunction);
-//		assertEquals(lines[line++], "" + param0 + jooCompiler.toByteCodeNumber("0") + VM_OPERATOR_ADD + jooCompiler.toByteCodeNumber("20"));
+		assertEquals(lines[line++], "" + VM_KEYWORD_FUNCTION);
+		assertEquals(lines[line++], "" + param0 + compiler.toByteCodeNumber("0") + OPERATOR_ADD + compiler.toByteCodeNumber("10"));
+		assertEquals(lines[line++], "" + VM_KEYWORD_FUNCTION);
+		assertEquals(lines[line++], "" + param0 + compiler.toByteCodeNumber("0") + OPERATOR_ADD + compiler.toByteCodeNumber("20"));
 		
 		
 		

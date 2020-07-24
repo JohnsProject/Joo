@@ -12,12 +12,8 @@ public class JooCompiler {
 	
 	// TODO
 	// import keyword
-	// compiler syntax analyser
 	// Standart native library
 	// specification
-	// change to a license that needs to buy a license in case of commercial use
-	// add make types extencible like operators
-	// joo is a game development programming language
 	
 	/*
 	 Change joo project directory structure to
@@ -34,7 +30,6 @@ public class JooCompiler {
 	 the Main.joo and the JooCompilerSettings.jcs file and compile it into the Build folder.
 	*/
 
-	public static final String KEYWORD_INCLUDE = "include";
 	/*
 	 Import keyword is used to import external files. The file get's duplicated and renamed
 	 to a single character. The file has to be in the same folder or nested folder of the folder
@@ -46,6 +41,7 @@ public class JooCompiler {
 	  	call <Native function name>: OtherJooApp
 	 */
 	public static final String KEYWORD_IMPORT = "import";
+	public static final String KEYWORD_INCLUDE = "include";
 	public static final String KEYWORD_CONSTANT = "constant";
 	public static final String KEYWORD_IF = "if";
 	public static final String KEYWORD_ELSE_IF = "elseIf";
@@ -150,7 +146,8 @@ public class JooCompiler {
 			settings = parseSettings(settingsData);
 			final String codePath = path;
 			String codeData = FileUtil.read(codePath);
-			codeData = replaceDefines(codeData);
+			codeData = addIncludedCode(codeData);
+			codeData = replaceConstants(codeData);
 			code = parseCode(codeData);
 			analyseCode(code);
 			byteCode = toByteCode(code);
@@ -159,24 +156,6 @@ public class JooCompiler {
 			System.err.println(e.getMessage() + ", Line: " + (e.getErrorOffset() + 1));
 		}
 		return byteCode;
-		
-//		parseConfig(directoryPath);
-		
-//		operators = new ArrayList<>();
-//		nativeFunctions = new ArrayList<>();
-//		variables = new Map[VM_TYPES.length];
-//		functions = new LinkedHashMap<String, Function>();
-//		// remove all tabs they are not needed at all
-//		String code = FileUtil.read(path).replaceAll("\t", "");
-//		code = includeIncludes(directoryPath, code);
-//		code = replaceDefines(code);
-//		final String[] codeLines = getLines(code);		
-//		parseVariables(codeLines);
-//		parseFunctions(codeLines);
-//		String compiledJooCode = "";
-//		compiledJooCode = writeVariablesAndFunctions(compiledJooCode);
-//		compiledJooCode = writeFunctionsAndInstructions(compiledJooCode);
-//		return compiledJooCode;
 	}
 	
 	private String getDirectoryPath(String path) {
@@ -271,7 +250,30 @@ public class JooCompiler {
 		}
 	}
 	
-	String replaceDefines(String codeData) throws ParseException {
+	String addIncludedCode(String codeData) throws ParseException {
+		final String[] codeLines = getLines(codeData);
+		for (int i = 0; i < codeLines.length; i++) {
+			String line = codeLines[i];
+			if(line.isEmpty())
+				continue;
+			final String[] lineData = line.split(" ");
+			if(lineData[0].equals(KEYWORD_INCLUDE))
+				codeData = addIncludedCode(line, lineData, codeData, i);
+		}
+		return codeData;
+	}
+	
+	private String addIncludedCode(String line, String[] lineData, String codeData, int lineIndex) throws ParseException {
+		if(lineData.length != 2) 
+			throw new ParseException("Invalid inclusion declaration", lineIndex);
+
+		final String path = lineData[1];
+		codeData += FileUtil.read(path);
+		codeData = codeData.replace(line + LINE_BREAK, "");
+		return codeData;
+	}
+	
+	String replaceConstants(String codeData) throws ParseException {
 		final String[] codeLines = getLines(codeData);
 		final Map<String, String> constants = new HashMap<String, String>();
 		for (int i = 0; i < codeLines.length; i++) {
@@ -280,12 +282,12 @@ public class JooCompiler {
 				continue;
 			final String[] lineData = line.split(" ");
 			if(lineData[0].equals(KEYWORD_CONSTANT))
-				codeData = replaceDefine(line, lineData, codeData, constants, i);
+				codeData = replaceConstant(line, lineData, codeData, constants, i);
 		}
 		return codeData;
 	}
 	
-	private String replaceDefine(String line, String[] lineData, String codeData, Map<String, String> constants, int lineIndex) throws ParseException {
+	private String replaceConstant(String line, String[] lineData, String codeData, Map<String, String> constants, int lineIndex) throws ParseException {
 		if(lineData.length != 4) 
 			throw new ParseException("Invalid constant declaration", lineIndex);
 		if(!lineData[2].equals(KEYWORD_VARIABLE_ASSIGN))

@@ -7,10 +7,8 @@ This is a multi line comment
 with 2 lines
 ##
 
-##
 include TestLibrary.joo
 include TestLibraries/TestDirectoryLibrary.joo
-##
 
 constant TEST_INT_CONSTANT = 25
 constant TEST_FIXED_CONSTANT = 25.25
@@ -153,8 +151,8 @@ function Start
 	endIf
 
 	call Function int0 intArray
-#	call Library_Function intArray
-#	call DirectoryLibrary_Function intArray
+	call LibraryFunction intArray
+	call DirectoryLibraryFunction intArray
 endFunction
 
 function Function int _param0 int: _param1
