@@ -39,36 +39,38 @@ public class JooVirtualMachine {
 	public static final byte COMPONENTS_END = 65;
 	public static final byte PARAMETERS_START = 66;
 	public static final byte PARAMETERS_END = 71;
+	public static final byte OPERATORS_START = 1;
+	public static final byte OPERATORS_END = 127;
+	public static final byte NATIVE_FUNCTIONS_START = 1;
+	public static final byte NATIVE_FUNCTIONS_END = 127;
 	public static final byte TYPES_START = 119;
 	public static final byte TYPES_END = 127;
-	public static final byte OPERATORS_START = 1;
-	public static final byte NATIVE_FUNCTIONS_START = 1;
 
-	// operators need to be in the same order as in JooCompilerConfig.jcc
-	public static final char COMPARATOR_SMALLER_EQUALS = 0 + OPERATORS_START;
-	public static final char COMPARATOR_BIGGER_EQUALS = 1 + OPERATORS_START;
-	public static final char COMPARATOR_SMALLER = 2 + OPERATORS_START;
-	public static final char COMPARATOR_BIGGER = 3 + OPERATORS_START;
-	public static final char COMPARATOR_EQUALS = 4 + OPERATORS_START;
-	public static final char COMPARATOR_NOT_EQUALS = 5 + OPERATORS_START;
+	// need to be in the same order as in JooCompilerConfig.jcc
+	public static final char COMPARATOR_SMALLER_EQUALS = OPERATORS_START + 0;
+	public static final char COMPARATOR_BIGGER_EQUALS = OPERATORS_START + 1;
+	public static final char COMPARATOR_SMALLER = OPERATORS_START + 2;
+	public static final char COMPARATOR_BIGGER = OPERATORS_START + 3;
+	public static final char COMPARATOR_EQUALS = OPERATORS_START + 4;
+	public static final char COMPARATOR_NOT_EQUALS = OPERATORS_START + 5;
 
-	public static final char OPERATOR_ASSIGN = 6 + OPERATORS_START;
-	public static final char OPERATOR_ASSIGN_POSITIVE = 7 + OPERATORS_START;
-	public static final char OPERATOR_ASSIGN_NEGATIVE = 8 + OPERATORS_START;
-	public static final char OPERATOR_ASSIGN_INVERSE = 9 + OPERATORS_START;
-	public static final char OPERATOR_ADD = 10 + OPERATORS_START;
-	public static final char OPERATOR_SUBTRACT = 11 + OPERATORS_START;
-	public static final char OPERATOR_MULTIPLY = 12 + OPERATORS_START;
-	public static final char OPERATOR_DIVIDE = 13 + OPERATORS_START;
-	public static final char OPERATOR_REMAINDER = 14 + OPERATORS_START;
-	public static final char OPERATOR_BITWISE_AND = 15 + OPERATORS_START;
-	public static final char OPERATOR_BITWISE_XOR = 16 + OPERATORS_START;
-	public static final char OPERATOR_BITWISE_OR = 17 + OPERATORS_START;
-	public static final char OPERATOR_BITWISE_NOT = 18 + OPERATORS_START;
-	public static final char OPERATOR_BITSHIFT_LEFT = 19 + OPERATORS_START;
-	public static final char OPERATOR_BITSHIFT_RIGHT = 20 + OPERATORS_START;
+	public static final char OPERATOR_ASSIGN = OPERATORS_START + 6;
+	public static final char OPERATOR_ASSIGN_POSITIVE = OPERATORS_START + 7;
+	public static final char OPERATOR_ASSIGN_NEGATIVE = OPERATORS_START + 8;
+	public static final char OPERATOR_ASSIGN_INVERSE = OPERATORS_START + 9;
+	public static final char OPERATOR_ADD = OPERATORS_START + 10;
+	public static final char OPERATOR_SUBTRACT = OPERATORS_START + 11;
+	public static final char OPERATOR_MULTIPLY = OPERATORS_START + 12;
+	public static final char OPERATOR_DIVIDE = OPERATORS_START + 13;
+	public static final char OPERATOR_REMAINDER = OPERATORS_START + 14;
+	public static final char OPERATOR_BITWISE_AND = OPERATORS_START + 15;
+	public static final char OPERATOR_BITWISE_XOR = OPERATORS_START + 16;
+	public static final char OPERATOR_BITWISE_OR = OPERATORS_START + 17;
+	public static final char OPERATOR_BITWISE_NOT = OPERATORS_START + 18;
+	public static final char OPERATOR_BITSHIFT_LEFT = OPERATORS_START + 19;
+	public static final char OPERATOR_BITSHIFT_RIGHT = OPERATORS_START + 20;
 	
-	public static final char FUNCTION_PRINT = 0 + NATIVE_FUNCTIONS_START;
+	public static final char FUNCTION_PRINT = NATIVE_FUNCTIONS_START + 0;
 
 	private int codeSize = 0;
 	private byte[] componentIndexes = new byte[9];

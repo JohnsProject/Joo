@@ -121,6 +121,12 @@ public class JooCompiler {
 	public static final byte VM_COMPONENTS_END = JooVirtualMachine.COMPONENTS_END;
 	public static final byte VM_PARAMETERS_START = JooVirtualMachine.PARAMETERS_START;
 	public static final byte VM_PARAMETERS_END = JooVirtualMachine.PARAMETERS_END;
+	public static final byte VM_OPERATORS_START = JooVirtualMachine.OPERATORS_START;
+	public static final byte VM_OPERATORS_END = JooVirtualMachine.OPERATORS_END;
+	public static final byte VM_NATIVE_FUNCTIONS_START = JooVirtualMachine.NATIVE_FUNCTIONS_START;
+	public static final byte VM_NATIVE_FUNCTIONS_END = JooVirtualMachine.NATIVE_FUNCTIONS_END;
+	public static final byte VM_TYPES_START = JooVirtualMachine.TYPES_START;
+	public static final byte VM_TYPES_END = JooVirtualMachine.TYPES_END;
 	
 	private String settingType;
 	private Settings settings;
@@ -946,7 +952,6 @@ public class JooCompiler {
 			if(!byteCodeLine.isEmpty())
 				byteCode += byteCodeLine + VM_LINE_BREAK;
 		}
-		
 		return byteCode;
 	}
 	
@@ -966,6 +971,8 @@ public class JooCompiler {
 	
 	private String writeComponentIndex(Code code, String type) {
 		String componentIndex = "" + (char)toByteCodeType(type) + (char)code.getComponentWithTypeCount(type) + VM_LINE_BREAK;
+		if(type.equals(KEYWORD_FUNCTION))
+			return componentIndex; // the function index only needs the function count
 		for (CodeComponent component : code.getComponents()) {
 			if(component.hasType(type)) {
 				componentIndex += "" + (char)component.getByteCodeName();
@@ -978,7 +985,6 @@ public class JooCompiler {
 					componentIndex += toByteCodeNumber(arraySize.getName());
 				}
 				componentIndex += "" + VM_LINE_BREAK;
-				// only write function names, the function start index will be added after the code is written
 			}
 		}
 		return componentIndex;
@@ -988,7 +994,6 @@ public class JooCompiler {
 		String function = "";
 		if(component.hasType(KEYWORD_FUNCTION) || component.hasType(KEYWORD_FUNCTION_REPEAT)) {
 			// the endFunction is not needed as after a function there will always be another function or end of file
-			// only the function keyword is needed here to know that this is where a function starts, so it can be added to the index later
 			function += (char)component.getByteCodeType();
 		}
 		else if(component.hasType(KEYWORD_FUNCTION_CALL)) {
