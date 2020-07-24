@@ -19,26 +19,27 @@ public class JooVirtualMachine {
 	public static final char KEYWORD_FUNCTION = 115;
 	public static final char KEYWORD_FUNCTION_CALL = 114;
 	public static final char KEYWORD_FUNCTION_REPEAT = 113;
-	public static final char KEYWORD_PARAMETER = 112;
+	public static final char KEYWORD_ARGUMENT = 112;
 	
-	public static final char LINE_BREAK = 101;
+	public static final char LINE_BREAK = 111;
 	
-	public static final char NUMBER_9 = 100;
-	public static final char NUMBER_8 = 99;
-	public static final char NUMBER_7 = 98;
-	public static final char NUMBER_6 = 97;
-	public static final char NUMBER_5 = 96;
-	public static final char NUMBER_4 = 95;
-	public static final char NUMBER_3 = 94;
-	public static final char NUMBER_2 = 93;
-	public static final char NUMBER_1 = 92;
-	public static final char NUMBER_0 = 91;
+	public static final char NUMBER_9 = 110;
+	public static final char NUMBER_8 = 109;
+	public static final char NUMBER_7 = 108;
+	public static final char NUMBER_6 = 107;
+	public static final char NUMBER_5 = 106;
+	public static final char NUMBER_4 = 105;
+	public static final char NUMBER_3 = 104;
+	public static final char NUMBER_2 = 103;
+	public static final char NUMBER_1 = 102;
+	public static final char NUMBER_0 = 101;
 	
-	public static final byte PARAMETERS_START = 66;
 	public static final byte COMPONENTS_START = 1;
 	public static final byte COMPONENTS_END = 65;
-	public static final byte ARRAY_INDEXES_START = 72;
+	public static final byte PARAMETERS_START = 66;
+	public static final byte PARAMETERS_END = 71;
 	public static final byte TYPES_START = 119;
+	public static final byte TYPES_END = 127;
 	public static final byte OPERATORS_START = 1;
 	public static final byte NATIVE_FUNCTIONS_START = 1;
 	
@@ -311,10 +312,10 @@ public class JooVirtualMachine {
 		int parameter5 = parameters[5];
 		byte currentParameter = 0;
 		for (int i = codeIndex; code[i] != LINE_BREAK; i++) {
-			if(code[i] == KEYWORD_PARAMETER) {
+			if(code[i] == KEYWORD_ARGUMENT) {
 				int parameterIndex = code[i + 1] - COMPONENTS_START;
 				char arrayIndex = code[i + 2];
-				if((arrayIndex != KEYWORD_PARAMETER) && (arrayIndex != LINE_BREAK)) {
+				if((arrayIndex != KEYWORD_ARGUMENT) && (arrayIndex != LINE_BREAK)) {
 					// don't subtract ARRAY_INDICES_START because its used to know if it's an array index
 					parameterIndex = components[parameterIndex] + arrayIndex;
 				}

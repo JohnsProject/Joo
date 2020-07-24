@@ -2,11 +2,6 @@ package com.johnsproject.joo;
 
 import java.io.File;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.johnsproject.joo.util.FileUtil;
@@ -85,10 +80,49 @@ public class JooCompiler {
 	
 	public static final String LINE_BREAK = "\n";
 	
-	public static final int FIXED_POINT = 255;
-	
 	public static final String PATH_COMPILER_SETTINGS = "JooCompilerSettings.jcs";
 	public static final String SETTINGS_TYPE_DECLARATION = "@";
+	
+	
+	public static final char VM_TYPE_INT = JooVirtualMachine.TYPE_INT;
+	public static final char VM_TYPE_FIXED = JooVirtualMachine.TYPE_FIXED;
+	public static final char VM_TYPE_BOOL = JooVirtualMachine.TYPE_BOOL;
+	public static final char VM_TYPE_CHAR = JooVirtualMachine.TYPE_CHAR;
+	
+	public static final char VM_TYPE_ARRAY_INT = JooVirtualMachine.TYPE_ARRAY_INT;
+	public static final char VM_TYPE_ARRAY_FIXED = JooVirtualMachine.TYPE_ARRAY_FIXED;
+	public static final char VM_TYPE_ARRAY_BOOL = JooVirtualMachine.TYPE_ARRAY_BOOL;
+	public static final char VM_TYPE_ARRAY_CHAR = JooVirtualMachine.TYPE_ARRAY_CHAR;
+	public static final char VM_TYPE_FUNCTION = JooVirtualMachine.TYPE_FUNCTION;
+	
+	public static final char VM_KEYWORD_IF = JooVirtualMachine.KEYWORD_IF;
+	public static final char VM_KEYWORD_ELSE_IF = JooVirtualMachine.KEYWORD_ELSE_IF;
+	public static final char VM_KEYWORD_ELSE = JooVirtualMachine.KEYWORD_ELSE;
+	public static final char VM_KEYWORD_FUNCTION = JooVirtualMachine.KEYWORD_FUNCTION;
+	public static final char VM_KEYWORD_FUNCTION_CALL = JooVirtualMachine.KEYWORD_FUNCTION_CALL;
+	public static final char VM_KEYWORD_FUNCTION_REPEAT = JooVirtualMachine.KEYWORD_FUNCTION_REPEAT;
+	public static final char VM_KEYWORD_ARGUMENT = JooVirtualMachine.KEYWORD_ARGUMENT;
+	
+	public static final char VM_LINE_BREAK = JooVirtualMachine.LINE_BREAK;
+	
+	public static final char VM_NUMBER_9 = JooVirtualMachine.NUMBER_9;
+	public static final char VM_NUMBER_8 = JooVirtualMachine.NUMBER_8;
+	public static final char VM_NUMBER_7 = JooVirtualMachine.NUMBER_7;
+	public static final char VM_NUMBER_6 = JooVirtualMachine.NUMBER_6;
+	public static final char VM_NUMBER_5 = JooVirtualMachine.NUMBER_5;
+	public static final char VM_NUMBER_4 = JooVirtualMachine.NUMBER_4;
+	public static final char VM_NUMBER_3 = JooVirtualMachine.NUMBER_3;
+	public static final char VM_NUMBER_2 = JooVirtualMachine.NUMBER_2;
+	public static final char VM_NUMBER_1 = JooVirtualMachine.NUMBER_1;
+	public static final char VM_NUMBER_0 = JooVirtualMachine.NUMBER_0;
+	
+	public static final char FIXED_POINT = JooVirtualMachine.FIXED_POINT;
+	public static final int FIXED_POINT_ONE = (1 << FIXED_POINT) - 1;
+	
+	public static final byte VM_COMPONENTS_START = JooVirtualMachine.COMPONENTS_START;
+	public static final byte VM_COMPONENTS_END = JooVirtualMachine.COMPONENTS_END;
+	public static final byte VM_PARAMETERS_START = JooVirtualMachine.PARAMETERS_START;
+	public static final byte VM_PARAMETERS_END = JooVirtualMachine.PARAMETERS_END;
 	
 	private String settingType;
 	private Settings settings;
@@ -258,7 +292,7 @@ public class JooCompiler {
 			final byte type = toByteCodeType(lineData[0]);
 			// toByteCodeType returns -1 if type doens't exist
 			if(type > 0) {
-				final int typeIndex = JooVirtualMachine.TYPE_INT - type;
+				final int typeIndex = VM_TYPE_INT - type;
 				typeCountBuffer[typeIndex]++;
 			}
 		}
@@ -266,7 +300,7 @@ public class JooCompiler {
 			if(i > 0)
 				typeCountBuffer[i] += typeCountBuffer[i - 1];
 			final byte typeCount = (byte) typeCountBuffer[i];
-			final byte byteCodeType = (byte) (JooVirtualMachine.TYPE_INT - i);
+			final byte byteCodeType = (byte) (VM_TYPE_INT - i);
 			final String type = toType(byteCodeType); 
 			final CodeComponent typeComponent = new CodeComponent("" + typeCount, typeCount, type, byteCodeType, 0);
 			typeRegistry.addComponent(typeComponent);
@@ -356,10 +390,10 @@ public class JooCompiler {
 			parseFunctionCall(code, lineData, lineIndex);
 		}
 		else if (keyword.equals(KEYWORD_FUNCTION_REPEAT)) {
-			parseKeywordComponent(code, lineData, lineIndex, KEYWORD_FUNCTION_REPEAT, (byte)JooVirtualMachine.KEYWORD_FUNCTION_REPEAT);
+			parseKeywordComponent(code, lineData, lineIndex, KEYWORD_FUNCTION_REPEAT, (byte)VM_KEYWORD_FUNCTION_REPEAT);
 		}
 		else if (keyword.equals(KEYWORD_FUNCTION_END)) {
-			parseKeywordComponent(code, lineData, lineIndex, KEYWORD_FUNCTION_END, (byte)JooVirtualMachine.KEYWORD_FUNCTION);
+			parseKeywordComponent(code, lineData, lineIndex, KEYWORD_FUNCTION_END, (byte)VM_KEYWORD_FUNCTION);
 		} else {
 			return false;
 		}
@@ -372,12 +406,12 @@ public class JooCompiler {
 		final String name = lineData[1];
 		final String type = KEYWORD_FUNCTION;
 		final byte byteCodeName = getUniqueByteCodeName(code, name, type);
-		final byte byteCodeType = (byte)JooVirtualMachine.KEYWORD_FUNCTION;
+		final byte byteCodeType = (byte)VM_KEYWORD_FUNCTION;
 		CodeComponent function = new CodeComponent(name, byteCodeName, type, byteCodeType, lineIndex);
 		for (int i = 2; i < lineData.length; i += 2) {
 			try {
 				final String paramName = lineData[i + 1];
-				final byte paramByteCodeName = (byte) (((i - 2) / 2) + JooVirtualMachine.COMPONENTS_START);
+				final byte paramByteCodeName = (byte) (((i - 2) / 2) + VM_PARAMETERS_START);
 				final String paramType = lineData[i];
 				final byte paramByteCodeType = toByteCodeType(paramType);
 				if(!isVariable(paramType))
@@ -396,7 +430,7 @@ public class JooCompiler {
 			throw new ParseException("Invalid function call", lineIndex);
 		final String name = lineData[1];
 		final String type = KEYWORD_FUNCTION_CALL;
-		final byte byteCodeType = (byte)JooVirtualMachine.KEYWORD_FUNCTION_CALL;
+		final byte byteCodeType = (byte)VM_KEYWORD_FUNCTION_CALL;
 		CodeComponent functionCall = new CodeComponent(name, (byte) 0, type, byteCodeType, lineIndex);
 		for (int i = 2; i < lineData.length; i++) {
 			final String argumentName = lineData[i];
@@ -416,10 +450,10 @@ public class JooCompiler {
 			parseCondition(code, lineData, lineIndex);
 		}
 		else if (keyword.equals(KEYWORD_ELSE)) {
-			parseKeywordComponent(code, lineData, lineIndex, KEYWORD_ELSE, (byte)JooVirtualMachine.KEYWORD_ELSE);
+			parseKeywordComponent(code, lineData, lineIndex, KEYWORD_ELSE, (byte)VM_KEYWORD_ELSE);
 		}
 		else if (keyword.equals(KEYWORD_IF_END)) {
-			parseKeywordComponent(code, lineData, lineIndex, KEYWORD_IF_END, (byte)JooVirtualMachine.KEYWORD_IF);
+			parseKeywordComponent(code, lineData, lineIndex, KEYWORD_IF_END, (byte)VM_KEYWORD_IF);
 		} else {
 			return false;
 		}
@@ -434,7 +468,7 @@ public class JooCompiler {
 			throw new ParseException("Invalid comparison operator, Operator: " + name, lineIndex);				
 		final byte byteCodeName = settings.getSettingWithName(name).getByteCodeName();
 		final String type = lineData[0];
-		final byte byteCodeType = (byte) (type.equals(KEYWORD_IF) ? JooVirtualMachine.KEYWORD_IF : JooVirtualMachine.KEYWORD_ELSE_IF);
+		final byte byteCodeType = (byte) (type.equals(KEYWORD_IF) ? VM_KEYWORD_IF : VM_KEYWORD_ELSE_IF);
 		CodeComponent condition = new CodeComponent(name, byteCodeName, type, byteCodeType, lineIndex);
 		final String variable0Data = lineData[1];
 		final CodeComponent variable0 = parseVariableComponent(variable0Data, code, lineIndex);
@@ -512,7 +546,7 @@ public class JooCompiler {
 			final String index = arrayData[1];
 			name = arrayData[0];
 			try {
-				final byte byteCodeIndex = (byte) (Byte.parseByte(index) + JooVirtualMachine.COMPONENTS_START);
+				final byte byteCodeIndex = (byte) (Byte.parseByte(index) + VM_COMPONENTS_START);
 				arrayIndex = new CodeComponent(index, byteCodeIndex, KEYWORD_ARRAY, (byte)0, lineIndex);
 			} catch (NumberFormatException e1) {
 				try {
@@ -590,7 +624,7 @@ public class JooCompiler {
 				valueType = type;
 				double number = Double.parseDouble(rawValue);
 				if(type.equals(TYPE_FIXED) || type.equals(TYPE_ARRAY_FIXED))
-					number *= FIXED_POINT;
+					number *= FIXED_POINT_ONE;
 				value = "" + Math.round(number);
 			} catch (NumberFormatException e) {
 				throw new ParseException("The declared value type doesn't match the variable type", lineIndex);					
@@ -609,13 +643,13 @@ public class JooCompiler {
 	 * @return Unique byte code name.
 	 */
 	private byte getUniqueByteCodeName(Code code, String name, String type) {
-		byte byteCodeName = JooVirtualMachine.COMPONENTS_START;
+		byte byteCodeName = VM_COMPONENTS_START;
 		final byte byteCodeType = toByteCodeType(type);
 		// toByteCodeType returns -1 if type doens't exist
 		if(byteCodeType > 0) {
 			CodeComponent typeRegistry = code.getComponentWithType(KEYWORD_TYPE_REGISTRY);
 			CodeComponent registry = typeRegistry.getComponentWithType(type);
-			final int typeIndex = JooVirtualMachine.TYPE_INT - byteCodeType;
+			final int typeIndex = VM_TYPE_INT - byteCodeType;
 			int previousTypeCount = 0; 
 			if(typeIndex > 0) {
 				previousTypeCount = typeRegistry.getComponent(typeIndex - 1).getByteCodeName(); 
@@ -663,31 +697,31 @@ public class JooCompiler {
 	byte toByteCodeType(String type) {
 		type = toType(type);
 		if(type.equals(TYPE_INT)) {
-			return JooVirtualMachine.TYPE_INT;
+			return (byte) VM_TYPE_INT;
 		}
 		else if(type.equals(TYPE_FIXED)) {
-			return JooVirtualMachine.TYPE_FIXED;
+			return (byte) VM_TYPE_FIXED;
 		}
 		else if(type.equals(TYPE_BOOL)) {
-			return JooVirtualMachine.TYPE_BOOL;
+			return (byte) VM_TYPE_BOOL;
 		}
 		else if(type.equals(TYPE_CHAR)) {
-			return JooVirtualMachine.TYPE_CHAR;
+			return (byte) VM_TYPE_CHAR;
 		}
 		else if(type.equals(TYPE_ARRAY_INT)) {
-			return JooVirtualMachine.TYPE_ARRAY_INT;
+			return (byte) VM_TYPE_ARRAY_INT;
 		}
 		else if(type.equals(TYPE_ARRAY_FIXED)) {
-			return JooVirtualMachine.TYPE_ARRAY_FIXED;
+			return (byte) VM_TYPE_ARRAY_FIXED;
 		}
 		else if(type.equals(TYPE_ARRAY_BOOL)) {
-			return JooVirtualMachine.TYPE_ARRAY_BOOL;
+			return (byte) VM_TYPE_ARRAY_BOOL;
 		}
 		else if(type.equals(TYPE_ARRAY_CHAR)) {
-			return JooVirtualMachine.TYPE_ARRAY_CHAR;
+			return (byte) VM_TYPE_ARRAY_CHAR;
 		}
 		else if(type.equals(KEYWORD_FUNCTION)) {
-			return JooVirtualMachine.TYPE_FUNCTION;
+			return (byte) VM_TYPE_FUNCTION;
 		}
 		return -1;
 	}
@@ -699,31 +733,31 @@ public class JooCompiler {
 	 * @return The code representation of type. Empty string if the type is unknown.
 	 */
 	String toType(byte type) {
-		if(type == JooVirtualMachine.TYPE_INT) {
+		if(type == VM_TYPE_INT) {
 			return TYPE_INT;
 		}
-		else if(type == JooVirtualMachine.TYPE_FIXED) {
+		else if(type == VM_TYPE_FIXED) {
 			return TYPE_FIXED;
 		}
-		else if(type == JooVirtualMachine.TYPE_BOOL) {
+		else if(type == VM_TYPE_BOOL) {
 			return TYPE_BOOL;
 		}
-		else if(type == JooVirtualMachine.TYPE_CHAR) {
+		else if(type == VM_TYPE_CHAR) {
 			return TYPE_CHAR;
 		}
-		else if(type == JooVirtualMachine.TYPE_ARRAY_INT) {
+		else if(type == VM_TYPE_ARRAY_INT) {
 			return TYPE_ARRAY_INT;
 		}
-		else if(type == JooVirtualMachine.TYPE_ARRAY_FIXED) {
+		else if(type == VM_TYPE_ARRAY_FIXED) {
 			return TYPE_ARRAY_FIXED;
 		}
-		else if(type == JooVirtualMachine.TYPE_ARRAY_BOOL) {
+		else if(type == VM_TYPE_ARRAY_BOOL) {
 			return TYPE_ARRAY_BOOL;
 		}
-		else if(type == JooVirtualMachine.TYPE_ARRAY_CHAR) {
+		else if(type == VM_TYPE_ARRAY_CHAR) {
 			return TYPE_ARRAY_CHAR;
 		}
-		else if(type == JooVirtualMachine.TYPE_FUNCTION) {
+		else if(type == VM_TYPE_FUNCTION) {
 			return KEYWORD_FUNCTION;
 		}
 		return "";
@@ -875,7 +909,7 @@ public class JooCompiler {
 			byteCodeLine += writeOperation(component);
 			byteCodeLine += writeCondition(component);
 			if(!byteCodeLine.isEmpty())
-				byteCode += byteCodeLine + JooVirtualMachine.LINE_BREAK;
+				byteCode += byteCodeLine + VM_LINE_BREAK;
 		}
 		
 		return byteCode;
@@ -896,7 +930,7 @@ public class JooCompiler {
 	}
 	
 	private String writeComponentIndex(Code code, String type) {
-		String componentIndex = "" + (char)toByteCodeType(type) + (char)code.getComponentWithTypeCount(type) + JooVirtualMachine.LINE_BREAK;
+		String componentIndex = "" + (char)toByteCodeType(type) + (char)code.getComponentWithTypeCount(type) + VM_LINE_BREAK;
 		for (CodeComponent component : code.getComponents()) {
 			if(component.hasType(type)) {
 				componentIndex += "" + (char)component.getByteCodeName();
@@ -908,7 +942,7 @@ public class JooCompiler {
 					final CodeComponent arraySize = component.getComponentWithType(KEYWORD_ARRAY);
 					componentIndex += toByteCodeNumber(arraySize.getName());
 				}
-				componentIndex += "" + JooVirtualMachine.LINE_BREAK;
+				componentIndex += "" + VM_LINE_BREAK;
 				// only write function names, the function start index will be added after the code is written
 			}
 		}
@@ -924,9 +958,9 @@ public class JooCompiler {
 		}
 		else if(component.hasType(KEYWORD_FUNCTION_CALL)) {
 			final CodeComponent calledFunction = code.getComponent(component.getName(), KEYWORD_FUNCTION);
-			function += (char)calledFunction.getByteCodeName();
 			for (CodeComponent argument : component.getComponents())
-				function += writeVariable(argument);
+				function += VM_KEYWORD_ARGUMENT + writeVariable(argument) + VM_LINE_BREAK;
+			function += (char)calledFunction.getByteCodeName();
 		}
 		return function;
 	}
@@ -964,7 +998,7 @@ public class JooCompiler {
 	private String writeVariable(CodeComponent component) {
 		String variable = "";
 		final byte byteCodeName = component.getByteCodeName();
-		if(byteCodeName >= JooVirtualMachine.COMPONENTS_START) {
+		if(byteCodeName >= VM_COMPONENTS_START) {
 			variable += "" + (char)byteCodeName;
 			if(component.getComponents().size() > 0) {
 				final CodeComponent arrayIndex = component.getComponent(0);
@@ -988,9 +1022,10 @@ public class JooCompiler {
 	 * @return The byte code representation of the specified value.
 	 */
 	String toByteCodeNumber(String value) {
+		value = "" + Math.round(Double.parseDouble(value));
 		for (int i = 0; i <= 9; i++) {
 			final char codeNumber = (char)('0' + i);
-			final char byteCodeNumber = (char)(JooVirtualMachine.NUMBER_0 + i);
+			final char byteCodeNumber = (char)(VM_NUMBER_0 + i);
 			value = value.replace(codeNumber, byteCodeNumber);
 		}
 		return value;
