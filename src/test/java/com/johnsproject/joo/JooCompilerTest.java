@@ -925,6 +925,8 @@ public class JooCompilerTest {
 		final String compiledByteCode = compiler.compile("TestCode.joo");
 		final String[] lines = compiledByteCode.split("" + VM_LINE_BREAK);
 		
+		System.out.println(compiledByteCode.length());
+		
 		// uncomment to print the byte code character as numbers
 		for (int l = 0; l < lines.length; l++) {
 			final char[] line = lines[l].toCharArray();
@@ -959,8 +961,7 @@ public class JooCompilerTest {
 		final char param0 = parameter++;
 		final char param1 = parameter++;
 		
-		// TODO unary operators
-		// that can be customized in the compiler settings and will be called to modify the value before applying it to the variable in front of the operator
+		// TODO native functions
 		int line = 0;
 		assertEquals(lines[line++], "" + VM_TYPE_INT + (char)3);
 		assertEquals(lines[line++], "" + int0);

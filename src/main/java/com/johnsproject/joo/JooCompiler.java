@@ -10,12 +10,16 @@ import com.johnsproject.joo.util.FileUtil;
 
 public class JooCompiler {
 	
-	// TODO
-	// import keyword
-	// Standart native library
-	// specification
+	// TODO Standart native library
+	// TODO specification
 	
-	/*
+	/* TODO remove JooCompilerSettings.jcs
+	Add the keywords operator and nativeFunction so the operators and native functions can be
+	declared directly in code, the include keyword can be used to import operator or native
+	function libraries.
+	*/
+	
+	/* TODO Add project directory structure
 	 Change joo project directory structure to
 	 
 	 -> ProjectName/
@@ -30,7 +34,7 @@ public class JooCompiler {
 	 the Main.joo and the JooCompilerSettings.jcs file and compile it into the Build folder.
 	*/
 
-	/*
+	/* TODO import keyword
 	 Import keyword is used to import external files. The file get's duplicated and renamed
 	 to a single character. The file has to be in the same folder or nested folder of the folder
 	 the joo file to be compiled is in. The file name can passed as parameter to the Native functions.

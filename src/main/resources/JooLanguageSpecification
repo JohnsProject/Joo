@@ -1,5 +1,85 @@
 Joo Language Specification
 
+Data types
+
+	int - 16 bit, positive and negative, integer numbers.
+	
+	fixed - 16 bit, positive and negative, 8.8 fixed point numbers.
+	
+	bool - 1 bit, 0 / false or 1 / true value.
+	
+	char - 8 bit, 'character' or numerical ASCII character representation.
+
+Variable
+
+	Declaration
+	
+		dataType name
+		dataType name = value
+
+	Operation
+	
+		name operator value
+	
+Array
+
+	Declaration
+	
+		dataType:size name
+	
+	Resizing
+	
+		name:newSize
+
+	Operation
+		
+		name operator value
+		name:index operator value
+		
+Constant
+
+	Declaration
+		
+		constant NAME = value
+	
+Function
+
+	Declaration
+		
+		function Name
+		endFunction
+		
+		function Name dataType parameterName dataType parameterName
+		endFunction
+		
+	Call
+		
+		call Name argument argument
+		
+	Recursive call
+	
+		function Name dataType parameterName dataType parameterName
+		repeatFunction
+		
+Condition
+
+	Declaration
+		
+		if variable0 comparator variable1
+		elseIf variable0 comparator value
+		else
+		endIf
+
+Inclusion
+
+	Declaration
+	
+		include FilePathInLocalDirectory
+
+
+
+
+
 1 Introduction
 Joo is a programming language that is designed to run on machines 
 with extremely low resources. It's supposed to run on a desktop as well as on
