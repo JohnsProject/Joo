@@ -36,7 +36,7 @@ public class JooCompilerTest {
 
 	@Test
 	public void parseSettingsTest() throws Exception {
-		final String settingsData = FileUtil.read(PATH_COMPILER_SETTINGS);
+		final String settingsData = FileUtil.read("StandartLibrary.joo");
 		final JooCompiler compiler = new JooCompiler();
 		final Settings settings = compiler.parseSettings(settingsData);
 		assert(settings.hasSettingWithName("<="));
@@ -74,37 +74,16 @@ public class JooCompilerTest {
 		assert(!settings.getSettingWithName("Storage_Clear").hasSettingWithName("param0"));
 		
 		try {
-			final String testSettings = "@operator" + "\n"
-										+ "01 + int|fixed" + "\n"
-										+ "02 + int|fixed";
+			final String testSettings = "operator + int|fixed" + "\n" +
+										"operator + int|fixed";
 			compiler.parseSettings(testSettings);
 			fail("Duplicate compiler setting exception not thrown");
 		} catch (ParseException e) {
 			assertEquals(e.getMessage(), "Duplicate compiler setting, Name: +");
 		}
 		
-		
 		try {
-			final String testSettings = "@function" + "\n"
-										+ "MyFunction";
-			compiler.parseSettings(testSettings);
-			fail("Invalid setting declaration exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Invalid setting declaration");
-		}
-		
-		try {
-			final String testSettings = "@operator" + "\n"
-										+ "0A + int|fixed";
-			compiler.parseSettings(testSettings);
-			fail("Invalid byte code name exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Invalid byte code name, Name: 0A");
-		}
-		
-		try {
-			final String testSettings = "@operator" + "\n"
-										+ "01 + int|fixed A";
+			final String testSettings = "operator + int|fixed A";
 			compiler.parseSettings(testSettings);
 			fail("Invalid operator declaration exception not thrown");
 		} catch (ParseException e) {
@@ -112,8 +91,7 @@ public class JooCompilerTest {
 		}
 		
 		try {
-			final String testSettings = "@function" + "\n"
-										+ "01 MyFunction bug";
+			final String testSettings = "native MyFunction bug";
 			compiler.parseSettings(testSettings);
 			fail("Invalid supported type exception not thrown");
 		} catch (ParseException e) {
@@ -413,7 +391,7 @@ public class JooCompilerTest {
 	
 	@Test
 	public void parseConditionComponentTest() throws Exception {
-		final String settingsData = FileUtil.read(PATH_COMPILER_SETTINGS);
+		final String settingsData = FileUtil.read("StandartLibrary.joo");
 		final JooCompiler compiler = new JooCompiler();
 		final Settings settings = compiler.parseSettings(settingsData);
 		String[] testCode;
@@ -533,7 +511,7 @@ public class JooCompilerTest {
 	
 	@Test
 	public void parseOperationComponentTest() throws Exception {
-		final String settingsData = FileUtil.read(PATH_COMPILER_SETTINGS);
+		final String settingsData = FileUtil.read("StandartLibrary.joo");
 		final JooCompiler compiler = new JooCompiler();
 		final Settings settings = compiler.parseSettings(settingsData);
 		String[] testCode;
@@ -549,7 +527,7 @@ public class JooCompilerTest {
 		compiler.parseOperationComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("="));
 		assert(code.getComponentWithName("=").hasName((byte) 7));
-		assert(code.getComponentWithName("=").hasType(KEYWORD_OPERATOR));
+		assert(code.getComponentWithName("=").hasType(TYPE_OPERATOR));
 		assert(code.getComponentWithName("=").hasComponentWithName("variable0"));
 		assert(code.getComponentWithName("=").getComponentWithName("variable0").hasName((byte) 1));
 		assert(code.getComponentWithName("=").getComponentWithName("variable0").hasType(TYPE_INT));
@@ -568,7 +546,7 @@ public class JooCompilerTest {
 	
 	@Test
 	public void parseCodeTest() throws Exception {
-		final String settingsData = FileUtil.read(PATH_COMPILER_SETTINGS);
+		final String settingsData = FileUtil.read("StandartLibrary.joo");
 		final JooCompiler compiler = new JooCompiler();
 		final Settings settings = compiler.parseSettings(settingsData);
 		
@@ -672,7 +650,7 @@ public class JooCompilerTest {
 		line++;
 		assert(code.getComponent(line).hasName("+"));
 		assert(code.getComponent(line).hasName((byte) 11));
-		assert(code.getComponent(line).hasType(KEYWORD_OPERATOR));
+		assert(code.getComponent(line).hasType(TYPE_OPERATOR));
 		assert(code.getComponent(line).hasComponentWithName("int0"));
 		assert(code.getComponent(line).getComponentWithName("int0").hasName((byte) 1));
 		assert(code.getComponent(line).getComponentWithName("int0").hasType(TYPE_INT));
@@ -692,7 +670,7 @@ public class JooCompilerTest {
 		line++;
 		assert(code.getComponent(line).hasName("+"));
 		assert(code.getComponent(line).hasName((byte) 11));
-		assert(code.getComponent(line).hasType(KEYWORD_OPERATOR));
+		assert(code.getComponent(line).hasType(TYPE_OPERATOR));
 		assert(code.getComponent(line).hasComponentWithName("fixed0"));
 		assert(code.getComponent(line).getComponentWithName("fixed0").hasName((byte) 2));
 		assert(code.getComponent(line).getComponentWithName("fixed0").hasType(TYPE_FIXED));
@@ -706,7 +684,7 @@ public class JooCompilerTest {
 		line++;
 		assert(code.getComponent(line).hasName("="));
 		assert(code.getComponent(line).hasName((byte) 7));
-		assert(code.getComponent(line).hasType(KEYWORD_OPERATOR));
+		assert(code.getComponent(line).hasType(TYPE_OPERATOR));
 		assert(code.getComponent(line).hasComponentWithName("bool0"));
 		assert(code.getComponent(line).getComponentWithName("bool0").hasName((byte) 3));
 		assert(code.getComponent(line).getComponentWithName("bool0").hasType(TYPE_BOOL));
@@ -724,7 +702,7 @@ public class JooCompilerTest {
 	
 	@Test
 	public void analyseCodeTest() throws Exception {
-		final String settingsData = FileUtil.read(PATH_COMPILER_SETTINGS);
+		final String settingsData = FileUtil.read("StandartLibrary.joo");
 		final JooCompiler compiler = new JooCompiler();
 		final Settings settings = compiler.parseSettings(settingsData);
 		
@@ -807,7 +785,7 @@ public class JooCompilerTest {
 		try {
 			Code code = new Code();
 			CodeComponent function = new CodeComponent("Function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0);
-			function.addComponent(new CodeComponent("parameter", (byte) 1, KEYWORD_PARAMETER, (byte) 0, 0));
+			function.addComponent(new CodeComponent("parameter", (byte) 1, TYPE_PARAMETER, (byte) 0, 0));
 			code.addComponent(function);
 			compiler.analyseCode(code);
 			fail("Parameter names should start with a _ exception not thrown");
@@ -818,7 +796,7 @@ public class JooCompilerTest {
 		try {
 			Code code = new Code();
 			CodeComponent function = new CodeComponent("Function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0);
-			function.addComponent(new CodeComponent("_0parameter", (byte) 1, KEYWORD_PARAMETER, (byte) 0, 0));
+			function.addComponent(new CodeComponent("_0parameter", (byte) 1, TYPE_PARAMETER, (byte) 0, 0));
 			code.addComponent(function);
 			compiler.analyseCode(code);
 			fail("Parameter names should start with a alphabetic character exception not thrown");
@@ -829,7 +807,7 @@ public class JooCompilerTest {
 		try {
 			Code code = new Code();
 			CodeComponent function = new CodeComponent("Function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0);
-			function.addComponent(new CodeComponent("_Parameter", (byte) 1, KEYWORD_PARAMETER, (byte) 0, 0));
+			function.addComponent(new CodeComponent("_Parameter", (byte) 1, TYPE_PARAMETER, (byte) 0, 0));
 			code.addComponent(function);
 			compiler.analyseCode(code);
 			fail("Parameter names should start with a lowercase character exception not thrown");
@@ -840,7 +818,7 @@ public class JooCompilerTest {
 		try {
 			Code code = new Code();
 			CodeComponent function = new CodeComponent("Function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0);
-			function.addComponent(new CodeComponent("_my_parameter", (byte) 1, KEYWORD_PARAMETER, (byte) 0, 0));
+			function.addComponent(new CodeComponent("_my_parameter", (byte) 1, TYPE_PARAMETER, (byte) 0, 0));
 			code.addComponent(function);
 			compiler.analyseCode(code);
 			fail("Parameter names should contain only alphanumeric characters exception not thrown");
@@ -851,8 +829,8 @@ public class JooCompilerTest {
 		try {
 			Code code = new Code();
 			CodeComponent function = new CodeComponent("Function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0);
-			function.addComponent(new CodeComponent("_parameter", (byte) 1, KEYWORD_PARAMETER, (byte) 0, 0));
-			function.addComponent(new CodeComponent("_parameter", (byte) 2, KEYWORD_PARAMETER, (byte) 0, 0));
+			function.addComponent(new CodeComponent("_parameter", (byte) 1, TYPE_PARAMETER, (byte) 0, 0));
+			function.addComponent(new CodeComponent("_parameter", (byte) 2, TYPE_PARAMETER, (byte) 0, 0));
 			code.addComponent(function);
 			compiler.analyseCode(code);
 			fail("Duplicate parameter");
@@ -961,7 +939,6 @@ public class JooCompilerTest {
 		final char param0 = parameter++;
 		final char param1 = parameter++;
 		
-		// TODO native functions
 		int line = 0;
 		assertEquals(lines[line++], "" + VM_TYPE_INT + (char)3);
 		assertEquals(lines[line++], "" + int0);
@@ -986,7 +963,7 @@ public class JooCompilerTest {
 		assertEquals(lines[line++], "" + boolArray + compiler.toByteCodeNumber("15"));
 		assertEquals(lines[line++], "" + VM_TYPE_ARRAY_CHAR + (char)1);
 		assertEquals(lines[line++], "" + charArray + compiler.toByteCodeNumber("13"));
-		assertEquals(lines[line++], "" + VM_TYPE_FUNCTION + (char)4); // TODO function start indices will be searched by the virtual machine
+		assertEquals(lines[line++], "" + VM_TYPE_FUNCTION + (char)4);
 		assertEquals(lines[line++], "" + VM_KEYWORD_FUNCTION);
 		assertEquals(lines[line++], "" + int0 + OPERATOR_ADD + compiler.toByteCodeNumber("100"));
 		assertEquals(lines[line++], "" + int0 + OPERATOR_SUBTRACT + int1);

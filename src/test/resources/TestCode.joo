@@ -7,6 +7,7 @@ This is a multi line comment
 with 2 lines
 ##
 
+include StandartLibrary.joo
 include TestLibrary.joo
 include TestLibraries/TestDirectoryLibrary.joo
 

@@ -1,6 +1,5 @@
 package com.johnsproject.joo;
 
-import java.io.File;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,40 +9,6 @@ import com.johnsproject.joo.util.FileUtil;
 
 public class JooCompiler {
 	
-	// TODO Standart native library
-	// TODO specification
-	
-	/* TODO remove JooCompilerSettings.jcs
-	Add the keywords operator and nativeFunction so the operators and native functions can be
-	declared directly in code, the include keyword can be used to import operator or native
-	function libraries.
-	*/
-	
-	/* TODO Add project directory structure
-	 Change joo project directory structure to
-	 
-	 -> ProjectName/
-	 --> JooCompilerSettings.jcs
-	 --> Source/
-	 ---> Main.joo
-	 ---> Other joo files
-	 --> Build/
-	 ---> ProjectName.cjoo
-	 
-	 Only the project folder path is passed and the compiler will search for
-	 the Main.joo and the JooCompilerSettings.jcs file and compile it into the Build folder.
-	*/
-
-	/* TODO import keyword
-	 Import keyword is used to import external files. The file get's duplicated and renamed
-	 to a single character. The file has to be in the same folder or nested folder of the folder
-	 the joo file to be compiled is in. The file name can passed as parameter to the Native functions.
-	 Usage is like: 
-	 
-	 	# import <file name> = <file path>
-	  	import OtherJooApp = App2.cjoo
-	  	call <Native function name>: OtherJooApp
-	 */
 	public static final String KEYWORD_IMPORT = "import";
 	public static final String KEYWORD_INCLUDE = "include";
 	public static final String KEYWORD_CONSTANT = "constant";
@@ -64,10 +29,9 @@ public class JooCompiler {
 	// used in joo compiler settings only
 	public static final String KEYWORD_TYPE_SEPARATOR = "|";
 
-	public static final String KEYWORD_PARAMETER = "parameter";
 	public static final String KEYWORD_OPERATOR = "operator";
+	public static final String KEYWORD_NATIVE = "native";
 	public static final String KEYWORD_TYPE_REGISTRY = "typeRegistry";
-	
 	
 	public static final String TYPE_INT = "int";
 	public static final String TYPE_FIXED = "fixed";
@@ -77,14 +41,12 @@ public class JooCompiler {
 	public static final String TYPE_ARRAY_FIXED = TYPE_FIXED + KEYWORD_ARRAY;
 	public static final String TYPE_ARRAY_BOOL = TYPE_BOOL + KEYWORD_ARRAY;
 	public static final String TYPE_ARRAY_CHAR = TYPE_CHAR + KEYWORD_ARRAY;
+	public static final String TYPE_PARAMETER = "parameter";
+	public static final String TYPE_OPERATOR = "operator";
 	
 	public static final String REGEX_ALPHANUMERIC = "[A-Za-z0-9]+";
 	
-	public static final String LINE_BREAK = "\n";
-	
-	public static final String PATH_COMPILER_SETTINGS = "JooCompilerSettings.jcs";
-	public static final String SETTINGS_TYPE_DECLARATION = "@";
-	
+	public static final String LINE_BREAK = "\n";	
 	
 	public static final char VM_TYPE_INT = JooVirtualMachine.TYPE_INT;
 	public static final char VM_TYPE_FIXED = JooVirtualMachine.TYPE_FIXED;
@@ -132,7 +94,6 @@ public class JooCompiler {
 	public static final byte VM_TYPES_START = JooVirtualMachine.TYPES_START;
 	public static final byte VM_TYPES_END = JooVirtualMachine.TYPES_END;
 	
-	private String settingType;
 	private Settings settings;
 	private Code code;
 	
@@ -148,16 +109,13 @@ public class JooCompiler {
 	}
 
 	public String compile(String path) {
-		final String directoryPath = getDirectoryPath(path);
 		String byteCode = "";
 		try {
-			final String settingsPath = directoryPath + PATH_COMPILER_SETTINGS;
-			final String settingsData = FileUtil.read(settingsPath);
-			settings = parseSettings(settingsData);
 			final String codePath = path;
 			String codeData = FileUtil.read(codePath);
 			codeData = addIncludedCode(codeData);
 			codeData = replaceConstants(codeData);
+			settings = parseSettings(codeData);
 			code = parseCode(codeData);
 			analyseCode(code);
 			byteCode = toByteCode(code);
@@ -168,15 +126,6 @@ public class JooCompiler {
 		return byteCode;
 	}
 	
-	private String getDirectoryPath(String path) {
-		String[] pathPieces = path.split(Pattern.quote(File.separator));
-		String codeDirectoryPath = "";
-		for (int i = 0; i < pathPieces.length - 1; i++) {
-			codeDirectoryPath += pathPieces[i] + File.separator;
-		}
-		return codeDirectoryPath;
-	}
-	
 	Settings parseSettings(String settingsData) throws ParseException {
 		final String[] settingsLines = getLines(settingsData);
 		final Settings settings = new Settings();
@@ -184,62 +133,59 @@ public class JooCompiler {
 			final String line = settingsLines[i];
 			if(line.isEmpty())
 				continue;
-			if(line.contains(SETTINGS_TYPE_DECLARATION)) {
-				settingType = line.replace(SETTINGS_TYPE_DECLARATION, "").replace(" ", "");
+			Setting setting = parseSetting(line, i);
+			if(setting == null) {
+				continue;
+			} else if (settings.hasSettingWithName(setting.getName())) {
+				throw new ParseException("Duplicate compiler setting, Name: " + setting.getName(), i);	
 			} else {
-				Setting setting = parseSetting(line, i);
-				if (settings.hasSettingWithName(setting.getName())) {
-					throw new ParseException("Duplicate compiler setting, Name: " + setting.getName(), i);	
-				} else {
-					settings.addSetting(setting);
-				}
+				settings.addSetting(setting);
 			}
 		}
 		return settings;
 	}
 	
+	private byte operatorByteCodeName = 1, nativeFunctionByteCodeName = 1;
+	
 	private Setting parseSetting(String line, int lineIndex) throws ParseException {
 		final String[] lineData = line.split(" ");
-		if(lineData.length < 2)
-			throw new ParseException("Invalid setting declaration", lineIndex);
-		final String name = lineData[1];
-		final byte byteCodeName;
-		final String type = settingType;
-		try {
-			byteCodeName = Byte.parseByte(lineData[0]);
-		} catch(NumberFormatException e) {
-			throw new ParseException("Invalid byte code name, Name: " + lineData[0], lineIndex);
+		final String type = lineData[0];
+		Setting setting = null;
+		if(type.equals(KEYWORD_OPERATOR)) {
+			setting = parseOperatorSetting(lineData, lineIndex);
 		}
-		Setting setting = new Setting(name, byteCodeName, type);
-		if(settingType.equals(KEYWORD_OPERATOR)) {
-			parseOperatorSetting(setting, lineData, lineIndex);
-		}
-		else if(settingType.equals(KEYWORD_FUNCTION)) {
-			parseFunctionSetting(setting, lineData, lineIndex);		
+		else if(type.equals(KEYWORD_NATIVE)) {
+			setting = parseFunctionSetting(lineData, lineIndex);		
 		}
 		return setting;
 	}
 	
-	private void parseOperatorSetting(Setting setting, String[] operatorData, int lineIndex) throws ParseException {
+	private Setting parseOperatorSetting(String[] operatorData, int lineIndex) throws ParseException {
 		if(operatorData.length != 3) {
 			throw new ParseException("Invalid operator declaration", lineIndex);
 		}
+		final String name = operatorData[1];
+		final byte byteCodeName = operatorByteCodeName++;
+		final Setting setting = new Setting(name, byteCodeName, KEYWORD_OPERATOR);
 		parseTypeSetting(setting, operatorData[2], lineIndex);
+		return setting;
 	}
 	
-	private void parseFunctionSetting(Setting setting, String[] functionData, int lineIndex) throws ParseException {
-		if(functionData.length == 2)
-			return;
+	private Setting parseFunctionSetting(String[] functionData, int lineIndex) throws ParseException {		
+		final String name = functionData[1];
+		final byte byteCodeName = nativeFunctionByteCodeName++;
+		Setting setting = new Setting(name, byteCodeName, KEYWORD_NATIVE);
 		for (int i = 2; i < functionData.length; i++) {
 			// -2 so it starts at 0
 			final String paramName = "param" + (i - 2);
 			// -1 because byte code names start at 1
 			final byte paramByteCodeName = (byte) (i - 1);
-			final String paramType = KEYWORD_PARAMETER;
+			final String paramType = TYPE_PARAMETER;
 			Setting paramSetting = new Setting(paramName, paramByteCodeName, paramType);
 			parseTypeSetting(paramSetting, functionData[i], lineIndex);
 			setting.addSetting(paramSetting);
-		}	
+		}
+		return setting;
 	}
 	
 	private void parseTypeSetting(Setting setting, String supportedType, int lineIndex) throws ParseException {
@@ -319,7 +265,7 @@ public class JooCompiler {
 		createTypeRegistry(code, codeLines);
 		for (int i = 0; i < codeLines.length; i++) {
 			final String line = codeLines[i];
-			if(line.isEmpty())
+			if(line.isEmpty() || line.contains(KEYWORD_OPERATOR) || line.contains(KEYWORD_NATIVE))
 				continue;
 			parseCodeComponent(code, line, i);
 		}
@@ -535,7 +481,7 @@ public class JooCompiler {
 			if(!settings.hasSettingWithName(name))
 				throw new ParseException("Invalid operator, Operator: " + name, lineIndex);				
 			final byte byteCodeName = settings.getSettingWithName(name).getByteCodeName();
-			final String type = KEYWORD_OPERATOR;
+			final String type = TYPE_OPERATOR;
 			CodeComponent operation = new CodeComponent(name, byteCodeName, type, (byte) 0, lineIndex);
 			final String variable0Data = lineData[0];
 			final CodeComponent variable0 = parseVariableComponent(variable0Data, code, lineIndex);
@@ -1011,7 +957,7 @@ public class JooCompiler {
 	
 	private String writeOperation(CodeComponent component) {
 		String operation = "";
-		if(component.hasType(KEYWORD_OPERATOR)) {
+		if(component.hasType(TYPE_OPERATOR)) {
 			operation += writeVariable(component.getComponent(0));
 			operation += "" + (char)component.getByteCodeName();
 			operation += writeVariable(component.getComponent(1));

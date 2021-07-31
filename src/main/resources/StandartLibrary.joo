@@ -1,0 +1,78 @@
+operator <= int|fixed
+operator >= int|fixed
+operator < int|fixed
+operator > int|fixed
+operator == int|fixed|bool|char
+operator != int|fixed|bool|char
+operator = int|fixed|bool|char
+operator =+ int|fixed|bool
+operator =- int|fixed|bool
+operator =! int|fixed|bool
+operator + int|fixed
+operator - int|fixed
+operator * int|fixed
+operator / int|fixed
+operator % int
+operator & int
+operator ^ int
+operator | int
+operator ~ int
+operator << int
+operator >> int
+
+# The Standard Native Library is a set of platform independent functions
+# that aims to help developing joo applications
+
+# Standard Graphics Library
+native Graphics_HasOutputSupport bool
+native Graphics_SetColor int int int
+native Graphics_DrawWindow int int
+native Graphics_DrawPoint int int
+native Graphics_DrawLine int int int int
+native Graphics_DrawTriangle int int int int int int
+native Graphics_DrawRect int int int int
+native Graphics_DrawCircle int int int
+native Graphics_DrawText
+native Graphics_HasInputSupport bool
+native Graphics_GetInputPosition int int
+native Graphics_GetInputCode int
+
+# Standard Audio Library
+native Audio_HasOutputSupport bool
+native Audio_PlaySound int int
+
+# Standart Serial Library
+native Serial_HasOutputSupport bool
+native Serial_Write char
+native Serial_WriteText
+native Serial_HasInputSupport bool
+native Serial_HasInput bool
+native Serial_Read char
+native Serial_ReadText
+
+# Standard Math Library
+native Math_Max int|fixed int|fixed int|fixed
+native Math_Min int|fixed int|fixed int|fixed
+native Math_Pow int|fixed int|fixed
+native Math_Sqrt int|fixed
+native Math_Sin fixed
+native Math_Cos fixed
+native Math_Tan fixed
+native Math_Random fixed
+native Math_Degrees fixed
+native Math_Radians fixed
+
+# Standard Time Library
+native Time_Delay fixed
+native Time_GetSeconds fixed
+
+# Standard Storage Library
+native Storage_HasSupport bool
+native Storage_Clear
+native Storage_Put int|fixed|bool|char
+native Storage_Get int|fixed|bool|char
+
+# Standard Type Library
+
+
+# Standard Array Library
