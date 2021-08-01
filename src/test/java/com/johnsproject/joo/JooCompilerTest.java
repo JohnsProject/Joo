@@ -275,6 +275,40 @@ public class JooCompilerTest {
 		} catch (ParseException e) {
 			assertEquals(e.getMessage(), "The declared value type doesn't match the variable type");
 		}
+		
+		try {
+			testCode = new String[] {"int", "0test", "=", "10"};
+			compiler.parseVariableComponent(code, testCode, 0);
+			fail("Variable names should start with a alphabetic character exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Variable names should start with a alphabetic character, Name: 0test");
+		}
+		
+		try {
+			testCode = new String[] {"int", "Test", "=", "10"};
+			compiler.parseVariableComponent(code, testCode, 0);
+			fail("Variable names should start with a lowercase character exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Variable names should start with a lowercase character, Name: Test");
+		}
+		
+		try {
+			testCode = new String[] {"int", "my_test", "=", "10"};
+			compiler.parseVariableComponent(code, testCode, 0);
+			fail("Variable names should contain only alphanumeric characters exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Variable names should contain only alphanumeric characters, Name: my_test");
+		}
+		
+		try {
+			testCode = new String[] {"int", "abc", "=", "10"};
+			compiler.parseVariableComponent(code, testCode, 0);
+			testCode = new String[] {"int", "abc", "=", "10"};
+			compiler.parseVariableComponent(code, testCode, 0);
+			fail("Duplicate variable exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Duplicate variable, Name: abc");
+		}
 	}
 	
 	@Test
@@ -311,19 +345,19 @@ public class JooCompilerTest {
 		assert(code.getComponentWithName("Test").hasName((byte) 1));
 		assert(code.getComponentWithName("Test").hasType(KEYWORD_FUNCTION));
 		
-		testCode = new String[] {"function", "Test", "int", "param0", "fixed", "param1"};
+		testCode = new String[] {"function", "Test", "int", "_param0", "fixed", "_param1"};
 		code = new Code();
 		createTypeRegistry(code);
 		compiler.parseFunctionComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("Test"));
 		assert(code.getComponentWithName("Test").hasName((byte) 1));
 		assert(code.getComponentWithName("Test").hasType(KEYWORD_FUNCTION));
-		assert(code.getComponentWithName("Test").hasComponentWithName("param0"));
-		assert(code.getComponentWithName("Test").getComponentWithName("param0").hasName((byte) (0 + VM_PARAMETERS_START)));
-		assert(code.getComponentWithName("Test").getComponentWithName("param0").hasType(TYPE_INT));
-		assert(code.getComponentWithName("Test").hasComponentWithName("param1"));
-		assert(code.getComponentWithName("Test").getComponentWithName("param1").hasName((byte) (1 + VM_PARAMETERS_START)));
-		assert(code.getComponentWithName("Test").getComponentWithName("param1").hasType(TYPE_FIXED));
+		assert(code.getComponentWithName("Test").hasComponentWithName("_param0"));
+		assert(code.getComponentWithName("Test").getComponentWithName("_param0").hasName((byte) (0 + VM_PARAMETERS_START)));
+		assert(code.getComponentWithName("Test").getComponentWithName("_param0").hasType(TYPE_INT));
+		assert(code.getComponentWithName("Test").hasComponentWithName("_param1"));
+		assert(code.getComponentWithName("Test").getComponentWithName("_param1").hasName((byte) (1 + VM_PARAMETERS_START)));
+		assert(code.getComponentWithName("Test").getComponentWithName("_param1").hasType(TYPE_FIXED));
 		
 		testCode = new String[] {"call", "Test"};
 		code = new Code();
@@ -331,6 +365,15 @@ public class JooCompilerTest {
 		compiler.parseFunctionComponent(code, testCode, 0);
 		assert(code.hasComponentWithName("Test"));
 		assert(code.getComponentWithName("Test").hasType(KEYWORD_FUNCTION_CALL));
+		
+		/*try {
+			compiler.parseFunctionComponent(code, testCode, 0);
+			fail("Invalid function exception not thrown");
+		} catch (Exception e) {
+			assertEquals(e.getMessage(), "Invalid function, Name: Test");
+			assert(code.hasComponentWithName("Test"));
+			assert(code.getComponentWithName("Test").hasType(KEYWORD_FUNCTION_CALL));
+		}*/
 		
 		testCode = new String[] {"call", "Test", "variable0", "variable1"};
 		code = new Code();
@@ -346,6 +389,21 @@ public class JooCompilerTest {
 		assert(code.getComponentWithName("Test").hasComponentWithName("variable1"));
 		assert(code.getComponentWithName("Test").getComponentWithName("variable1").hasName((byte) 2));
 		assert(code.getComponentWithName("Test").getComponentWithName("variable1").hasType(TYPE_FIXED));
+		
+		/*try {
+			compiler.parseFunctionComponent(code, testCode, 0);
+			fail("Invalid function exception not thrown");
+		} catch (Exception e) {
+			assertEquals(e.getMessage(), "Invalid function, Name: Test");
+			assert(code.hasComponentWithName("Test"));
+			assert(code.getComponentWithName("Test").hasType(KEYWORD_FUNCTION_CALL));
+			assert(code.getComponentWithName("Test").hasComponentWithName("variable0"));
+			assert(code.getComponentWithName("Test").getComponentWithName("variable0").hasName((byte) 1));
+			assert(code.getComponentWithName("Test").getComponentWithName("variable0").hasType(TYPE_INT));
+			assert(code.getComponentWithName("Test").hasComponentWithName("variable1"));
+			assert(code.getComponentWithName("Test").getComponentWithName("variable1").hasName((byte) 2));
+			assert(code.getComponentWithName("Test").getComponentWithName("variable1").hasType(TYPE_FIXED));
+		}*/
 		
 		try {
 			testCode = new String[] {"function"};
@@ -369,6 +427,80 @@ public class JooCompilerTest {
 			fail("Invalid parameter declaration exception not thrown");
 		} catch (ParseException e) {
 			assertEquals(e.getMessage(), "Invalid parameter declaration");
+		}
+		
+		try {
+			testCode = new String[] {"function", "0Test"};
+			compiler.parseFunctionComponent(code, testCode, 0);
+			fail("Function names should start with a alphabetic character exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Function names should start with a alphabetic character, Name: 0Test");
+		}
+		
+		try {
+			testCode = new String[] {"function", "test"};
+			compiler.parseFunctionComponent(code, testCode, 0);
+			fail("Function names should start with a uppercase character exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Function names should start with a uppercase character, Name: test");
+		}
+		
+		try {
+			testCode = new String[] {"function", "My_Test"};
+			compiler.parseFunctionComponent(code, testCode, 0);
+			fail("Function names should contain only alphanumeric characters exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Function names should contain only alphanumeric characters, Name: My_Test");
+		}
+		
+		try {
+			testCode = new String[] {"function", "ABC"};
+			compiler.parseFunctionComponent(code, testCode, 0);
+			testCode = new String[] {"function", "ABC"};
+			compiler.parseFunctionComponent(code, testCode, 0);
+			fail("Duplicate function exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Duplicate function, Name: ABC");
+		}
+		
+		try {
+			testCode = new String[] {"function", "Test", "int", "parameter"};
+			compiler.parseFunctionComponent(code, testCode, 0);
+			fail("Parameter names should start with a _ exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Parameter names should start with a _, Name: parameter");
+		}
+		
+		try {
+			testCode = new String[] {"function", "Test0", "int", "_0parameter"};
+			compiler.parseFunctionComponent(code, testCode, 0);
+			fail("Parameter names should start with a alphabetic character exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Parameter names should start with a alphabetic character, Name: _0parameter");
+		}
+		
+		try {
+			testCode = new String[] {"function", "Test1", "int", "_Parameter"};
+			compiler.parseFunctionComponent(code, testCode, 0);
+			fail("Parameter names should start with a lowercase character exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Parameter names should start with a lowercase character, Name: _Parameter");
+		}
+		
+		try {
+			testCode = new String[] {"function", "Test2", "int", "_my_parameter"};
+			compiler.parseFunctionComponent(code, testCode, 0);
+			fail("Parameter names should contain only alphanumeric characters exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Parameter names should contain only alphanumeric characters, Name: _my_parameter");
+		}
+		
+		try {
+			testCode = new String[] {"function", "Test3", "int", "_parameter", "int", "_parameter"};
+			compiler.parseFunctionComponent(code, testCode, 0);
+			fail("Duplicate parameter");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Duplicate parameter, Name: _parameter");
 		}
 		
 		try {
@@ -707,136 +839,6 @@ public class JooCompilerTest {
 		final Settings settings = compiler.parseSettings(settingsData);
 		
 		compiler.setSettings(settings);
-		
-		try {
-			Code code = new Code();
-			code.addComponent(new CodeComponent("0variable", (byte) 1, TYPE_INT, (byte) 0, 0));
-			compiler.analyseCode(code);
-			fail("Variable names should start with a alphabetic character exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Variable names should start with a alphabetic character, Name: 0variable");
-		}
-		
-		try {
-			Code code = new Code();
-			code.addComponent(new CodeComponent("Variable", (byte) 1, TYPE_INT, (byte) 0, 0));
-			compiler.analyseCode(code);
-			fail("Variable names should start with a lowercase character exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Variable names should start with a lowercase character, Name: Variable");
-		}
-		
-		try {
-			Code code = new Code();
-			code.addComponent(new CodeComponent("my_variable", (byte) 1, TYPE_INT, (byte) 0, 0));
-			compiler.analyseCode(code);
-			fail("Variable names should contain only alphanumeric characters exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Variable names should contain only alphanumeric characters, Name: my_variable");
-		}
-		
-		try {
-			Code code = new Code();
-			code.addComponent(new CodeComponent("variable", (byte) 1, TYPE_INT, (byte) 0, 0));
-			code.addComponent(new CodeComponent("variable", (byte) 2, TYPE_INT, (byte) 0, 0));
-			compiler.analyseCode(code);
-			fail("Duplicate variable exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Duplicate variable, Name: variable");
-		}
-		
-		try {
-			Code code = new Code();
-			code.addComponent(new CodeComponent("0Function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0));
-			compiler.analyseCode(code);
-			fail("Function names should start with a alphabetic character exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Function names should start with a alphabetic character, Name: 0Function");
-		}
-		
-		try {
-			Code code = new Code();
-			code.addComponent(new CodeComponent("function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0));
-			compiler.analyseCode(code);
-			fail("Function names should start with a uppercase character exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Function names should start with a uppercase character, Name: function");
-		}
-		
-		try {
-			Code code = new Code();
-			code.addComponent(new CodeComponent("My_Function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0));
-			compiler.analyseCode(code);
-			fail("Function names should contain only alphanumeric characters exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Function names should contain only alphanumeric characters, Name: My_Function");
-		}
-		
-		try {
-			Code code = new Code();
-			code.addComponent(new CodeComponent("Function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0));
-			code.addComponent(new CodeComponent("Function", (byte) 2, KEYWORD_FUNCTION, (byte) 0, 0));
-			compiler.analyseCode(code);
-			fail("Duplicate function exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Duplicate function, Name: Function");
-		}
-		
-		try {
-			Code code = new Code();
-			CodeComponent function = new CodeComponent("Function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0);
-			function.addComponent(new CodeComponent("parameter", (byte) 1, TYPE_PARAMETER, (byte) 0, 0));
-			code.addComponent(function);
-			compiler.analyseCode(code);
-			fail("Parameter names should start with a _ exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Parameter names should start with a _, Name: parameter");
-		}
-		
-		try {
-			Code code = new Code();
-			CodeComponent function = new CodeComponent("Function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0);
-			function.addComponent(new CodeComponent("_0parameter", (byte) 1, TYPE_PARAMETER, (byte) 0, 0));
-			code.addComponent(function);
-			compiler.analyseCode(code);
-			fail("Parameter names should start with a alphabetic character exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Parameter names should start with a alphabetic character, Name: _0parameter");
-		}
-		
-		try {
-			Code code = new Code();
-			CodeComponent function = new CodeComponent("Function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0);
-			function.addComponent(new CodeComponent("_Parameter", (byte) 1, TYPE_PARAMETER, (byte) 0, 0));
-			code.addComponent(function);
-			compiler.analyseCode(code);
-			fail("Parameter names should start with a lowercase character exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Parameter names should start with a lowercase character, Name: _Parameter");
-		}
-		
-		try {
-			Code code = new Code();
-			CodeComponent function = new CodeComponent("Function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0);
-			function.addComponent(new CodeComponent("_my_parameter", (byte) 1, TYPE_PARAMETER, (byte) 0, 0));
-			code.addComponent(function);
-			compiler.analyseCode(code);
-			fail("Parameter names should contain only alphanumeric characters exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Parameter names should contain only alphanumeric characters, Name: _my_parameter");
-		}
-		
-		try {
-			Code code = new Code();
-			CodeComponent function = new CodeComponent("Function", (byte) 1, KEYWORD_FUNCTION, (byte) 0, 0);
-			function.addComponent(new CodeComponent("_parameter", (byte) 1, TYPE_PARAMETER, (byte) 0, 0));
-			function.addComponent(new CodeComponent("_parameter", (byte) 2, TYPE_PARAMETER, (byte) 0, 0));
-			code.addComponent(function);
-			compiler.analyseCode(code);
-			fail("Duplicate parameter");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Duplicate parameter, Name: _parameter");
-		}
 		
 		try {
 			Code code = new Code();

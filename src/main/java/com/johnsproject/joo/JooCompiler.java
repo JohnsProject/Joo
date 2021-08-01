@@ -97,7 +97,6 @@ public class JooCompiler {
 	private Settings settings;
 	private Code code;
 	
-	
 	public JooCompiler() { }
 	
 	void setSettings(Settings settings) {
@@ -329,7 +328,9 @@ public class JooCompiler {
 				parsed = parseVariableDeclarationWithoutValue(variable, lineData, lineIndex);
 			if(!parsed)
 				parsed = parseVariableDeclarationWithValue(variable, lineData, lineIndex); 
+			
 			code.addComponent(variable);
+			analyseVariable(code, variable);
 		} else {
 			return false;
 		}
@@ -370,6 +371,24 @@ public class JooCompiler {
 			return false;
 		}
 		return true;
+	}
+	
+	private void analyseVariable(Code code, CodeComponent variable) throws ParseException {
+		final String name = variable.getName();
+		final int lineIndex = variable.getLineIndex();
+		final char firstCharacter = name.toCharArray()[0];
+		if(!Character.isAlphabetic(firstCharacter)) {
+			throw new ParseException("Variable names should start with a alphabetic character, Name: " + name, lineIndex);
+		}
+		else if(Character.isUpperCase(firstCharacter)) {
+			throw new ParseException("Variable names should start with a lowercase character, Name: " + name, lineIndex);
+		}
+		else if(!name.matches(REGEX_ALPHANUMERIC)) {
+			throw new ParseException("Variable names should contain only alphanumeric characters, Name: " + name, lineIndex);
+		}
+		else if(code.getComponentWithNameCount(name) > 1) {
+			throw new ParseException("Duplicate variable, Name: " + name, lineIndex);			
+		}
 	}
 	
 	boolean parseFunctionComponent(Code code, String[] lineData, int lineIndex) throws ParseException {
@@ -413,7 +432,51 @@ public class JooCompiler {
 				throw new ParseException("Invalid parameter declaration", lineIndex);
 			}
 		}
+		
 		code.addComponent(function);
+		analyseFunctionDeclaration(code, function);
+	}
+	
+	private void analyseFunctionDeclaration(Code code, CodeComponent function) throws ParseException {
+		final String name = function.getName();
+		final int lineIndex = function.getLineIndex();
+		final char firstCharacter = name.toCharArray()[0];
+		if(!Character.isAlphabetic(firstCharacter)) {
+			throw new ParseException("Function names should start with a alphabetic character, Name: " + name, lineIndex);
+		}
+		else if(Character.isLowerCase(firstCharacter)) {
+			throw new ParseException("Function names should start with a uppercase character, Name: " + name, lineIndex);
+		}
+		else if(!name.matches(REGEX_ALPHANUMERIC)) {
+			throw new ParseException("Function names should contain only alphanumeric characters, Name: " + name, lineIndex);
+		}
+		else if(code.getComponentCount(name, KEYWORD_FUNCTION) > 1) {
+			throw new ParseException("Duplicate function, Name: " + name, lineIndex);			
+		}
+		for(CodeComponent parameter : function.getComponents()) {
+			analyseFunctionParameter(function, parameter);
+		}
+	}
+	
+	private void analyseFunctionParameter(CodeComponent function, CodeComponent parameter) throws ParseException {
+		final String name = parameter.getName();
+		final int lineIndex = parameter.getLineIndex();
+		final char[] nameCharacters = name.toCharArray();
+		if(nameCharacters[0] != '_') {
+			throw new ParseException("Parameter names should start with a _, Name: " + name, lineIndex);
+		}
+		else if(!Character.isAlphabetic(nameCharacters[1])) {
+			throw new ParseException("Parameter names should start with a alphabetic character, Name: " + name, lineIndex);
+		}
+		else if(Character.isUpperCase(nameCharacters[1])) {
+			throw new ParseException("Parameter names should start with a lowercase character, Name: " + name, lineIndex);
+		}
+		else if(!name.substring(1).matches(REGEX_ALPHANUMERIC)) {
+			throw new ParseException("Parameter names should contain only alphanumeric characters, Name: " + name, lineIndex);
+		}
+		else if(function.getComponentWithNameCount(name) > 1) {
+			throw new ParseException("Duplicate parameter, Name: " + name, lineIndex);			
+		}
 	}
 
 	private void parseFunctionCall(Code code, String[] lineData, int lineIndex) throws ParseException {
@@ -432,7 +495,17 @@ public class JooCompiler {
 			CodeComponent argument = new CodeComponent(argumentName, argumentByteCodeName, argumentType, argumentByteCodeType, lineIndex);
 			functionCall.addComponent(argument);
 		}
+		
 		code.addComponent(functionCall);
+		//analyseFunctionCall(code, functionCall);
+	}
+	
+	private void analyseFunctionCall(Code code, CodeComponent function) throws ParseException {
+		final String name = function.getName();
+		final int lineIndex = function.getLineIndex();
+		if(code.getComponentCount(name, KEYWORD_FUNCTION) == 0) {
+			throw new ParseException("Invalid function, Name: " + name, lineIndex);			
+		}
 	}
 
 	boolean parseConditionComponent(Code code, String[] lineData, int lineIndex) throws ParseException {
@@ -811,83 +884,9 @@ public class JooCompiler {
 	
 	void analyseCode(Code code) throws ParseException {
 		for (CodeComponent component : code.getComponents()) {
-			if(isVariable(component.getType())) {
-				analyseVariable(code, component);
-			} 
-			else if(component.hasType(KEYWORD_FUNCTION)) {
-				analyseFunctionDeclaration(code, component);
-			}
-			else if(component.hasType(KEYWORD_FUNCTION_CALL)) {
+			if(component.hasType(KEYWORD_FUNCTION_CALL)) {
 				analyseFunctionCall(code, component);
 			}
-		}
-	}
-	
-	private void analyseVariable(Code code, CodeComponent variable) throws ParseException {
-		final String name = variable.getName();
-		final int lineIndex = variable.getLineIndex();
-		final char firstCharacter = name.toCharArray()[0];
-		if(!Character.isAlphabetic(firstCharacter)) {
-			throw new ParseException("Variable names should start with a alphabetic character, Name: " + name, lineIndex);
-		}
-		else if(Character.isUpperCase(firstCharacter)) {
-			throw new ParseException("Variable names should start with a lowercase character, Name: " + name, lineIndex);
-		}
-		else if(!name.matches(REGEX_ALPHANUMERIC)) {
-			throw new ParseException("Variable names should contain only alphanumeric characters, Name: " + name, lineIndex);
-		}
-		else if(code.getComponentWithNameCount(name) > 1) {
-			throw new ParseException("Duplicate variable, Name: " + name, lineIndex);			
-		}
-	}
-	
-	private void analyseFunctionDeclaration(Code code, CodeComponent function) throws ParseException {
-		final String name = function.getName();
-		final int lineIndex = function.getLineIndex();
-		final char firstCharacter = name.toCharArray()[0];
-		if(!Character.isAlphabetic(firstCharacter)) {
-			throw new ParseException("Function names should start with a alphabetic character, Name: " + name, lineIndex);
-		}
-		else if(Character.isLowerCase(firstCharacter)) {
-			throw new ParseException("Function names should start with a uppercase character, Name: " + name, lineIndex);
-		}
-		else if(!name.matches(REGEX_ALPHANUMERIC)) {
-			throw new ParseException("Function names should contain only alphanumeric characters, Name: " + name, lineIndex);
-		}
-		else if(code.getComponentCount(name, KEYWORD_FUNCTION) > 1) {
-			throw new ParseException("Duplicate function, Name: " + name, lineIndex);			
-		}
-		for(CodeComponent parameter : function.getComponents()) {
-			analyseFunctionParameter(function, parameter);
-		}
-	}
-	
-	private void analyseFunctionParameter(CodeComponent function, CodeComponent parameter) throws ParseException {
-		final String name = parameter.getName();
-		final int lineIndex = parameter.getLineIndex();
-		final char[] nameCharacters = name.toCharArray();
-		if(nameCharacters[0] != '_') {
-			throw new ParseException("Parameter names should start with a _, Name: " + name, lineIndex);
-		}
-		else if(!Character.isAlphabetic(nameCharacters[1])) {
-			throw new ParseException("Parameter names should start with a alphabetic character, Name: " + name, lineIndex);
-		}
-		else if(Character.isUpperCase(nameCharacters[1])) {
-			throw new ParseException("Parameter names should start with a lowercase character, Name: " + name, lineIndex);
-		}
-		else if(!name.substring(1).matches(REGEX_ALPHANUMERIC)) {
-			throw new ParseException("Parameter names should contain only alphanumeric characters, Name: " + name, lineIndex);
-		}
-		else if(function.getComponentWithNameCount(name) > 1) {
-			throw new ParseException("Duplicate parameter, Name: " + name, lineIndex);			
-		}
-	}
-	
-	private void analyseFunctionCall(Code code, CodeComponent function) throws ParseException {
-		final String name = function.getName();
-		final int lineIndex = function.getLineIndex();
-		if(code.getComponentCount(name, KEYWORD_FUNCTION) == 0) {
-			throw new ParseException("Invalid function, Name: " + name, lineIndex);			
 		}
 	}
 	
