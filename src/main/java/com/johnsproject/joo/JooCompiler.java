@@ -1,8 +1,9 @@
 package com.johnsproject.joo;
 
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import com.johnsproject.joo.util.FileUtil;
@@ -31,7 +32,6 @@ public class JooCompiler {
 
 	public static final String KEYWORD_OPERATOR = "operator";
 	public static final String KEYWORD_NATIVE = "native";
-	public static final String KEYWORD_TYPE_REGISTRY = "typeRegistry";
 	
 	public static final String TYPE_INT = "int";
 	public static final String TYPE_FIXED = "fixed";
@@ -44,7 +44,8 @@ public class JooCompiler {
 	public static final String TYPE_PARAMETER = "parameter";
 	public static final String TYPE_OPERATOR = "operator";
 	
-	public static final String REGEX_ALPHANUMERIC = "[A-Za-z0-9]+";
+	public static final String ALPHANUMERIC_REGEX = "[A-Za-z0-9]+";
+	public static final String CONSTANT_REGEX = "[A-Z0-9_]+";
 	
 	public static final String LINE_BREAK = "\n";	
 	
@@ -94,14 +95,9 @@ public class JooCompiler {
 	public static final byte VM_TYPES_START = JooVirtualMachine.TYPES_START;
 	public static final byte VM_TYPES_END = JooVirtualMachine.TYPES_END;
 	
-	private Settings settings;
 	private Code code;
 	
 	public JooCompiler() { }
-	
-	void setSettings(Settings settings) {
-		this.settings = settings;
-	}
 	
 	Code getCode() {
 		return code;
@@ -111,10 +107,15 @@ public class JooCompiler {
 		String byteCode = "";
 		try {
 			final String codePath = path;
-			String codeData = FileUtil.read(codePath);
-			codeData = addIncludedCode(codeData);
-			codeData = replaceConstants(codeData);
-			settings = parseSettings(codeData);
+			final String codeData = FileUtil.read(codePath);
+			String[] codeLines = getLines(codeData);
+			codeLines = addIncludedCode(codeLines);
+			Code code = new Code();
+			parseConstants(code, codeLines);
+			parseOperators(code, codeLines);
+			parseNatives(code, codeLines);
+			parseVariables(code, codeLines);
+			parseFunctions(code, codeLines);
 			code = parseCode(codeData);
 			analyseCode(code);
 			byteCode = toByteCode(code);
@@ -125,69 +126,199 @@ public class JooCompiler {
 		return byteCode;
 	}
 	
-	Settings parseSettings(String settingsData) throws ParseException {
-		final String[] settingsLines = getLines(settingsData);
-		final Settings settings = new Settings();
-		for (int i = 0; i < settingsLines.length; i++) {
-			final String line = settingsLines[i];
-			if(line.isEmpty())
-				continue;
-			Setting setting = parseSetting(line, i);
-			if(setting == null) {
-				continue;
-			} else if (settings.hasSettingWithName(setting.getName())) {
-				throw new ParseException("Duplicate compiler setting, Name: " + setting.getName(), i);	
-			} else {
-				settings.addSetting(setting);
+	/**
+	 * This method splits up the code to a array of code lines. 
+	 * It removes unnecessary characters like '\t' and '\r' and splits the code at 
+	 * the '\n' characters. It also converts comment only to empty lines and removes 
+	 * the comments in the lines that also contain code.
+	 * 
+	 * The empty lines are kept so the compiler can tell the location of the errors.
+	 *  
+	 * @param code to get lines from.
+	 * @return Array of code lines. 
+	 */
+	String[] getLines(String code) {
+		code = code.replace("\t", "");
+		code = code.replace("\r", "");
+		String[] codeLines = code.split(LINE_BREAK);
+		boolean multiLineComment = false;
+		for (int i = 0; i < codeLines.length; i++) {
+			String line = codeLines[i];
+			if(line.equals(KEYWORD_COMMENT + KEYWORD_COMMENT)) {
+				multiLineComment = !multiLineComment;
+				codeLines[i] = "";
+			}
+			else if(multiLineComment) {
+				codeLines[i] = "";
+			}
+			else if(line.contains(KEYWORD_COMMENT)) {
+				final String[] lineData = line.split(KEYWORD_COMMENT);
+				final String lineCode = lineData[0];
+				if(lineCode.isEmpty()) {
+					codeLines[i] = "";
+				} else {
+					codeLines[i] = lineCode;
+				}
 			}
 		}
-		return settings;
+		return codeLines;
 	}
 	
-	private byte operatorByteCodeName = 1, nativeFunctionByteCodeName = 1;
-	
-	private Setting parseSetting(String line, int lineIndex) throws ParseException {
-		final String[] lineData = line.split(" ");
-		final String type = lineData[0];
-		Setting setting = null;
-		if(type.equals(KEYWORD_OPERATOR)) {
-			setting = parseOperatorSetting(lineData, lineIndex);
+	String[] addIncludedCode(String[] codeLines) throws ParseException {
+		final List<String> fullCodeLines = new ArrayList<String>();
+		fullCodeLines.addAll(Arrays.asList(codeLines));
+		for (int i = 0; i < codeLines.length; i++) {
+			final String line = codeLines[i];
+			if(!line.isEmpty()) {
+				final String[] lineData = line.split(" ");
+				if(lineData[0].equals(KEYWORD_INCLUDE)) {
+					validateInclude(lineData, i);
+					final String[] includedCode = getIncludedCode(lineData);
+					fullCodeLines.addAll(Arrays.asList(includedCode));
+					fullCodeLines.set(i, "");
+				}
+			}
 		}
-		else if(type.equals(KEYWORD_NATIVE)) {
-			setting = parseFunctionSetting(lineData, lineIndex);		
-		}
-		return setting;
+		return fullCodeLines.toArray(new String[0]);
 	}
 	
-	private Setting parseOperatorSetting(String[] operatorData, int lineIndex) throws ParseException {
-		if(operatorData.length != 3) {
+	private void validateInclude(String[] lineData, int lineIndex) throws ParseException {
+		if(lineData.length != 2)
+			throw new ParseException("Invalid inclusion declaration", lineIndex);
+	}
+	
+	private String[] getIncludedCode(String[] lineData) throws ParseException {
+		final String path = lineData[1];
+		final String codeData = FileUtil.read(path);
+		final String[] codeLines = getLines(codeData);
+		return addIncludedCode(codeLines);
+	}
+	
+	void parseConstants(Code code, String[] codeLines) throws ParseException {
+		for (int i = 0; i < codeLines.length; i++) {
+			final String line = codeLines[i];
+			if(!line.isEmpty()) {
+				final String[] lineData = line.split(" ");
+				if(lineData[0].equals(KEYWORD_CONSTANT)) {
+					validateConstant(code, lineData, i);
+					replaceConstant(code, lineData, codeLines, i);
+					codeLines[i] = "";
+				}
+			}
+		}
+	}
+	
+	private void validateConstant(Code code, String[] lineData, int lineIndex) throws ParseException {
+		if(lineData.length != 4) 
+			throw new ParseException("Invalid constant declaration", lineIndex);
+		
+		final String name = lineData[1];
+		final String operator = lineData[2];
+		final char firstCharacter = name.toCharArray()[0];
+		if(!operator.equals(KEYWORD_VARIABLE_ASSIGN))
+			throw new ParseException("Invalid constant assignment operator, Operator: " + operator + ", Constant: " + name, lineIndex);
+		if(code.hasComponent(name, KEYWORD_CONSTANT))
+			throw new ParseException("Duplicate constant, Constant: " + name, lineIndex);
+		if(!name.matches(CONSTANT_REGEX))
+			throw new ParseException("Constant names should contain only uppercase alphanumeric characters, Constant: " + name, lineIndex);
+		if(!Character.isAlphabetic(firstCharacter))
+			throw new ParseException("Constant names should start with a alphabetic character, Constant: " + name, lineIndex);
+	}
+	
+	private void replaceConstant(Code code, String[] lineData, String[] codeLines, int lineIndex) {
+		final String name = lineData[1];
+		final String value = lineData[3];
+		
+		for (int i = 0; i < codeLines.length; i++) {
+			final String line = codeLines[i];
+			if(!line.substring(0, KEYWORD_CONSTANT.length()).equals(KEYWORD_CONSTANT))
+				codeLines[i] = line.replace(name, value);
+		}
+		
+		final CodeComponent nameComponent = new CodeComponent(name, (byte) 0, KEYWORD_CONSTANT, (byte) 0, lineIndex);
+		final CodeComponent valueComponent = new CodeComponent(value, (byte) 0, KEYWORD_CONSTANT, (byte) 0, lineIndex);
+		nameComponent.addComponent(valueComponent);
+		code.addComponent(nameComponent);
+	}
+	
+	void parseOperators(Code code, String[] codeLines) throws ParseException {
+		for (int i = 0; i < codeLines.length; i++) {
+			final String line = codeLines[i];
+			if(!line.isEmpty()) {
+				final String[] lineData = line.split(" ");
+				if(lineData[0].equals(KEYWORD_OPERATOR)) {
+					validateOperator(code, lineData, i);
+					parseOperator(code, lineData, i);
+					codeLines[i] = "";
+				}
+			}
+		}
+	}
+	
+	private void validateOperator(Code code, String[] lineData, int lineIndex) throws ParseException {
+		if(lineData.length != 3)
 			throw new ParseException("Invalid operator declaration", lineIndex);
-		}
-		final String name = operatorData[1];
-		final byte byteCodeName = operatorByteCodeName++;
-		final Setting setting = new Setting(name, byteCodeName, KEYWORD_OPERATOR);
-		parseTypeSetting(setting, operatorData[2], lineIndex);
-		return setting;
+
+		final String name = lineData[1];
+		if(code.hasComponent(name, KEYWORD_OPERATOR))
+			throw new ParseException("Duplicate operator, Operator: " + name, lineIndex);		
+		if(name.matches(ALPHANUMERIC_REGEX))
+			throw new ParseException("Operators shouldn't contain alphanumeric characters, Operator: " + name, lineIndex);
 	}
 	
-	private Setting parseFunctionSetting(String[] functionData, int lineIndex) throws ParseException {		
-		final String name = functionData[1];
-		final byte byteCodeName = nativeFunctionByteCodeName++;
-		Setting setting = new Setting(name, byteCodeName, KEYWORD_NATIVE);
-		for (int i = 2; i < functionData.length; i++) {
-			// -2 so it starts at 0
+	private void parseOperator(Code code, String[] lineData, int lineIndex) throws ParseException {
+		final String name = lineData[1];
+		final byte byteCodeName = (byte)(code.getComponentWithTypeCount(KEYWORD_OPERATOR) + VM_COMPONENTS_START);
+		final CodeComponent component = new CodeComponent(name, byteCodeName, KEYWORD_OPERATOR, (byte) 0, lineIndex);
+		parseSupportedType(component, lineData[2], lineIndex);
+		code.addComponent(component);
+	}
+	
+	void parseNatives(Code code, String[] codeLines) throws ParseException {
+		for (int i = 0; i < codeLines.length; i++) {
+			final String line = codeLines[i];
+			if(!line.isEmpty()) {
+				final String[] lineData = line.split(" ");
+				if(lineData[0].equals(KEYWORD_NATIVE)) {
+					validateNative(code, lineData, i);
+					parseNative(code, lineData, i);
+					codeLines[i] = "";
+				}
+			}
+		}
+	}
+	
+	private void validateNative(Code code, String[] lineData, int lineIndex) throws ParseException {
+		if(lineData.length < 2)
+			throw new ParseException("Invalid native declaration", lineIndex);
+		
+		final String name = lineData[1];
+		final char firstCharacter = name.toCharArray()[0];
+		if(code.hasComponent(name, KEYWORD_NATIVE))
+			throw new ParseException("Duplicate native, Native: " + name, lineIndex);		
+		if(!Character.isAlphabetic(firstCharacter))
+			throw new ParseException("Native names should start with a alphabetic character, Native: " + name, lineIndex);
+		if(Character.isLowerCase(firstCharacter))
+			throw new ParseException("Native names should start with a uppercase character, Native: " + name, lineIndex);
+		if(!name.matches(ALPHANUMERIC_REGEX))
+			throw new ParseException("Native names should contain only alphanumeric characters, Native: " + name, lineIndex);
+	}
+	
+	private void parseNative(Code code, String[] lineData, int lineIndex) throws ParseException {		
+		final String name = lineData[1];
+		final byte byteCodeName = (byte)(code.getComponentWithTypeCount(KEYWORD_NATIVE) + VM_COMPONENTS_START);
+		final CodeComponent component = new CodeComponent(name, byteCodeName, KEYWORD_NATIVE, (byte) 0, lineIndex);
+		for (int i = 2; i < lineData.length; i++) {
 			final String paramName = "param" + (i - 2);
-			// -1 because byte code names start at 1
-			final byte paramByteCodeName = (byte) (i - 1);
-			final String paramType = TYPE_PARAMETER;
-			Setting paramSetting = new Setting(paramName, paramByteCodeName, paramType);
-			parseTypeSetting(paramSetting, functionData[i], lineIndex);
-			setting.addSetting(paramSetting);
+			final byte paramByteCodeName = (byte) ((i - 2) + VM_COMPONENTS_START);
+			final CodeComponent paramComponent = new CodeComponent(paramName, paramByteCodeName, TYPE_PARAMETER, (byte) 0, lineIndex);
+			parseSupportedType(paramComponent, lineData[i], lineIndex);
+			component.addComponent(paramComponent);
 		}
-		return setting;
-	}
+		code.addComponent(component);
+	}	
 	
-	private void parseTypeSetting(Setting setting, String supportedType, int lineIndex) throws ParseException {
+	private void parseSupportedType(CodeComponent component, String supportedType, int lineIndex) throws ParseException {
 		final String[] supportedTypes;
 		if(supportedType.contains(KEYWORD_TYPE_SEPARATOR)) {
 			supportedTypes = supportedType.split(Pattern.quote(KEYWORD_TYPE_SEPARATOR));
@@ -197,65 +328,282 @@ public class JooCompiler {
 		for (int i = 0; i < supportedTypes.length; i++) {
 			String type = supportedTypes[i];
 			if(isVariable(type)) {
-				Setting typeSetting = new Setting(type, toByteCodeType(type), type);
-				setting.addSetting(typeSetting);
+				CodeComponent typeComponent = new CodeComponent(type, toByteCodeType(type), type, toByteCodeType(type), lineIndex);
+				component.addComponent(typeComponent);
 			} else {
 				throw new ParseException("Invalid supported type, Type: " + type, lineIndex);
 			}
 		}
 	}
 	
-	String addIncludedCode(String codeData) throws ParseException {
-		final String[] codeLines = getLines(codeData);
+	void parseVariables(Code code, String[] codeLines) throws ParseException {
 		for (int i = 0; i < codeLines.length; i++) {
-			String line = codeLines[i];
-			if(line.isEmpty())
-				continue;
-			final String[] lineData = line.split(" ");
-			if(lineData[0].equals(KEYWORD_INCLUDE))
-				codeData = addIncludedCode(line, lineData, codeData, i);
+			final String line = codeLines[i];
+			if(!line.isEmpty()) {
+				final String[] lineData = line.split(" ");
+				if(isVariable(lineData[0])) {
+					validateVariable(code, lineData, i);
+					parseVariable(code, lineData, i);
+					codeLines[i] = "";
+				}
+			}
 		}
-		return codeData;
 	}
 	
-	private String addIncludedCode(String line, String[] lineData, String codeData, int lineIndex) throws ParseException {
-		if(lineData.length != 2) 
-			throw new ParseException("Invalid inclusion declaration", lineIndex);
-
-		final String path = lineData[1];
-		codeData += FileUtil.read(path);
-		codeData = codeData.replace(line + LINE_BREAK, "");
-		return codeData;
-	}
-	
-	String replaceConstants(String codeData) throws ParseException {
-		final String[] codeLines = getLines(codeData);
-		final Map<String, String> constants = new HashMap<String, String>();
-		for (int i = 0; i < codeLines.length; i++) {
-			String line = codeLines[i];
-			if(line.isEmpty())
-				continue;
-			final String[] lineData = line.split(" ");
-			if(lineData[0].equals(KEYWORD_CONSTANT))
-				codeData = replaceConstant(line, lineData, codeData, constants, i);
-		}
-		return codeData;
-	}
-	
-	private String replaceConstant(String line, String[] lineData, String codeData, Map<String, String> constants, int lineIndex) throws ParseException {
-		if(lineData.length != 4) 
-			throw new ParseException("Invalid constant declaration", lineIndex);
-		if(!lineData[2].equals(KEYWORD_VARIABLE_ASSIGN))
-			throw new ParseException("Invalid assignment operator, Operator: " + lineData[2], lineIndex);
+	private void validateVariable(Code code, String[] lineData, int lineIndex) throws ParseException {
+		if((lineData.length != 2) && (lineData.length != 4))
+			throw new ParseException("Invalid variable declaration", lineIndex);
 		
-		final String constantName = lineData[1];
-		final String constantValue = lineData[3];
-		if(constants.containsKey(constantName))
-			throw new ParseException("Duplicate constant, Name: " + constantName, lineIndex);
-		codeData = codeData.replace(line + LINE_BREAK, "");
-		codeData = codeData.replace(constantName, constantValue);
-		constants.put(constantName, constantValue);
-		return codeData;
+		final String type = toType(lineData[0]);
+		final String name = lineData[1];
+		final char firstCharacter = name.toCharArray()[0];
+		if(code.hasComponent(name, type))
+			throw new ParseException("Duplicate variable, Variable: " + name, lineIndex);
+		if(!Character.isAlphabetic(firstCharacter))
+			throw new ParseException("Variable names should start with a alphabetic character, Variable: " + name, lineIndex);
+		if(Character.isUpperCase(firstCharacter))
+			throw new ParseException("Variable names should start with a lowercase character, Variable: " + name, lineIndex);
+		if(!name.matches(ALPHANUMERIC_REGEX))
+			throw new ParseException("Variable names should contain only alphanumeric characters, Variable: " + name, lineIndex);
+		if(lineData.length == 4) 
+		{
+			if(type.contains(KEYWORD_ARRAY))
+				throw new ParseException("Invalid array declaration. Value can't be assigned to array", lineIndex);
+			
+			final String operator = lineData[2];
+			if(!operator.equals(KEYWORD_VARIABLE_ASSIGN))
+				throw new ParseException("Invalid assignment operator, Operator: " + operator, lineIndex);
+		}
+	}
+	
+	private void parseVariable(Code code, String[] lineData, int lineIndex) throws ParseException {
+		final String name = lineData[1];
+		final String type = toType(lineData[0]);
+		final byte byteCodeName = (byte)(code.getComponentWithTypeCount(type) + VM_COMPONENTS_START);
+		final byte byteCodeType = toByteCodeType(type);
+		CodeComponent component = new CodeComponent(name, byteCodeName, type, byteCodeType, lineIndex);
+		if(isArray(type))
+			parseArraySize(component, lineData, lineIndex);
+		else if(lineData.length == 4) // value is assigned
+			parseVariableValue(component, lineData, lineIndex);
+		
+		code.addComponent(component);
+	}
+	
+	private void parseArraySize(CodeComponent component, String[] lineData, int lineIndex) throws ParseException {
+		final String[] typeData = lineData[0].split(KEYWORD_ARRAY);
+		final String size = typeData[1];
+		final byte byteCodeSize;
+		try {
+			byteCodeSize = (byte) Byte.parseByte(size);
+		} catch (NumberFormatException e) {
+			throw new ParseException("Invalid array size declaration, Size: " + size, lineIndex);
+		}
+		final CodeComponent arraySizeComponent = new CodeComponent(size, byteCodeSize, KEYWORD_ARRAY, (byte)0, lineIndex);
+		component.addComponent(arraySizeComponent);
+	}
+	
+	private void parseVariableValue(CodeComponent component, String[] lineData, int lineIndex) throws ParseException {
+		final CodeComponent variableValueComponent = parseValueComponent(lineData[3], component.getType(), lineIndex);
+		component.addComponent(variableValueComponent);
+	}
+	
+	void parseFunctions(Code code, String[] codeLines) throws ParseException {
+		for (int i = 0; i < codeLines.length; i++) {
+			final String line = codeLines[i];
+			if(!line.isEmpty()) {
+				final String[] lineData = line.split(" ");
+				if(lineData[0].equals(KEYWORD_FUNCTION)) {					
+					validateFunctionClose(code, i);
+					validateFunction(code, lineData, i);
+					parseFunction(code, lineData, i);
+					codeLines[i] = "";
+				} else if (lineData[0].equals(KEYWORD_FUNCTION_END)) {			
+					validateFunctionEnd(code, lineData, i);
+					parseFunctionEnd(code, lineData, i);
+					codeLines[i] = "";		
+					validateFunctionClose(code, i);
+				}
+				if(i + 1 == codeLines.length)
+					validateFunctionClose(code, i);
+			}
+		}
+	}
+	
+	private void validateFunction(Code code, String[] lineData, int lineIndex) throws ParseException {
+		if(lineData.length < 2)
+			throw new ParseException("Invalid function declaration", lineIndex);
+		
+		final String functionName = lineData[1];
+		final char firstFunctionCharacter = functionName.toCharArray()[0];		
+		if(code.hasComponent(functionName, KEYWORD_FUNCTION))
+			throw new ParseException("Duplicate function, Function: " + functionName, lineIndex);
+		else if(!Character.isAlphabetic(firstFunctionCharacter))
+			throw new ParseException("Function names should start with a alphabetic character, Function: " + functionName, lineIndex);
+		else if(Character.isLowerCase(firstFunctionCharacter))
+			throw new ParseException("Function names should start with a uppercase character, Function: " + functionName, lineIndex);
+		else if(!functionName.matches(ALPHANUMERIC_REGEX))
+			throw new ParseException("Function names should contain only alphanumeric characters, Function: " + functionName, lineIndex);	
+		
+		final List<String> parameterNames = new ArrayList<>();
+		for (int i = 2; i < lineData.length; i += 2) {
+			final String paramType = lineData[i];
+			if(!isVariable(paramType))
+				throw new ParseException("Invalid parameter type declaration, Function: " + functionName, lineIndex);
+			
+			try {
+				final String paramName = lineData[i + 1];
+				final char[] paramNameCharacters = paramName.toCharArray();
+				if(parameterNames.contains(paramName))
+					throw new ParseException("Duplicate parameter, Param: " + paramName + ", Function: " + functionName, lineIndex);		
+				else if(paramNameCharacters[0] != '_')
+					throw new ParseException("Parameter names should start with a _, Param: " + paramName + ", Function: " + functionName, lineIndex);
+				else if(!Character.isAlphabetic(paramNameCharacters[1]))
+					throw new ParseException("Parameter names should start with a alphabetic character, Param: " + paramName + ", Function: " + functionName, lineIndex);
+				else if(Character.isUpperCase(paramNameCharacters[1]))
+					throw new ParseException("Parameter names should start with a lowercase character, Param: " + paramName + ", Function: " + functionName, lineIndex);
+				else if(!paramName.substring(1).matches(ALPHANUMERIC_REGEX))
+					throw new ParseException("Parameter names should contain only alphanumeric characters, Param: " + paramName + ", Function: " + functionName, lineIndex);
+				
+				parameterNames.add(paramName);
+			} catch(ArrayIndexOutOfBoundsException e) {
+				throw new ParseException("Invalid parameter declaration, Function: " + functionName, lineIndex);
+			}
+		}
+	}
+	
+	private void parseFunction(Code code, String[] lineData, int lineIndex) throws ParseException {		
+		final String name = lineData[1];
+		final String type = KEYWORD_FUNCTION;
+		final byte byteCodeName = (byte)(code.getComponentWithTypeCount(type) + VM_COMPONENTS_START);
+		final byte byteCodeType = toByteCodeType(type);
+		CodeComponent function = new CodeComponent(name, byteCodeName, type, byteCodeType, lineIndex);
+		for (int i = 2; (i + 1) < lineData.length; i += 2) {
+			final String paramName = lineData[i + 1];
+			final byte paramByteCodeName = (byte) (((i - 2) / 2) + VM_PARAMETERS_START);
+			final String paramType = lineData[i];
+			final byte paramByteCodeType = toByteCodeType(paramType);
+			CodeComponent parameter = new CodeComponent(paramName, paramByteCodeName, paramType, paramByteCodeType, lineIndex);
+			function.addComponent(parameter);
+		}
+		code.addComponent(function);
+	}
+	
+	private void validateFunctionEnd(Code code, String[] lineData, int lineIndex) throws ParseException {
+		if(lineData.length > 1)
+			throw new ParseException("Invalid function end", lineIndex);
+	}
+	
+	private void parseFunctionEnd(Code code, String[] lineData, int lineIndex) throws ParseException {		
+		CodeComponent functionEnd = new CodeComponent(lineData[0], (byte) 0, lineData[0], (byte) 0, lineIndex);
+		code.addComponent(functionEnd);
+	}
+	
+	/**
+	 * Checks if the function is a endless function.
+	 */
+	private void validateFunctionClose(Code code, int lineIndex) throws ParseException {
+		if(code.getComponentWithTypeCount(KEYWORD_FUNCTION) > code.getComponentWithTypeCount(KEYWORD_FUNCTION_END)) {
+			final CodeComponent function = code.getComponentWithType(KEYWORD_FUNCTION, code.getComponentWithTypeCount(KEYWORD_FUNCTION) - 1);
+			throw new ParseException("Endless function, Function: " + function.getName(), lineIndex);
+		}
+		if(code.getComponentWithTypeCount(KEYWORD_FUNCTION) < code.getComponentWithTypeCount(KEYWORD_FUNCTION_END)) {
+			throw new ParseException("endFunction should have a corresponding function", lineIndex);
+		}
+	}
+	
+	void parseInstructions(Code code, String[] codeLines) throws ParseException {
+		for (int i = 0; i < codeLines.length; i++) {
+			final String line = codeLines[i];
+			if(!line.isEmpty()) {
+				validateInstruction(code, line, i);
+				final String[] lineData = line.split(" ");
+				boolean parsed = false;
+				if(!parsed)
+					parsed = parseInstruction(code, lineData, i);
+//				if(!parsed)
+//					parsed = parseCondition(code, lineData, i);
+//				if(!parsed)
+//					parsed = parseOperation(code, lineData, i);
+				if(!parsed)
+					throw new ParseException("Invalid instruction", i);
+				else
+					codeLines[i] = "";
+			}
+		}
+	}
+	
+	private void validateInstruction(Code code, String codeLine, int lineIndex) throws ParseException {
+		boolean isInsideFunction = false;
+		for (int i = 0; i < code.getComponentWithTypeCount(KEYWORD_FUNCTION); i++) {
+			final CodeComponent function = code.getComponentWithType(KEYWORD_FUNCTION, i);
+			final CodeComponent functionEnd = code.getComponent(code.getComponents().indexOf(function) + 1);
+			if(lineIndex > function.getLineIndex() && lineIndex < functionEnd.getLineIndex())
+				isInsideFunction = true;
+		}
+		if(!isInsideFunction)
+			throw new ParseException("Instructions should be inside functions, Instruction: " + codeLine, lineIndex);
+	}
+	
+	private boolean parseInstruction(Code code, String[] lineData, int lineIndex) throws ParseException {
+		boolean isParsed = true;
+		final String keyword = lineData[0];
+		if (keyword.equals(KEYWORD_FUNCTION_CALL)) {
+			validateFunctionCall(code, lineData, lineIndex);
+			parseFunctionCall(code, lineData, lineIndex);
+		} else if (keyword.equals(KEYWORD_FUNCTION_REPEAT)) {
+			validateFunctionRepeat(code, lineData, lineIndex);
+			parseFunctionRepeat(code, lineData, lineIndex);
+		} else {
+			isParsed = false;
+		}
+		return isParsed;
+	}
+	
+	private void validateFunctionCall(Code code, String[] lineData, int lineIndex) throws ParseException {
+		if(lineData.length < 2)
+			throw new ParseException("Invalid function call", lineIndex);
+		
+		final String name = lineData[1];
+		if(!code.hasComponent(name, KEYWORD_FUNCTION)) {
+			throw new ParseException("Called function doesn't exist, Function: " + name, lineIndex);	
+		}
+		
+		final CodeComponent function = code.getComponent(name, KEYWORD_FUNCTION);
+		for (int i = 2; i < lineData.length; i++) {
+			final CodeComponent variable = getVariableWithName(lineData[i], code, lineIndex);
+			final CodeComponent param = function.getComponent(i - 2);
+			if(!param.hasType(variable.getType()))
+				throw new ParseException("The argument type must match the parameter type, Argument: " + lineData[i] + ", Parameter: " + param.getName() + ", Function: " + function.getName(), lineIndex);
+		}
+	}
+	
+	private void parseFunctionCall(Code code, String[] lineData, int lineIndex) throws ParseException {
+		final String name = lineData[1];
+		final String type = KEYWORD_FUNCTION_CALL;
+		final byte byteCodeType = (byte)VM_KEYWORD_FUNCTION_CALL;
+		CodeComponent functionCall = new CodeComponent(name, (byte) 0, type, byteCodeType, lineIndex);
+		for (int i = 2; i < lineData.length; i++) {
+			final String argumentName = lineData[i];
+			final CodeComponent variable = getVariableWithName(argumentName, code, lineIndex);
+			final byte argumentByteCodeName = variable.getByteCodeName();
+			final String argumentType = variable.getType();
+			final byte argumentByteCodeType = variable.getByteCodeType();
+			CodeComponent argument = new CodeComponent(argumentName, argumentByteCodeName, argumentType, argumentByteCodeType, lineIndex);
+			functionCall.addComponent(argument);
+		}
+		
+		code.addComponent(functionCall);
+	}
+	
+	private void validateFunctionRepeat(Code code, String[] lineData, int lineIndex) throws ParseException {
+		if(lineData.length > 1)
+			throw new ParseException("Invalid function repeat", lineIndex);
+	}
+	
+	private void parseFunctionRepeat(Code code, String[] lineData, int lineIndex) throws ParseException {
+		CodeComponent functionEnd = new CodeComponent(lineData[0], (byte) 0, lineData[0], (byte) 0, lineIndex);
+		code.addComponent(functionEnd);
 	}
 	
 	Code parseCode(String codeData) throws ParseException {
@@ -302,8 +650,6 @@ public class JooCompiler {
 		final String[] lineData = line.split(" ");
 		boolean parsed = false;
 		if(!parsed)
-			parsed = parseVariableComponent(code, lineData, lineIndex);
-		if(!parsed)
 			parsed = parseFunctionComponent(code, lineData, lineIndex);
 		if(!parsed)
 			parsed = parseConditionComponent(code, lineData, lineIndex);
@@ -311,84 +657,6 @@ public class JooCompiler {
 			parsed = parseOperationComponent(code, lineData, lineIndex);
 		if(!parsed)
 			throw new ParseException("Invalid instruction", lineIndex);
-	}
-	
-	boolean parseVariableComponent(Code code, String[] lineData, int lineIndex) throws ParseException {
-		final String typeData = lineData[0];
-		if (isVariable(typeData)) {
-			if((lineData.length != 2) && (lineData.length != 4))
-				throw new ParseException("Invalid variable declaration", lineIndex);
-			final String name = lineData[1];
-			final String type = toType(typeData);
-			final byte byteCodeName = getUniqueByteCodeName(code, name, type);
-			final byte byteCodeType = toByteCodeType(type);
-			CodeComponent variable = new CodeComponent(name, byteCodeName, type, byteCodeType, lineIndex);
-			boolean parsed = false;
-			if(!parsed)
-				parsed = parseVariableDeclarationWithoutValue(variable, lineData, lineIndex);
-			if(!parsed)
-				parsed = parseVariableDeclarationWithValue(variable, lineData, lineIndex); 
-			
-			code.addComponent(variable);
-			analyseVariable(code, variable);
-		} else {
-			return false;
-		}
-		return true;
-	}
-	
-	private boolean parseVariableDeclarationWithoutValue(CodeComponent variable, String[] lineData, int lineIndex) throws ParseException {
-		if(lineData.length == 2) {
-			if(variable.getType().contains(KEYWORD_ARRAY)) {
-				final String[] typeData = lineData[0].split(KEYWORD_ARRAY);
-				final String size = typeData[1];
-				final byte byteCodeSize;
-				try {
-					byteCodeSize = (byte) Byte.parseByte(size);
-				} catch (NumberFormatException e) {
-					throw new ParseException("Invalid array size declaration, Size: " + size, lineIndex);
-				}
-				final CodeComponent arraySizeComponent = new CodeComponent(size, byteCodeSize, KEYWORD_ARRAY, (byte)0, lineIndex);
-				variable.addComponent(arraySizeComponent);
-			}
-		} else {
-			return false;
-		}
-		return true;
-	}
-	
-	private boolean parseVariableDeclarationWithValue(CodeComponent variable, String[] lineData, int lineIndex) throws ParseException {
-		if(lineData.length == 4) {
-			if(variable.getType().contains(KEYWORD_ARRAY))
-				throw new ParseException("Invalid array declaration. Value can't be assigned to array", lineIndex);
-			if(lineData[2].equals(KEYWORD_VARIABLE_ASSIGN)) {
-				final CodeComponent variableValueComponent = parseValueComponent(lineData[3], variable.getType(), lineIndex);
-				variable.addComponent(variableValueComponent);
-			} else {
-				throw new ParseException("Invalid assignment operator, Operator: " + lineData[2], lineIndex);					
-			}
-		} else {
-			return false;
-		}
-		return true;
-	}
-	
-	private void analyseVariable(Code code, CodeComponent variable) throws ParseException {
-		final String name = variable.getName();
-		final int lineIndex = variable.getLineIndex();
-		final char firstCharacter = name.toCharArray()[0];
-		if(!Character.isAlphabetic(firstCharacter)) {
-			throw new ParseException("Variable names should start with a alphabetic character, Name: " + name, lineIndex);
-		}
-		else if(Character.isUpperCase(firstCharacter)) {
-			throw new ParseException("Variable names should start with a lowercase character, Name: " + name, lineIndex);
-		}
-		else if(!name.matches(REGEX_ALPHANUMERIC)) {
-			throw new ParseException("Variable names should contain only alphanumeric characters, Name: " + name, lineIndex);
-		}
-		else if(code.getComponentWithNameCount(name) > 1) {
-			throw new ParseException("Duplicate variable, Name: " + name, lineIndex);			
-		}
 	}
 	
 	boolean parseFunctionComponent(Code code, String[] lineData, int lineIndex) throws ParseException {
@@ -447,7 +715,7 @@ public class JooCompiler {
 		else if(Character.isLowerCase(firstCharacter)) {
 			throw new ParseException("Function names should start with a uppercase character, Name: " + name, lineIndex);
 		}
-		else if(!name.matches(REGEX_ALPHANUMERIC)) {
+		else if(!name.matches(ALPHANUMERIC_REGEX)) {
 			throw new ParseException("Function names should contain only alphanumeric characters, Name: " + name, lineIndex);
 		}
 		else if(code.getComponentCount(name, KEYWORD_FUNCTION) > 1) {
@@ -471,40 +739,11 @@ public class JooCompiler {
 		else if(Character.isUpperCase(nameCharacters[1])) {
 			throw new ParseException("Parameter names should start with a lowercase character, Name: " + name, lineIndex);
 		}
-		else if(!name.substring(1).matches(REGEX_ALPHANUMERIC)) {
+		else if(!name.substring(1).matches(ALPHANUMERIC_REGEX)) {
 			throw new ParseException("Parameter names should contain only alphanumeric characters, Name: " + name, lineIndex);
 		}
 		else if(function.getComponentWithNameCount(name) > 1) {
 			throw new ParseException("Duplicate parameter, Name: " + name, lineIndex);			
-		}
-	}
-
-	private void parseFunctionCall(Code code, String[] lineData, int lineIndex) throws ParseException {
-		if(lineData.length < 2)
-			throw new ParseException("Invalid function call", lineIndex);
-		final String name = lineData[1];
-		final String type = KEYWORD_FUNCTION_CALL;
-		final byte byteCodeType = (byte)VM_KEYWORD_FUNCTION_CALL;
-		CodeComponent functionCall = new CodeComponent(name, (byte) 0, type, byteCodeType, lineIndex);
-		for (int i = 2; i < lineData.length; i++) {
-			final String argumentName = lineData[i];
-			final CodeComponent variable = getVariableWithName(argumentName, code, lineIndex);
-			final byte argumentByteCodeName = variable.getByteCodeName();
-			final String argumentType = variable.getType();
-			final byte argumentByteCodeType = variable.getByteCodeType();
-			CodeComponent argument = new CodeComponent(argumentName, argumentByteCodeName, argumentType, argumentByteCodeType, lineIndex);
-			functionCall.addComponent(argument);
-		}
-		
-		code.addComponent(functionCall);
-		//analyseFunctionCall(code, functionCall);
-	}
-	
-	private void analyseFunctionCall(Code code, CodeComponent function) throws ParseException {
-		final String name = function.getName();
-		final int lineIndex = function.getLineIndex();
-		if(code.getComponentCount(name, KEYWORD_FUNCTION) == 0) {
-			throw new ParseException("Invalid function, Name: " + name, lineIndex);			
 		}
 	}
 
@@ -528,9 +767,9 @@ public class JooCompiler {
 		if(lineData.length != 4)
 			throw new ParseException("Invalid condition declaration", lineIndex);
 		final String name = lineData[2];
-		if(!settings.hasSettingWithName(name))
+		if(!code.hasComponentWithName(name))
 			throw new ParseException("Invalid comparison operator, Operator: " + name, lineIndex);				
-		final byte byteCodeName = settings.getSettingWithName(name).getByteCodeName();
+		final byte byteCodeName = code.getComponentWithName(name).getByteCodeName();
 		final String type = lineData[0];
 		final byte byteCodeType = (byte) (type.equals(KEYWORD_IF) ? VM_KEYWORD_IF : VM_KEYWORD_ELSE_IF);
 		CodeComponent condition = new CodeComponent(name, byteCodeName, type, byteCodeType, lineIndex);
@@ -551,9 +790,9 @@ public class JooCompiler {
 	boolean parseOperationComponent(Code code, String[] lineData, int lineIndex) throws ParseException {
 		if (lineData.length == 3) {
 			final String name = lineData[1];
-			if(!settings.hasSettingWithName(name))
+			if(!code.hasComponentWithName(name))
 				throw new ParseException("Invalid operator, Operator: " + name, lineIndex);				
-			final byte byteCodeName = settings.getSettingWithName(name).getByteCodeName();
+			final byte byteCodeName = code.getComponentWithName(name).getByteCodeName();
 			final String type = TYPE_OPERATOR;
 			CodeComponent operation = new CodeComponent(name, byteCodeName, type, (byte) 0, lineIndex);
 			final String variable0Data = lineData[0];
@@ -587,7 +826,7 @@ public class JooCompiler {
 	 */
 	private void parseKeywordComponent(Code code, String[] lineData, int lineIndex, String keyword, byte byteCodeKeyword) throws ParseException {
 		if(lineData.length > 1)
-			throw new ParseException("Invalid instruction", lineIndex);
+			throw new ParseException("Invalid instruction, Instruction: " + keyword, lineIndex);
 		final CodeComponent keywordComponent = new CodeComponent(keyword, byteCodeKeyword, keyword, byteCodeKeyword, lineIndex);
 		code.addComponent(keywordComponent);
 	}
@@ -656,7 +895,7 @@ public class JooCompiler {
 			}
 		}
 		if(variable == null)
-			throw new ParseException("Invalid variable, Name: " + name, lineIndex);		
+			throw new ParseException("Variable doesn't exist, Variable: " + name, lineIndex);		
 		return variable;
 	}
 	
@@ -842,44 +1081,6 @@ public class JooCompiler {
 		} else {
 			return type;
 		}
-	}
-	
-	/**
-	 * This method splits up the code to a array of code lines. 
-	 * It removes unnecessary characters like '\t' and '\r' and splits the code at 
-	 * the '\n' characters. It also converts comment only to empty lines and removes 
-	 * the comments in the lines that also contain code.
-	 * 
-	 * The empty lines are kept so the compiler can tell the location of the errors.
-	 *  
-	 * @param code to get lines from.
-	 * @return Array of code lines. 
-	 */
-	String[] getLines(String code) {
-		code = code.replace("\t", "");
-		code = code.replace("\r", "");
-		String[] codeLines = code.split(LINE_BREAK);
-		boolean multiLineComment = false;
-		for (int i = 0; i < codeLines.length; i++) {
-			String line = codeLines[i];
-			if(line.equals(KEYWORD_COMMENT + KEYWORD_COMMENT)) {
-				multiLineComment = !multiLineComment;
-				codeLines[i] = "";
-			}
-			else if(multiLineComment) {
-				codeLines[i] = "";
-			}
-			else if(line.contains(KEYWORD_COMMENT)) {
-				final String[] lineData = line.split(KEYWORD_COMMENT);
-				final String lineCode = lineData[0];
-				if(lineCode.isEmpty()) {
-					codeLines[i] = "";
-				} else {
-					codeLines[i] = lineCode;
-				}
-			}
-		}
-		return codeLines;
 	}
 	
 	void analyseCode(Code code) throws ParseException {

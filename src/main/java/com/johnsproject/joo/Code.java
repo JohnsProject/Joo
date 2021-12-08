@@ -124,6 +124,23 @@ class Code {
 	}	
 	
 	/**
+	 * Returns the {@link CodeCompoent} of the type with the specified index, 
+	 * if it's found in the components list of this CodeComponent, or null.
+	 * 
+	 * @param type of the component.
+	 * @param index of the component.
+	 * @return The component with the specified name.
+	 */
+	public CodeComponent getComponentWithType(String type, int index) {
+		int i = 0;
+		for (CodeComponent component : components) {
+			if(component.hasType(type) && (i++ == index))
+				return component;
+		}
+		return null;
+	}
+	
+	/**
 	 * Returns the number of {@link CodeCompoent} with the specified type.
 	 * <br><br>
 	 * This method does not search in the component lists of this CodeComponent's components.

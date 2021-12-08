@@ -7,6 +7,7 @@ import org.junit.Test;
 import com.johnsproject.joo.util.FileUtil;
 
 import static com.johnsproject.joo.JooCompiler.*;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -33,83 +34,21 @@ import static com.johnsproject.joo.JooVirtualMachine.OPERATOR_BITSHIFT_LEFT;
 import static com.johnsproject.joo.JooVirtualMachine.OPERATOR_BITSHIFT_RIGHT;
 
 public class JooCompilerTest {
-
-	@Test
-	public void parseSettingsTest() throws Exception {
-		final String settingsData = FileUtil.read("StandartLibrary.joo");
-		final JooCompiler compiler = new JooCompiler();
-		final Settings settings = compiler.parseSettings(settingsData);
-		assert(settings.hasSettingWithName("<="));
-		assert(settings.getSettingWithName("<=").hasName((byte)1));
-		assert(settings.getSettingWithName("<=").hasSettingWithType(TYPE_INT));
-		assert(settings.getSettingWithName("<=").hasSettingWithType(TYPE_FIXED));
-		assert(settings.hasSettingWithName("=="));
-		assert(settings.getSettingWithName("==").hasName((byte)5));
-		assert(settings.getSettingWithName("==").hasSettingWithType(TYPE_INT));
-		assert(settings.getSettingWithName("==").hasSettingWithType(TYPE_FIXED));
-		assert(settings.getSettingWithName("==").hasSettingWithType(TYPE_BOOL));
-		assert(settings.getSettingWithName("==").hasSettingWithType(TYPE_CHAR));
-		assert(settings.hasSettingWithName("%"));
-		assert(settings.getSettingWithName("%").hasName((byte)15));
-		assert(settings.getSettingWithName("%").hasSettingWithType(TYPE_INT));
-
-		assert(settings.hasSettingWithName("Graphics_HasOutputSupport"));
-		assert(settings.getSettingWithName("Graphics_HasOutputSupport").hasName((byte)1));
-		assert(settings.getSettingWithName("Graphics_HasOutputSupport").getSettingWithName("param0").hasSettingWithType(TYPE_BOOL));
-		assert(settings.hasSettingWithName("Graphics_SetColor"));
-		assert(settings.getSettingWithName("Graphics_SetColor").hasName((byte)2));
-		assert(settings.getSettingWithName("Graphics_SetColor").getSettingWithName("param0").hasSettingWithType(TYPE_INT));
-		assert(settings.getSettingWithName("Graphics_SetColor").getSettingWithName("param1").hasSettingWithType(TYPE_INT));
-		assert(settings.getSettingWithName("Graphics_SetColor").getSettingWithName("param2").hasSettingWithType(TYPE_INT));
-		assert(settings.hasSettingWithName("Math_Max"));
-		assert(settings.getSettingWithName("Math_Max").hasName((byte)22));
-		assert(settings.getSettingWithName("Math_Max").getSettingWithName("param0").hasSettingWithType(TYPE_INT));
-		assert(settings.getSettingWithName("Math_Max").getSettingWithName("param0").hasSettingWithType(TYPE_FIXED));
-		assert(settings.getSettingWithName("Math_Max").getSettingWithName("param1").hasSettingWithType(TYPE_INT));
-		assert(settings.getSettingWithName("Math_Max").getSettingWithName("param1").hasSettingWithType(TYPE_FIXED));
-		assert(settings.getSettingWithName("Math_Max").getSettingWithName("param2").hasSettingWithType(TYPE_INT));
-		assert(settings.getSettingWithName("Math_Max").getSettingWithName("param2").hasSettingWithType(TYPE_FIXED));
-		assert(settings.hasSettingWithName("Storage_Clear"));
-		assert(settings.getSettingWithName("Storage_Clear").hasName((byte)35));
-		assert(!settings.getSettingWithName("Storage_Clear").hasSettingWithName("param0"));
-		
-		try {
-			final String testSettings = "operator + int|fixed" + "\n" +
-										"operator + int|fixed";
-			compiler.parseSettings(testSettings);
-			fail("Duplicate compiler setting exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Duplicate compiler setting, Name: +");
-		}
-		
-		try {
-			final String testSettings = "operator + int|fixed A";
-			compiler.parseSettings(testSettings);
-			fail("Invalid operator declaration exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Invalid operator declaration");
-		}
-		
-		try {
-			final String testSettings = "native MyFunction bug";
-			compiler.parseSettings(testSettings);
-			fail("Invalid supported type exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Invalid supported type, Type: bug");
-		}
-	}
 	
 	@Test
 	public void addIncludedCodeTest() throws Exception {
 		final JooCompiler compiler = new JooCompiler();
 		
-		String testCode = "include TestLibrary.joo\n";
-		
+		String[] testCode = new String[] {"include TestLibrary.joo"};
+		String[] fileCode = compiler.getLines(FileUtil.read("TestLibrary.joo"));
 		testCode = compiler.addIncludedCode(testCode);
-		assertEquals(testCode, FileUtil.read("TestLibrary.joo"));
+		
+		for (int i = 0; i < fileCode.length; i++) {
+			assertEquals(testCode[i + 1], fileCode[i]);
+		}
 		
 		try {
-			testCode = "include";
+			testCode = new String[] {"include"};
 			testCode = compiler.addIncludedCode(testCode);
 			fail("Invalid inclusion declaration exception not thrown");
 		} catch (ParseException e) {
@@ -118,197 +57,717 @@ public class JooCompilerTest {
 	}
 	
 	@Test
-	public void replaceDefinesTest() throws Exception {
+	public void parseConstantsTest() throws Exception {
 		final JooCompiler compiler = new JooCompiler();
 		
-		String testCode = "constant TEST_CONSTANT = 10" + "\n" +
-								"int int0 = TEST_CONSTANT";
+		String[] codeLines = new String[] {
+				"constant TEST_CONSTANT = 10",
+				"int int0 = TEST_CONSTANT"
+				};
 		
-		testCode = compiler.replaceConstants(testCode);
-		assertEquals(testCode, "int int0 = 10");
+		Code code = new Code();
+		compiler.parseConstants(code, codeLines);
+		assertEquals(codeLines[1], "int int0 = 10");
+		
+		int constantIndex = 0;
+		CodeComponent constantComponent = code.getComponent(constantIndex++);
+		assert(constantComponent.hasName("TEST_CONSTANT"));
+		assert(constantComponent.hasType(KEYWORD_CONSTANT));
+		assert(constantComponent.hasComponent("10", KEYWORD_CONSTANT));
 		
 		try {
-			testCode = "constant TEST_CONSTANT = ";
-			testCode = compiler.replaceConstants(testCode);
+			code.getComponents().clear();
+			codeLines = new String[] {"constant TEST_CONSTANT = "};
+			compiler.parseConstants(code, codeLines);
 			fail("Invalid constant declaration exception not thrown");
 		} catch (ParseException e) {
 			assertEquals(e.getMessage(), "Invalid constant declaration");
 		}
 		
 		try {
-			testCode = "constant TEST_CONSTANT + 10";
-			testCode = compiler.replaceConstants(testCode);
+			code.getComponents().clear();
+			codeLines = new String[] {"constant TEST_CONSTANT + 10 "};
+			compiler.parseConstants(code, codeLines);
 			fail("Invalid assignment operator exception not thrown");
 		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Invalid assignment operator, Operator: +");
+			assertEquals(e.getMessage(), "Invalid constant assignment operator, Operator: +, Constant: TEST_CONSTANT");
 		}
 		
 		try {
-			testCode = "constant TEST_CONSTANT = 10" + "\n" +
-					"constant TEST_CONSTANT = 5";
-			testCode = compiler.replaceConstants(testCode);
+			code.getComponents().clear();
+			codeLines = new String[] {
+					"constant TEST_CONSTANT = 10",
+					"constant TEST_CONSTANT = 5"
+					};
+			compiler.parseConstants(code, codeLines);
 			fail("Duplicate constant exception not thrown");
 		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Duplicate constant, Name: TEST_CONSTANT");
+			assertEquals(e.getMessage(), "Duplicate constant, Constant: TEST_CONSTANT");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"constant TeST_CONSTANT = 10"};
+			compiler.parseConstants(code, codeLines);
+			fail("Constant names should only contain alphanumeric uppercase characters exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Constant names should contain only uppercase alphanumeric characters, Constant: TeST_CONSTANT");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"constant 0EST_CONSTANT = 10"};
+			compiler.parseConstants(code, codeLines);
+			fail("Constant names should start with alphabetic characters exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Constant names should start with a alphabetic character, Constant: 0EST_CONSTANT");
 		}
 	}
 	
 	@Test
-	public void parseVariableComponentTest() throws Exception {
+	public void parseOperatorsTest() throws Exception {
 		final JooCompiler compiler = new JooCompiler();
-		String[] testCode;
-		Code code;
 		
-		testCode = new String[] {"int", "test", "=", "10"};
-		code = new Code();
-		createTypeRegistry(code);
-		compiler.parseVariableComponent(code, testCode, 0);
-		assert(code.hasComponentWithName("test"));
-		assert(code.getComponentWithName("test").hasName((byte) 1));
-		assert(code.getComponentWithName("test").hasType(TYPE_INT));
-		assert(code.getComponentWithName("test").hasComponentWithName("10"));
-		assert(code.getComponentWithName("test").getComponentWithName("10").hasType(TYPE_INT));
+		String[] codeLines = new String[] {
+				"operator + int|fixed",
+				"operator = int|fixed|char|bool"
+				};
 		
-		testCode = new String[] {"fixed", "test", "=", "20.5"};
-		code = new Code();
-		createTypeRegistry(code);
-		compiler.parseVariableComponent(code, testCode, 0);
-		assert(code.hasComponentWithName("test"));
-		assert(code.getComponentWithName("test").hasName((byte) 1));
-		assert(code.getComponentWithName("test").hasType(TYPE_FIXED));
-		assert(code.getComponentWithName("test").hasComponentWithName("5228"));
-		assert(code.getComponentWithName("test").getComponentWithName("5228").hasType(TYPE_FIXED));
+		Code code = new Code();
+		compiler.parseOperators(code, codeLines);
 		
-		testCode = new String[] {"bool", "test", "=", "true"};
-		code = new Code();
-		createTypeRegistry(code);
-		compiler.parseVariableComponent(code, testCode, 0);
-		assert(code.hasComponentWithName("test"));
-		assert(code.getComponentWithName("test").hasName((byte) 1));
-		assert(code.getComponentWithName("test").hasType(TYPE_BOOL));
-		assert(code.getComponentWithName("test").hasComponentWithName("1"));
-		assert(code.getComponentWithName("test").getComponentWithName("1").hasType(TYPE_BOOL));
-		
-		testCode = new String[] {"bool", "test", "=", "false"};
-		code = new Code();
-		createTypeRegistry(code);
-		compiler.parseVariableComponent(code, testCode, 0);
-		assert(code.hasComponentWithName("test"));
-		assert(code.getComponentWithName("test").hasName((byte) 1));
-		assert(code.getComponentWithName("test").hasType(TYPE_BOOL));
-		assert(code.getComponentWithName("test").hasComponentWithName("0"));
-		assert(code.getComponentWithName("test").getComponentWithName("0").hasType(TYPE_BOOL));
-		
-		testCode = new String[] {"char", "test", "=", "'A'"};
-		code = new Code();
-		createTypeRegistry(code);
-		compiler.parseVariableComponent(code, testCode, 0);
-		assert(code.hasComponentWithName("test"));
-		assert(code.getComponentWithName("test").hasName((byte) 1));
-		assert(code.getComponentWithName("test").hasType(TYPE_CHAR));
-		assert(code.getComponentWithName("test").hasComponentWithName("65"));
-		assert(code.getComponentWithName("test").getComponentWithName("65").hasType(TYPE_CHAR));
-		
-		testCode = new String[] {"int", "test"};
-		code = new Code();
-		createTypeRegistry(code);
-		compiler.parseVariableComponent(code, testCode, 0);
-		assert(code.hasComponentWithName("test"));
-		assert(code.getComponentWithName("test").hasName((byte) 1));
-		assert(code.getComponentWithName("test").hasType(TYPE_INT));
-		assert(!code.getComponentWithName("test").hasComponentWithName("10"));
-		
-		testCode = new String[] {"int:10", "test"};
-		code = new Code();
-		createTypeRegistry(code);
-		compiler.parseVariableComponent(code, testCode, 0);
-		assert(code.hasComponentWithName("test"));
-		assert(code.getComponentWithName("test").hasName((byte) 1));
-		assert(code.getComponentWithName("test").hasType(TYPE_ARRAY_INT));
-		assert(code.getComponentWithName("test").hasComponentWithName("10"));
-		assert(code.getComponentWithName("test").getComponentWithName("10").hasType(KEYWORD_ARRAY));
+		int operatorIndex = 0, typeIndex = 0;
+		CodeComponent operatorComponent = code.getComponent(operatorIndex++);
+		assert(operatorComponent.hasName("+"));
+		assert(operatorComponent.hasType(KEYWORD_OPERATOR));
+		assert(operatorComponent.hasName((byte) 1));
+
+		CodeComponent typeComponent = operatorComponent.getComponent(typeIndex++);
+		assert(typeComponent.hasName(TYPE_INT));
+		assert(typeComponent.hasName((byte)VM_TYPE_INT));
+
+		typeComponent = operatorComponent.getComponent(typeIndex++);
+		assert(typeComponent.hasName(TYPE_FIXED));
+		assert(typeComponent.hasName((byte)VM_TYPE_FIXED));
+
+		typeIndex = 0;
+		operatorComponent = code.getComponent(operatorIndex++);
+		assert(operatorComponent.hasName("="));
+		assert(operatorComponent.hasType(KEYWORD_OPERATOR));
+		assert(operatorComponent.hasName((byte) 2));
+
+		typeComponent = operatorComponent.getComponent(typeIndex++);
+		assert(typeComponent.hasName(TYPE_INT));
+		assert(typeComponent.hasName((byte)VM_TYPE_INT));
+
+		typeComponent = operatorComponent.getComponent(typeIndex++);
+		assert(typeComponent.hasName(TYPE_FIXED));
+		assert(typeComponent.hasName((byte)VM_TYPE_FIXED));
+
+		typeComponent = operatorComponent.getComponent(typeIndex++);
+		assert(typeComponent.hasName(TYPE_CHAR));
+		assert(typeComponent.hasName((byte)VM_TYPE_CHAR));
+
+		typeComponent = operatorComponent.getComponent(typeIndex++);
+		assert(typeComponent.hasName(TYPE_BOOL));
+		assert(typeComponent.hasName((byte)VM_TYPE_BOOL));
 		
 		try {
-			testCode = new String[] {"int", "test", "="};
-			compiler.parseVariableComponent(code, testCode, 0);
+			code.getComponents().clear();
+			codeLines = new String[] {"operator *"};
+			compiler.parseOperators(code, codeLines);
+			fail("Invalid operator declaration exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Invalid operator declaration");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {
+					"operator * int",
+					"operator * bool"
+					};
+			compiler.parseOperators(code, codeLines);
+			fail("Duplicate operator exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Duplicate operator, Operator: *");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"operator - a"};
+			compiler.parseOperators(code, codeLines);
+			fail("Invalid supported type exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Invalid supported type, Type: a");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"operator a int"};
+			compiler.parseOperators(code, codeLines);
+			fail("Operators shouldn't contain alphanumeric characters exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Operators shouldn't contain alphanumeric characters, Operator: a");
+		}
+	}
+	
+	@Test
+	public void parseNativesTest() throws Exception {
+		final JooCompiler compiler = new JooCompiler();
+		
+		String[] codeLines = new String[] {
+				"native HelloWorld int|fixed bool",
+				"native WorldHello int|bool"
+				};
+		
+		Code code = new Code();
+		compiler.parseNatives(code, codeLines);
+	
+		int nativeIndex = 0, parameterIndex = 0, typeIndex = 0;
+		CodeComponent nativeComponent = code.getComponent(nativeIndex++);
+		assert(nativeComponent.hasName("HelloWorld"));
+		assert(nativeComponent.hasType(KEYWORD_NATIVE));
+		assert(nativeComponent.hasName((byte) 1));
+
+		CodeComponent parameterComponent = nativeComponent.getComponent(parameterIndex++);
+		assert(parameterComponent.hasName("param0"));
+		assert(parameterComponent.hasType(TYPE_PARAMETER));
+		assert(parameterComponent.hasName((byte)1));
+
+		CodeComponent typeComponent = parameterComponent.getComponent(typeIndex++);
+		assert(typeComponent.hasName(TYPE_INT));
+		assert(typeComponent.hasName((byte)VM_TYPE_INT));
+		
+		typeComponent = parameterComponent.getComponent(typeIndex++);
+		assert(typeComponent.hasName(TYPE_FIXED));
+		assert(typeComponent.hasName((byte)VM_TYPE_FIXED));
+
+		typeIndex = 0;
+		parameterComponent = nativeComponent.getComponent(parameterIndex++);
+		assert(parameterComponent.hasName("param1"));
+		assert(parameterComponent.hasType(TYPE_PARAMETER));
+		assert(parameterComponent.hasName((byte)2));
+		
+		typeComponent = parameterComponent.getComponent(typeIndex++);
+		assert(typeComponent.hasName(TYPE_BOOL));
+		assert(typeComponent.hasName((byte)VM_TYPE_BOOL));
+		
+		parameterIndex = 0;
+		nativeComponent = code.getComponent(nativeIndex++);
+		assert(nativeComponent.hasName("WorldHello"));
+		assert(nativeComponent.hasType(KEYWORD_NATIVE));
+		assert(nativeComponent.hasName((byte) 2));
+		
+		typeIndex = 0;
+		parameterComponent = nativeComponent.getComponent(parameterIndex++);
+		assert(parameterComponent.hasName("param0"));
+		assert(parameterComponent.hasType(TYPE_PARAMETER));
+		assert(parameterComponent.hasName((byte)1));
+
+		typeComponent = parameterComponent.getComponent(typeIndex++);
+		assert(typeComponent.hasName(TYPE_INT));
+		assert(typeComponent.hasName((byte)VM_TYPE_INT));
+
+		typeComponent = parameterComponent.getComponent(typeIndex++);
+		assert(typeComponent.hasName(TYPE_BOOL));
+		assert(typeComponent.hasName((byte)VM_TYPE_BOOL));
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"native"};
+			compiler.parseNatives(code, codeLines);
+			fail("Invalid native declaration exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Invalid native declaration");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {
+					"native Hello",
+					"native Hello"
+					};
+			compiler.parseNatives(code, codeLines);
+			fail("Duplicate native exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Duplicate native, Native: Hello");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {
+					"native Hello a"
+					};
+			compiler.parseNatives(code, codeLines);
+			fail("Invalid supported type exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Invalid supported type, Type: a");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"native 0ello"};
+			compiler.parseNatives(code, codeLines);
+			fail("Native names should start with alphabetic character exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Native names should start with a alphabetic character, Native: 0ello");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"native hello"};
+			compiler.parseNatives(code, codeLines);
+			fail("Native names should start with uppercase character exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Native names should start with a uppercase character, Native: hello");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"native Hell@"};
+			compiler.parseNatives(code, codeLines);
+			fail("Native names should only contain alphanumeric characters exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Native names should contain only alphanumeric characters, Native: Hell@");
+		}
+	}
+	
+	@Test
+	public void parseVariablesTest() throws Exception {
+		final JooCompiler compiler = new JooCompiler();
+		String[] codeLines = new String[] {
+				"int testInt = 10",
+				"int withoutValue",
+				"fixed testFixed = 20.5",
+				"bool testBoolTrue = true",
+				"bool testBoolFalse = false",
+				"char testChar = 'A'",
+				"int:10 testIntArray",
+				"fixed:15 testFixedArray",
+				"bool:5 testBoolArray",
+				"char:3 testCharArray",
+				};
+		
+		Code code = new Code();		
+		compiler.parseVariables(code, codeLines);
+		
+		int variableIndex = 0;
+		CodeComponent variableComponent = code.getComponent(variableIndex++);
+		assert(variableComponent.hasName("testInt"));
+		assert(variableComponent.hasType(TYPE_INT));
+		assert(variableComponent.hasName((byte) 1));
+		assert(variableComponent.hasType((byte) VM_TYPE_INT));
+		assert(variableComponent.hasComponent("10", TYPE_INT));
+
+		variableComponent = code.getComponent(variableIndex++);
+		assert(variableComponent.hasName("withoutValue"));
+		assert(variableComponent.hasType(TYPE_INT));
+		assert(variableComponent.hasName((byte) 2));
+		assert(variableComponent.hasType((byte) VM_TYPE_INT));
+
+		variableComponent = code.getComponent(variableIndex++);
+		assert(variableComponent.hasName("testFixed"));
+		assert(variableComponent.hasType(TYPE_FIXED));
+		assert(variableComponent.hasName((byte) 1));
+		assert(variableComponent.hasType((byte) VM_TYPE_FIXED));
+		assert(variableComponent.hasComponent("5228", TYPE_FIXED));
+
+		variableComponent = code.getComponent(variableIndex++);
+		assert(variableComponent.hasName("testBoolTrue"));
+		assert(variableComponent.hasType(TYPE_BOOL));
+		assert(variableComponent.hasName((byte) 1));
+		assert(variableComponent.hasType((byte) VM_TYPE_BOOL));
+		assert(variableComponent.hasComponent("1", TYPE_BOOL));
+
+		variableComponent = code.getComponent(variableIndex++);
+		assert(variableComponent.hasName("testBoolFalse"));
+		assert(variableComponent.hasType(TYPE_BOOL));
+		assert(variableComponent.hasName((byte) 2));
+		assert(variableComponent.hasType((byte) VM_TYPE_BOOL));
+		assert(variableComponent.hasComponent("0", TYPE_BOOL));
+
+		variableComponent = code.getComponent(variableIndex++);
+		assert(variableComponent.hasName("testChar"));
+		assert(variableComponent.hasType(TYPE_CHAR));
+		assert(variableComponent.hasName((byte) 1));
+		assert(variableComponent.hasType((byte) VM_TYPE_CHAR));
+		assert(variableComponent.hasComponent("65", TYPE_CHAR));
+
+		variableComponent = code.getComponent(variableIndex++);
+		assert(variableComponent.hasName("testIntArray"));
+		assert(variableComponent.hasType(TYPE_ARRAY_INT));
+		assert(variableComponent.hasName((byte) 1));
+		assert(variableComponent.hasType((byte) VM_TYPE_ARRAY_INT));
+		assert(variableComponent.hasComponent("10", KEYWORD_ARRAY));
+
+		variableComponent = code.getComponent(variableIndex++);
+		assert(variableComponent.hasName("testFixedArray"));
+		assert(variableComponent.hasType(TYPE_ARRAY_FIXED));
+		assert(variableComponent.hasName((byte) 1));
+		assert(variableComponent.hasType((byte) VM_TYPE_ARRAY_FIXED));
+		assert(variableComponent.hasComponent("15", KEYWORD_ARRAY));
+
+		variableComponent = code.getComponent(variableIndex++);
+		assert(variableComponent.hasName("testBoolArray"));
+		assert(variableComponent.hasType(TYPE_ARRAY_BOOL));
+		assert(variableComponent.hasName((byte) 1));
+		assert(variableComponent.hasType((byte) VM_TYPE_ARRAY_BOOL));
+		assert(variableComponent.hasComponent("5", KEYWORD_ARRAY));
+
+		variableComponent = code.getComponent(variableIndex++);
+		assert(variableComponent.hasName("testCharArray"));
+		assert(variableComponent.hasType(TYPE_ARRAY_CHAR));
+		assert(variableComponent.hasName((byte) 1));
+		assert(variableComponent.hasType((byte) VM_TYPE_ARRAY_CHAR));
+		assert(variableComponent.hasComponent("3", KEYWORD_ARRAY));
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"int test ="};
+			compiler.parseVariables(code, codeLines);
 			fail("Invalid variable declaration exception not thrown");
 		} catch (ParseException e) {
 			assertEquals(e.getMessage(), "Invalid variable declaration");
 		}
 		
 		try {
-			testCode = new String[] {"int:A", "test"};
-			compiler.parseVariableComponent(code, testCode, 0);
+			code.getComponents().clear();
+			codeLines = new String[] {"int:A test"};
+			compiler.parseVariables(code, codeLines);
 			fail("Invalid array size declaration exception not thrown");
 		} catch (ParseException e) {
 			assertEquals(e.getMessage(), "Invalid array size declaration, Size: A");
 		}
 		
 		try {
-			testCode = new String[] {"int:15", "test", "=", "10"};
-			compiler.parseVariableComponent(code, testCode, 0);
+			code.getComponents().clear();
+			codeLines = new String[] {"int:15 test = 10"};
+			compiler.parseVariables(code, codeLines);
 			fail("Invalid array declaration exception not thrown");
 		} catch (ParseException e) {
 			assertEquals(e.getMessage(), "Invalid array declaration. Value can't be assigned to array");
 		}
 		
 		try {
-			testCode = new String[] {"int", "test", "-", "10"};
-			compiler.parseVariableComponent(code, testCode, 0);
+			code.getComponents().clear();
+			codeLines = new String[] {"int test - 10"};
+			compiler.parseVariables(code, codeLines);
 			fail("Invalid assignment operator exception not thrown");
 		} catch (ParseException e) {
 			assertEquals(e.getMessage(), "Invalid assignment operator, Operator: -");
 		}
 		
 		try {
-			testCode = new String[] {"char", "test", "=", "'A''"};
-			compiler.parseVariableComponent(code, testCode, 0);
+			code.getComponents().clear();
+			codeLines = new String[] {"char test = 'A''"};
+			compiler.parseVariables(code, codeLines);
 			fail("Invalid char value declaration exception not thrown");
 		} catch (ParseException e) {
 			assertEquals(e.getMessage(), "Invalid char value declaration");
 		}
 		
 		try {
-			testCode = new String[] {"int", "test", "=", "A"};
-			compiler.parseVariableComponent(code, testCode, 0);
+			code.getComponents().clear();
+			codeLines = new String[] {"int test = A"};
+			compiler.parseVariables(code, codeLines);
 			fail("The declared value type doesn't match the variable type exception not thrown");
 		} catch (ParseException e) {
 			assertEquals(e.getMessage(), "The declared value type doesn't match the variable type");
 		}
 		
 		try {
-			testCode = new String[] {"int", "0test", "=", "10"};
-			compiler.parseVariableComponent(code, testCode, 0);
+			code.getComponents().clear();
+			codeLines = new String[] {"int 0test = 10"};
+			compiler.parseVariables(code, codeLines);
 			fail("Variable names should start with a alphabetic character exception not thrown");
 		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Variable names should start with a alphabetic character, Name: 0test");
+			assertEquals(e.getMessage(), "Variable names should start with a alphabetic character, Variable: 0test");
 		}
 		
 		try {
-			testCode = new String[] {"int", "Test", "=", "10"};
-			compiler.parseVariableComponent(code, testCode, 0);
+			code.getComponents().clear();
+			codeLines = new String[] {"int Test = 10"};
+			compiler.parseVariables(code, codeLines);
 			fail("Variable names should start with a lowercase character exception not thrown");
 		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Variable names should start with a lowercase character, Name: Test");
+			assertEquals(e.getMessage(), "Variable names should start with a lowercase character, Variable: Test");
 		}
 		
 		try {
-			testCode = new String[] {"int", "my_test", "=", "10"};
-			compiler.parseVariableComponent(code, testCode, 0);
+			code.getComponents().clear();
+			codeLines = new String[] {"int my_test = 10"};
+			compiler.parseVariables(code, codeLines);
 			fail("Variable names should contain only alphanumeric characters exception not thrown");
 		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Variable names should contain only alphanumeric characters, Name: my_test");
+			assertEquals(e.getMessage(), "Variable names should contain only alphanumeric characters, Variable: my_test");
 		}
 		
 		try {
-			testCode = new String[] {"int", "abc", "=", "10"};
-			compiler.parseVariableComponent(code, testCode, 0);
-			testCode = new String[] {"int", "abc", "=", "10"};
-			compiler.parseVariableComponent(code, testCode, 0);
+			code.getComponents().clear();
+			codeLines = new String[] {
+					"int abc = 10",
+					"int abc = 10"
+					};
+			compiler.parseVariables(code, codeLines);
 			fail("Duplicate variable exception not thrown");
 		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Duplicate variable, Name: abc");
+			assertEquals(e.getMessage(), "Duplicate variable, Variable: abc");
 		}
+	}
+	
+	@Test
+	public void parseFunctionsTest() throws Exception {
+		final JooCompiler compiler = new JooCompiler();
+		String[] codeLines = new String[] {
+				"function TestPlain",
+				"endFunction",
+				"function TestParam int _intParam fixed _fixedParam bool _boolParam char _charParam int: _intArrayParam",
+				"endFunction",
+				};
+		
+		Code code = new Code();		
+		compiler.parseFunctions(code, codeLines);
+		
+		int functionIndex = 0, paramIndex = 0;		
+		CodeComponent functionComponent = code.getComponent(functionIndex++);
+		assert(functionComponent.hasName("TestPlain"));
+		assert(functionComponent.hasType(KEYWORD_FUNCTION));
+		assert(functionComponent.hasName((byte) 1));
+		assert(functionComponent.hasType((byte) VM_TYPE_FUNCTION));
+		
+		functionComponent = code.getComponent(functionIndex++);
+		assert(functionComponent.hasName("endFunction"));
+		assert(functionComponent.hasType(KEYWORD_FUNCTION_END));
+
+		functionComponent = code.getComponent(functionIndex++);
+		assert(functionComponent.hasName("TestParam"));
+		assert(functionComponent.hasType(KEYWORD_FUNCTION));
+		assert(functionComponent.hasName((byte) 2));
+		assert(functionComponent.hasType((byte) VM_TYPE_FUNCTION));
+		
+		functionComponent = code.getComponent(functionIndex++);
+		assert(functionComponent.hasName("endFunction"));
+		assert(functionComponent.hasType(KEYWORD_FUNCTION_END));
+
+		functionComponent = code.getComponentWithName("TestParam");
+		CodeComponent paramComponent = functionComponent.getComponent(paramIndex++);
+		assert(paramComponent.hasName("_intParam"));
+		assert(paramComponent.hasType(TYPE_INT));
+		assert(paramComponent.hasName((byte) (0 + VM_PARAMETERS_START)));
+		assert(paramComponent.hasType((byte) VM_TYPE_INT));
+
+		paramComponent = functionComponent.getComponent(paramIndex++);
+		assert(paramComponent.hasName("_fixedParam"));
+		assert(paramComponent.hasType(TYPE_FIXED));
+		assert(paramComponent.hasName((byte) (1 + VM_PARAMETERS_START)));
+		assert(paramComponent.hasType((byte) VM_TYPE_FIXED));
+
+		paramComponent = functionComponent.getComponent(paramIndex++);
+		assert(paramComponent.hasName("_boolParam"));
+		assert(paramComponent.hasType(TYPE_BOOL));
+		assert(paramComponent.hasName((byte) (2 + VM_PARAMETERS_START)));
+		assert(paramComponent.hasType((byte) VM_TYPE_BOOL));
+
+		paramComponent = functionComponent.getComponent(paramIndex++);
+		assert(paramComponent.hasName("_charParam"));
+		assert(paramComponent.hasType(TYPE_CHAR));
+		assert(paramComponent.hasName((byte) (3 + VM_PARAMETERS_START)));
+		assert(paramComponent.hasType((byte) VM_TYPE_CHAR));
+
+		paramComponent = functionComponent.getComponent(paramIndex++);
+		assert(paramComponent.hasName("_intArrayParam"));
+		assert(paramComponent.hasType(TYPE_ARRAY_INT));
+		assert(paramComponent.hasName((byte) (4 + VM_PARAMETERS_START)));
+		assert(paramComponent.hasType((byte) VM_TYPE_ARRAY_INT));
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"function", "endFunction"};
+			compiler.parseFunctions(code, codeLines);
+			fail("Invalid function declaration exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Invalid function declaration");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"function 0est", "endFunction"};
+			compiler.parseFunctions(code, codeLines);
+			fail("Function names should start with a alphabetic character exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Function names should start with a alphabetic character, Function: 0est");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"function test", "endFunction"};
+			compiler.parseFunctions(code, codeLines);
+			fail("Function names should start with a uppercase character exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Function names should start with a uppercase character, Function: test");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"function My_Test", "endFunction"};
+			compiler.parseFunctions(code, codeLines);
+			fail("Function names should contain only alphanumeric characters exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Function names should contain only alphanumeric characters, Function: My_Test");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"function Test"};
+			compiler.parseFunctions(code, codeLines);
+			fail("Endless function exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Endless function, Function: Test");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"function Test", "function Test1", "endFunction"};
+			compiler.parseFunctions(code, codeLines);
+			fail("Endless function exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Endless function, Function: Test");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"function Test", "endFunction", "function Test1"};
+			compiler.parseFunctions(code, codeLines);
+			fail("Endless function exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Endless function, Function: Test1");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"endFunction"};
+			compiler.parseFunctions(code, codeLines);
+			fail("endFunction should have a corresponding function exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "endFunction should have a corresponding function");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"function Test", "endFunction", "endFunction"};
+			compiler.parseFunctions(code, codeLines);
+			fail("endFunction should have a corresponding function exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "endFunction should have a corresponding function");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {
+					"function Hi", "endFunction",
+					"function Hi", "endFunction"
+					};
+			compiler.parseFunctions(code, codeLines);
+			fail("Duplicate function exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Duplicate function, Function: Hi");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"function Test a _param", "endFunction"};
+			compiler.parseFunctions(code, codeLines);
+			fail("Invalid parameter type declaration exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Invalid parameter type declaration, Function: Test");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"function Test int param", "endFunction"};
+			compiler.parseFunctions(code, codeLines);
+			fail("Parameter names should start with a _ exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Parameter names should start with a _, Param: param, Function: Test");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"function Test int _0param", "endFunction"};
+			compiler.parseFunctions(code, codeLines);
+			fail("Parameter names should start with a alphabetic character exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Parameter names should start with a alphabetic character, Param: _0param, Function: Test");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"function Test int _Param", "endFunction"};
+			compiler.parseFunctions(code, codeLines);
+			fail("Parameter names should start with a lowercase character exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Parameter names should start with a lowercase character, Param: _Param, Function: Test");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"function Test int _my_param", "endFunction"};
+			compiler.parseFunctions(code, codeLines);
+			fail("Parameter names should contain only alphanumeric characters exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Parameter names should contain only alphanumeric characters, Param: _my_param, Function: Test");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"function Test int", "endFunction"};
+			compiler.parseFunctions(code, codeLines);
+			fail("Invalid parameter declaration exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Invalid parameter declaration, Function: Test");
+		}
+		
+		try {
+			code.getComponents().clear();
+			codeLines = new String[] {"function Test int _param fixed _param", "endFunction"};
+			compiler.parseFunctions(code, codeLines);
+			fail("Duplicate parameter exception not thrown");
+		} catch (ParseException e) {
+			assertEquals(e.getMessage(), "Duplicate parameter, Param: _param, Function: Test");
+		}
+	}
+	
+	@Test
+	public void parseInstructionsTest() throws Exception {
+		final JooCompiler compiler = new JooCompiler();
+		String[] codeLines = new String[] {
+				"int var = 0",
+				
+				"function TestPlain",
+					"call TestParam var",
+				"endFunction",
+				
+				"function TestParam int _param",
+					"call TestParam _param",
+					"repeatFunction",
+				"endFunction",
+				};
+		
+		Code code = new Code();		
+		compiler.parseVariables(code, codeLines);
+		compiler.parseFunctions(code, codeLines);
+		compiler.parseInstructions(code, codeLines);
+		
+		String function = "TestPlain";
+		assert(code.hasComponent(function, KEYWORD_FUNCTION));
+		assert(code.getComponentWithName(function).hasName((byte) 1));
+		assert(code.getComponentWithName(function).hasType((byte) VM_TYPE_FUNCTION));
+		
+		String function = "TestPlain";
+		assert(code.hasComponent(function, KEYWORD_FUNCTION));
+		assert(code.getComponentWithName(function).hasName((byte) 1));
+		assert(code.getComponentWithName(function).hasType((byte) VM_TYPE_FUNCTION));
 	}
 	
 	@Test
@@ -830,24 +1289,6 @@ public class JooCompilerTest {
 		line++;
 		assert(code.getComponent(line).hasName("endFunction"));
 		assert(code.getComponent(line).hasType(KEYWORD_FUNCTION_END));
-	}
-	
-	@Test
-	public void analyseCodeTest() throws Exception {
-		final String settingsData = FileUtil.read("StandartLibrary.joo");
-		final JooCompiler compiler = new JooCompiler();
-		final Settings settings = compiler.parseSettings(settingsData);
-		
-		compiler.setSettings(settings);
-		
-		try {
-			Code code = new Code();
-			code.addComponent(new CodeComponent("Function", (byte) 1, KEYWORD_FUNCTION_CALL, (byte) 0, 0));
-			compiler.analyseCode(code);
-			fail("Invalid function exception not thrown");
-		} catch (ParseException e) {
-			assertEquals(e.getMessage(), "Invalid function, Name: Function");
-		}
 	}
 	
 	@Test
