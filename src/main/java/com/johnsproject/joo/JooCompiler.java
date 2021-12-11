@@ -33,7 +33,7 @@ public class JooCompiler {
 	  	call <Native function name>: OtherJooApp
 	 */
 	public static final String KEYWORD_IMPORT = "import";
-	public static final String KEYWORD_DEFINE = "define";
+	public static final String KEYWORD_CONSTANT = "constant";
 	public static final String KEYWORD_IF = "if";
 	public static final String KEYWORD_ELSE_IF = "elseIf";
 	public static final String KEYWORD_ELSE = "else";
@@ -170,7 +170,7 @@ public class JooCompiler {
 				continue;
 			}
 			final String[] codeLine = splitCodeLine(codeLines[i]);
-			if(codeLine[0].equals(KEYWORD_DEFINE)) {
+			if(codeLine[0].equals(KEYWORD_CONSTANT)) {
 				if(defineNames.contains(codeLine[1])) {
 					System.err.println("Error, Line : " + i + ", Message : Duplicate constant, Name : " + codeLine[1]);	
 				}
