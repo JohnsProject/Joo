@@ -2,6 +2,7 @@ package com.johnsproject.joo;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,10 +45,8 @@ public class JooCompiler {
 	public static final String KEYWORD_FUNCTION_CALL = "call";
 	public static final String KEYWORD_TRUE = "true";
 	public static final String KEYWORD_FALSE = "false";
-	public static final String KEYWORD_PARAMETER = ":";
 	public static final String KEYWORD_COMMENT = "#";
-	public static final String KEYWORD_ARRAY_START = "[";
-	public static final String KEYWORD_ARRAY_END = "]";
+	public static final String KEYWORD_ARRAY = ":";
 	public static final String KEYWORD_CHAR = "'";
 	public static final String KEYWORD_VARIABLE_ASSIGN = "=";
 	// used in joo compiler config only
@@ -59,10 +58,10 @@ public class JooCompiler {
 	public static final String TYPE_FIXED = "fixed";
 	public static final String TYPE_BOOL = "bool";
 	public static final String TYPE_CHAR = "char";
-	public static final String TYPE_ARRAY_INT = TYPE_INT + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END;
-	public static final String TYPE_ARRAY_FIXED = TYPE_FIXED + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END;
-	public static final String TYPE_ARRAY_BOOL = TYPE_BOOL + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END;
-	public static final String TYPE_ARRAY_CHAR = TYPE_CHAR + KEYWORD_ARRAY_START + KEYWORD_ARRAY_END;
+	public static final String TYPE_ARRAY_INT = TYPE_INT + KEYWORD_ARRAY;
+	public static final String TYPE_ARRAY_FIXED = TYPE_FIXED + KEYWORD_ARRAY;
+	public static final String TYPE_ARRAY_BOOL = TYPE_BOOL + KEYWORD_ARRAY;
+	public static final String TYPE_ARRAY_CHAR = TYPE_CHAR + KEYWORD_ARRAY;
 	
 	public static final String LINE_BREAK = "\n";
 	
@@ -197,7 +196,7 @@ public class JooCompiler {
 		final String[] configLines = getLines(config);
 		int currentType = -1;
 		for (int i = 0; i < configLines.length; i++) {
-			String line = configLines[i].replace(" ", "");
+			String line = configLines[i];
 			if(line.isEmpty() || line.contains(KEYWORD_COMMENT)) {
 				continue;
 			}
@@ -220,29 +219,22 @@ public class JooCompiler {
 	}
 	
 	private Operator parseOperator(String line) {
-		if(line.contains(KEYWORD_TYPE_SEPARATOR)) {
-			String[] operatorData = line.split(Pattern.quote(KEYWORD_TYPE_SEPARATOR));
-			Operator operator = new Operator(operatorData[0]);
-			for (int i = 1; i < operatorData.length; i++) {
-				operator.addSupportedType(operatorData[i]);
-			}
-			return operator;
-		} else {
-			return new Operator(line);
+		String[] operatorData = line.split(" ");
+		String[] operatorTypes = operatorData[1].split(Pattern.quote(KEYWORD_TYPE_SEPARATOR));
+		Operator operator = new Operator(operatorData[0]);
+		for (int i = 1; i < operatorTypes.length; i++) {
+			operator.addSupportedType(operatorTypes[i]);
 		}
+		return operator;
 	}
 	
 	private NativeFunction parseNativeFunction(String line) {
-		if(line.contains(KEYWORD_PARAMETER)) {
-			String[] nativeFunctionData = line.split(KEYWORD_PARAMETER);
-			NativeFunction nativeFunction = new NativeFunction(nativeFunctionData[0]);
-			for (int i = 1; i < nativeFunctionData.length; i++) {
-				parseParameter(nativeFunctionData[i], i - 1, nativeFunction);
-			}
-			return nativeFunction;				
-		} else {
-			return new NativeFunction(line);
+		String[] nativeFunctionData = line.split(" ");
+		NativeFunction nativeFunction = new NativeFunction(nativeFunctionData[0]);
+		for (int i = 1; i < nativeFunctionData.length; i++) {
+			parseParameter(nativeFunctionData[i], i - 1, nativeFunction);
 		}
+		return nativeFunction;
 	}
 	
 	private void parseParameter(String parameter, int parameterIndex, NativeFunction nativeFunction) {
@@ -374,7 +366,7 @@ public class JooCompiler {
 				continue;
 			}
 			final String[] codeLine = splitCodeLine(codeLines[i]);
-			if(codeLine[0].contains(arrayType + KEYWORD_ARRAY_START)) {
+			if(codeLine[0].contains(arrayType + KEYWORD_ARRAY)) {
 				String variableName = codeLine[1];
 				if(variables.containsKey(variableName)) {
 					System.err.println("Error, Message : Duplicate variable, Name : " + variableName);					
@@ -390,12 +382,7 @@ public class JooCompiler {
 	}
 	
 	private String getArraySize(final int line, final String[] codeLine, final String arrayType, final String variableName) {
-		String arraySize = codeLine[0].replace(arrayType + KEYWORD_ARRAY_START, "");
-		if(arraySize.contains(KEYWORD_ARRAY_END)) {
-			arraySize = arraySize.replace(KEYWORD_ARRAY_END, "");
-		} else {
-			System.err.println("Error, Line : " + line + ", Message : Unclosed array size declaration, Name : " + variableName);
-		}
+		String arraySize = codeLine[0].replace(arrayType + KEYWORD_ARRAY, "");
 		try {
 			int size = Integer.parseInt(arraySize);
 			if(size < 0) {
@@ -607,8 +594,8 @@ public class JooCompiler {
 	}
 	
 	private void parseVariable0(final int lineIndex, final String rawVariableData, Instruction instruction) {
-		if(rawVariableData.contains(KEYWORD_ARRAY_START)) {
-			String[] variableData = rawVariableData.replace(KEYWORD_ARRAY_END, "").split(Pattern.quote(KEYWORD_ARRAY_START));
+		if(rawVariableData.contains(KEYWORD_ARRAY)) {
+			String[] variableData = rawVariableData.split(Pattern.quote(KEYWORD_ARRAY));
 			instruction.setVariable0Name(variableData[0]);
 			instruction.setVariable0ArrayIndex(variableData[1]);
 			instruction.hasVariable0ArrayIndex(true);
@@ -653,8 +640,8 @@ public class JooCompiler {
 	private void parseIntValue(final String variable0Data, final String variable1Data, final Map<String, String> parameters, Instruction instruction) {
 		try {
 			String variableName = variable0Data;
-			if(variableName.contains(KEYWORD_ARRAY_START)){
-				variableName = variableName.split(Pattern.quote(KEYWORD_ARRAY_START))[0];
+			if(variableName.contains(KEYWORD_ARRAY)){
+				variableName = variableName.split(Pattern.quote(KEYWORD_ARRAY))[0];
 			}
 			boolean isIntParameter = false;
 			if(parameters.containsKey(variableName)) {
@@ -690,8 +677,8 @@ public class JooCompiler {
 	}
 	
 	private void parseVariable1(final int lineIndex, final String rawVariableData, Instruction instruction) {
-		if(rawVariableData.contains(KEYWORD_ARRAY_START)) {
-			String[] variableData = rawVariableData.replace(KEYWORD_ARRAY_END, "").split(Pattern.quote(KEYWORD_ARRAY_START));
+		if(rawVariableData.contains(KEYWORD_ARRAY)) {
+			String[] variableData = rawVariableData.split(Pattern.quote(KEYWORD_ARRAY));
 			instruction.setVariable1Name(variableData[0]);
 			instruction.setVariable1ArrayIndex(variableData[1]);
 			instruction.hasVariable1ArrayIndex(true);
@@ -913,8 +900,8 @@ public class JooCompiler {
 			String parameterName = "";
 			String parameterIndex = "";
 			// parse if parameter is a array with index				
-			if(parameter.contains(KEYWORD_ARRAY_START)) {
-				String[] parameterData = parameter.replace(KEYWORD_ARRAY_END, "").split(Pattern.quote(KEYWORD_ARRAY_START));
+			if(parameter.contains(KEYWORD_ARRAY)) {
+				String[] parameterData = parameter.split(Pattern.quote(KEYWORD_ARRAY));
 				parameterName = parameterData[0];
 				parameterIndex = "" + (char) (Integer.parseInt(parameterData[1]) + 1);
 			} else {

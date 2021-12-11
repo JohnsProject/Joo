@@ -1,78 +1,78 @@
 @OPERATORS
-<= |int|fixed
->= |int|fixed
-< |int|fixed
-> |int|fixed
-== |int|fixed|bool|char
-!= |int|fixed|bool|char
-= |int|fixed|bool|char
-=+ |int|fixed|bool
-=- |int|fixed|bool
-=! |int|fixed|bool
-+ |int|fixed
-- |int|fixed
-* |int|fixed
-/ |int|fixed
-% |int
-& |int
-^ |int
-| |int
-~ |int
-<< |int
->> |int
+<= int|fixed
+>= int|fixed
+< int|fixed
+> int|fixed
+== int|fixed|bool|char
+!= int|fixed|bool|char
+= int|fixed|bool|char
+=+ int|fixed|bool
+=- int|fixed|bool
+=! int|fixed|bool
++ int|fixed
+- int|fixed
+* int|fixed
+/ int|fixed
+% int
+& int
+^ int
+| int
+~ int
+<< int
+>> int
 
 @FUNCTIONS
 # The Standard Native Library is a set of platform independent functions
 # that aims to help developing joo applications
 
 # Standard Graphics Library
-Graphics_HasOutputSupport: bool
-Graphics_SetColor: int: int: int
-Graphics_DrawWindow: int: int
-Graphics_DrawPoint: int: int
-Graphics_DrawLine: int: int: int: int
-Graphics_DrawTriangle: int: int: int: int: int: int
-Graphics_DrawRect: int: int: int: int
-Graphics_DrawCircle: int: int: int
+Graphics_HasOutputSupport bool
+Graphics_SetColor int int int
+Graphics_DrawWindow int int
+Graphics_DrawPoint int int
+Graphics_DrawLine int int int int
+Graphics_DrawTriangle int int int int int int
+Graphics_DrawRect int int int int
+Graphics_DrawCircle int int int
 Graphics_DrawText
-Graphics_HasInputSupport: bool
-Graphics_GetInputPosition: int: int
-Graphics_GetInputCode: int
+Graphics_HasInputSupport bool
+Graphics_GetInputPosition int int
+Graphics_GetInputCode int
 
 # Standard Audio Library
-Audio_HasOutputSupport: bool
-Audio_PlaySound: int: int
+Audio_HasOutputSupport bool
+Audio_PlaySound int int
 
 # Standart Serial Library
-Serial_HasOutputSupport: bool
-Serial_Write: char
+Serial_HasOutputSupport bool
+Serial_Write char
 Serial_WriteText
-Serial_HasInputSupport: bool
-Serial_HasInput: bool
-Serial_Read: char
+Serial_HasInputSupport bool
+Serial_HasInput bool
+Serial_Read char
 Serial_ReadText
 
 # Standard Math Library
-Math_Max: int|fixed: int|fixed: int|fixed
-Math_Min: int|fixed: int|fixed: int|fixed
-Math_Pow: int|fixed: int|fixed
-Math_Sqrt: int|fixed
-Math_Sin: fixed
-Math_Cos: fixed
-Math_Tan: fixed
-Math_Random: fixed
-Math_Degrees: fixed
-Math_Radians: fixed
+Math_Max int|fixed int|fixed int|fixed
+Math_Min int|fixed int|fixed int|fixed
+Math_Pow int|fixed int|fixed
+Math_Sqrt int|fixed
+Math_Sin fixed
+Math_Cos fixed
+Math_Tan fixed
+Math_Random fixed
+Math_Degrees fixed
+Math_Radians fixed
 
 # Standard Time Library
-Time_Delay: fixed
-Time_GetSeconds: fixed
+Time_Delay fixed
+Time_GetSeconds fixed
 
 # Standard Storage Library
-Storage_HasSupport: bool
+Storage_HasSupport bool
 Storage_Clear
-Storage_Put: int|fixed|bool|char
-Storage_Get: int|fixed|bool|char
+Storage_Put int|fixed|bool|char
+Storage_Get int|fixed|bool|char
 
 # Standard Type Library
 
