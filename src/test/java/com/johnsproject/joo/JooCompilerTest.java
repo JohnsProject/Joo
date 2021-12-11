@@ -759,15 +759,31 @@ public class JooCompilerTest {
 		compiler.parseFunctions(code, codeLines);
 		compiler.parseInstructions(code, codeLines);
 		
-		String function = "TestPlain";
-		assert(code.hasComponent(function, KEYWORD_FUNCTION));
-		assert(code.getComponentWithName(function).hasName((byte) 1));
-		assert(code.getComponentWithName(function).hasType((byte) VM_TYPE_FUNCTION));
+		int lineIndex = 0;		
+		CodeComponent codeComponent = code.getComponent(lineIndex++);
+		assertEquals(codeComponent.getName(), "var");
+		assertEquals(codeComponent.getType(), TYPE_INT);
+		assertEquals(codeComponent.getByteCodeName(), (byte) 1);
+		assertEquals(codeComponent.getByteCodeType(), (byte) VM_TYPE_INT);
 		
-		String function = "TestPlain";
-		assert(code.hasComponent(function, KEYWORD_FUNCTION));
-		assert(code.getComponentWithName(function).hasName((byte) 1));
-		assert(code.getComponentWithName(function).hasType((byte) VM_TYPE_FUNCTION));
+		codeComponent = code.getComponent(lineIndex++);
+		assertEquals(codeComponent.getName(), "TestPlain");
+		assertEquals(codeComponent.getType(), KEYWORD_FUNCTION);
+		assertEquals(codeComponent.getByteCodeName(), (byte) 1);
+		assertEquals(codeComponent.getByteCodeType(), (byte) VM_TYPE_FUNCTION);
+		
+		int instructionIndex = 0;
+		CodeComponent instructionComponent = codeComponent.getComponent(instructionIndex++);
+		assertEquals(instructionComponent.getName(), "TestPlain");
+		assertEquals(instructionComponent.getType(), KEYWORD_FUNCTION);
+		assertEquals(instructionComponent.getByteCodeName(), (byte) 1);
+		assertEquals(instructionComponent.getByteCodeType(), (byte) VM_TYPE_FUNCTION);
+		
+		codeComponent = code.getComponent(lineIndex++);
+		assertEquals(codeComponent.getName(), KEYWORD_FUNCTION_END);
+		assertEquals(codeComponent.getType(), KEYWORD_FUNCTION_END);
+		assertEquals(codeComponent.getByteCodeName(), (byte) 0);
+		assertEquals(codeComponent.getByteCodeType(), (byte) 0);
 	}
 	
 	@Test
