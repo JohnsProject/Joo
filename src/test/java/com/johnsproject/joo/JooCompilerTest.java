@@ -164,6 +164,7 @@ public class JooCompilerTest {
 		assertEquals(jooLines[line++], "" + function + JooVirtualMachine.KEYWORD_PARAMETER + int0 + JooVirtualMachine.KEYWORD_PARAMETER + intArray);
 		assertEquals(jooLines[line++], "" + libraryFunction + JooVirtualMachine.KEYWORD_PARAMETER + intArray);
 		assertEquals(jooLines[line++], "" + directoryLibraryFunction + JooVirtualMachine.KEYWORD_PARAMETER + intArray);		
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION_CALL + (char)2 + JooVirtualMachine.KEYWORD_PARAMETER + char0);		
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION + function);
 		assertEquals(jooLines[line++], "" + fixed1 + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("" + Math.round(25f * 255)));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + fixed1 + JooVirtualMachine.COMPARATOR_SMALLER_EQUALS + toBytecodeNumber("" + Math.round(80f * 255)));
@@ -816,6 +817,11 @@ public class JooCompilerTest {
 		assertEquals(currentInstruction.isFunctionCall(), true);
 		assertEquals(currentInstruction.getFunctionName(), "DirectoryLibrary_Function");
 		assertEquals(currentInstruction.getParameters().get(0), "intArray");
+		
+		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
+		assertEquals(currentInstruction.isFunctionCall(), true);
+		assertEquals(currentInstruction.getFunctionName(), "Serial_Write");
+		assertEquals(currentInstruction.getParameters().get(0), "char0");
 		
 		currentInstructionIndex = 0;
 		

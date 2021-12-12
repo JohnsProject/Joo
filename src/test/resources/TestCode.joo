@@ -147,6 +147,9 @@ function Start
 
 	bool:15 boolArray
 	char:13 charArray
+	
+	call Serial_Write char0
+	
 endFunction
 
 function Function int _param0 int: _param1

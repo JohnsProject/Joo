@@ -50,7 +50,7 @@ public class JooVirtualMachineTest {
 		assertEquals(jooVM.getComponents()[boolArrayIndex + 0], 15);
 		assertEquals(jooVM.getComponents()[charArrayIndex + 0], 30);
 		assertEquals(jooVM.getComponents()[functionIndex + 0], 75);
-		assertEquals(jooVM.getComponents()[functionIndex + 1], 530);
+		assertEquals(jooVM.getComponents()[functionIndex + 1], 535);
 	}
 	
 	@Test

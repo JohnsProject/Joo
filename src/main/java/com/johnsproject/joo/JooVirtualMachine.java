@@ -72,8 +72,8 @@ public class JooVirtualMachine {
 	public static final char OPERATOR_BITWISE_NOT = 18 + OPERATORS_START;
 	public static final char OPERATOR_BITSHIFT_LEFT = 19 + OPERATORS_START;
 	public static final char OPERATOR_BITSHIFT_RIGHT = 20 + OPERATORS_START;
-	
-	public static final char FUNCTION_PRINT = 0 + NATIVE_FUNCTIONS_START;
+
+	public static final char FUNCTION_SERIAL_WRITE = 1 + NATIVE_FUNCTIONS_START;
 
 	private int codeSize = 0;
 	private byte[] componentIndexes = new byte[9];
@@ -537,8 +537,8 @@ public class JooVirtualMachine {
 	
 	void callNativeFunction(char functionIndex) {
 		switch (functionIndex) {
-		case FUNCTION_PRINT:
-			
+		case FUNCTION_SERIAL_WRITE:
+			System.out.println(components[parameters[0]]);
 			break;
 		}
 	}

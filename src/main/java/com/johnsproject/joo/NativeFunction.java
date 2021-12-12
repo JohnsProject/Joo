@@ -6,15 +6,21 @@ import java.util.List;
 public class NativeFunction {
 	
 	private String name;
+	private final char byteCodeName;
 	private List<Parameter> parameters;
 	
-	public NativeFunction(String name) {
+	public NativeFunction(String name, char byteCodeName) {
 		this.name = name;
+		this.byteCodeName = byteCodeName;
 		parameters = new ArrayList<>();
 	}
 
 	public String getName() {
 		return name;
+	}
+	
+	public char getByteCodeName() {
+		return byteCodeName;
 	}
 	
 	public int getParameterCount() {

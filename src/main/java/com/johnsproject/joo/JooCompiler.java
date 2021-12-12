@@ -2,6 +2,7 @@ package com.johnsproject.joo;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,6 @@ public class JooCompiler {
 	public static final String CODE_ENDING = ".joo";
 	public static final String BYTECODE_ENDING = ".cjoo";
 	public static final String STANDART_LIBRARY = "StandartLibrary.joo";
-	public static final String PATH_COMPILER_CONFIG = "JooCompilerConfig.jcc";
 	
 	public static final char[] VM_TYPES = new char[] {
 			JooVirtualMachine.TYPE_INT,
@@ -85,7 +85,7 @@ public class JooCompiler {
 	
 	private char name;
 	private List<Operator> operators;
-	private List<NativeFunction> nativeFunctions;
+	private Map<String, NativeFunction> nativeFunctions;
 	private Map<String, Variable>[] variables;
 	private Map<String, Function> functions;
 	
@@ -131,7 +131,7 @@ public class JooCompiler {
 	public String compile(final String path) {
 		name = JooVirtualMachine.COMPONENTS_START;
 		operators = new ArrayList<>();
-		nativeFunctions = new ArrayList<>();
+		nativeFunctions = new LinkedHashMap<String, NativeFunction>();
 		variables = new Map[VM_TYPES.length];
 		functions = new LinkedHashMap<String, Function>();
 		String directoryPath = getDirectoryPath(path);
@@ -219,7 +219,7 @@ public class JooCompiler {
 				code = code.replace(codeLines[i], "");
 			}
 			if(codeLine[0].equals(KEYWORD_NATIVE_FUNCTION)) {
-				nativeFunctions.add(parseNativeFunction(codeLine));
+				nativeFunctions.put(codeLine[1], parseNativeFunction(codeLine));
 				code = code.replace(codeLines[i], "");
 			}
 		}
@@ -236,7 +236,7 @@ public class JooCompiler {
 	}
 	
 	private NativeFunction parseNativeFunction(String[] codeLine) {
-		NativeFunction nativeFunction = new NativeFunction(codeLine[1]);
+		NativeFunction nativeFunction = new NativeFunction(codeLine[1], (char) (nativeFunctions.size() + JooVirtualMachine.NATIVE_FUNCTIONS_START));
 		for (int i = 2; i < codeLine.length; i++) {
 			parseParameter(codeLine[i], i - 2, nativeFunction);
 		}
@@ -544,26 +544,38 @@ public class JooCompiler {
 			}
 			// Has the function call parameters?
 			if(codeLine.length > 2) {
-				parseFunctionCallParameters(lineIndex, codeLine, instruction, calledFunctionParams);
+				parseFunctionCallParameters(lineIndex, codeLine, instruction, calledFunctionParams.values());
+			}
+		} else if (nativeFunctions.containsKey(functionName)) {
+			final NativeFunction calledFunction = nativeFunctions.get(functionName);
+			instruction.setFunctionName(functionName);
+			if(calledFunction.getParameterCount() != codeLine.length - 2) {
+				System.err.println("Error, Line : " + lineIndex + ", Message : Function call parameters not equal to function parameters, Name : " + functionName);				
+			}
+			// Has the function call parameters?
+			if(codeLine.length > 2) {
+				parseFunctionCallParameters(lineIndex, codeLine, instruction, null);
 			}
 		} else {
 			System.err.println("Error, Line : " + lineIndex + ", Message : Unknown function call, Name : " + functionName);
 		}
 	}
 	
-	private void parseFunctionCallParameters(final int lineIndex, final String[] codeLine, Instruction instruction, final Map<String, String> calledFunctionParams) {
+	private void parseFunctionCallParameters(final int lineIndex, final String[] codeLine, Instruction instruction, final Collection<String> calledFunctionParamTypes) {
 		for (int i = 2; i < codeLine.length; i++) {
 			// parsing in case of array with index as parameter will be done later
 			final String variableName = codeLine[i];
 			instruction.addParameter(variableName);
 		}
-		int paramIndex = 0;
-		final List<String> instructionParams = instruction.getParameters();
-		for (String paramType : calledFunctionParams.values()) {
-			final String instructionParamName = instructionParams.get(paramIndex++);
-			final int typeIndex = getTypeIndex(paramType);
-			if(!variables[typeIndex].containsKey(instructionParamName)) {
-				System.err.println("Error, Line : " + lineIndex + ", Message : Function call parameter not equal to function parameter type, ParameterName : " + instructionParamName);					
+		if(calledFunctionParamTypes != null) { // TODO type checking for native functions
+			int paramIndex = 0;
+			final List<String> instructionParams = instruction.getParameters();
+			for (String paramType : calledFunctionParamTypes) {
+				final String instructionParamName = instructionParams.get(paramIndex++);
+				final int typeIndex = getTypeIndex(paramType);
+				if(!variables[typeIndex].containsKey(instructionParamName)) {
+					System.err.println("Error, Line : " + lineIndex + ", Message : Function call parameter not equal to function parameter type, ParameterName : " + instructionParamName);					
+				}
 			}
 		}
 	}
@@ -824,12 +836,8 @@ public class JooCompiler {
 				else if(instruction.isFunctionCall()) {
 					if(functions.containsKey(instruction.getFunctionName())) {
 						code += "" + functions.get(instruction.getFunctionName()).getByteCodeName();
-					} else {
-						for (int i = 0; i < nativeFunctions.size(); i++) {
-							if(nativeFunctions.get(i).getName().equals(instruction.getFunctionName())) {
-								code += "" + JooVirtualMachine.KEYWORD_FUNCTION_CALL + (char)(i + JooVirtualMachine.NATIVE_FUNCTIONS_START);
-							}
-						}
+					} else if(nativeFunctions.containsKey(instruction.getFunctionName())) {
+						code += "" + JooVirtualMachine.KEYWORD_FUNCTION_CALL + nativeFunctions.get(instruction.getFunctionName()).getByteCodeName();
 					}
 				} else {
 					code = writeBinaryOperation(code, function.getParameters().keySet(), instruction);
