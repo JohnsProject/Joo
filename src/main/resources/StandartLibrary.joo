@@ -1,0 +1,44 @@
+# This is a standart library used of the joo programming language
+
+operator <= int|fixed
+operator >= int|fixed
+operator < int|fixed
+operator > int|fixed
+operator == int|fixed|bool|char
+operator != int|fixed|bool|char
+operator = int|fixed|bool|char
+operator =+ int|fixed|bool
+operator =- int|fixed|bool
+operator =! int|fixed|bool
+operator + int|fixed
+operator - int|fixed
+operator * int|fixed
+operator / int|fixed
+operator % int
+operator & int
+operator ^ int
+operator | int
+operator ~ int
+operator << int
+operator >> int
+
+# Standart Serial Library
+native Serial_HasOutputSupport bool
+native Serial_Write char
+native Serial_WriteText
+native Serial_HasInputSupport bool
+native Serial_HasInput bool
+native Serial_Read char
+native Serial_ReadText
+
+# Standard Math Library
+native Math_Max int|fixed int|fixed int|fixed
+native Math_Min int|fixed int|fixed int|fixed
+native Math_Pow int|fixed int|fixed
+native Math_Sqrt int|fixed
+native Math_Sin fixed
+native Math_Cos fixed
+native Math_Tan fixed
+native Math_Random fixed
+native Math_Degrees fixed
+native Math_Radians fixed

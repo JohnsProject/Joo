@@ -1,5 +1,6 @@
 # This is a example code used to test the joo programming language
 
+include StandartLibrary.joo
 include TestLibrary.joo
 include TestLibraries/TestDirectoryLibrary.joo
 

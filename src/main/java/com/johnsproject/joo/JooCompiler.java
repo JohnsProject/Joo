@@ -2,8 +2,6 @@ package com.johnsproject.joo;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +18,7 @@ public class JooCompiler {
 	// Standart native library
 	// specification
 	// change to a license that needs to buy a license in case of commercial use
-	// add make types extencible like operators
-	// joo is a game development programming language
+	// add make types extensible like operators
 
 	public static final String KEYWORD_INCLUDE = "include";
 	/*
@@ -50,9 +47,11 @@ public class JooCompiler {
 	public static final String KEYWORD_ARRAY = ":";
 	public static final String KEYWORD_CHAR = "'";
 	public static final String KEYWORD_VARIABLE_ASSIGN = "=";
-	// used in joo compiler config only
 	public static final String KEYWORD_TYPE_SEPARATOR = "|";
 
+	public static final String KEYWORD_OPERATOR = "operator";
+	public static final String KEYWORD_NATIVE_FUNCTION = "native";
+	
 	public static final String TYPE_PARAMETER = "parameter";
 	public static final String TYPE_FUNCTION = "function";
 	public static final String TYPE_INT = "int";
@@ -70,6 +69,7 @@ public class JooCompiler {
 
 	public static final String CODE_ENDING = ".joo";
 	public static final String BYTECODE_ENDING = ".cjoo";
+	public static final String STANDART_LIBRARY = "StandartLibrary.joo";
 	public static final String PATH_COMPILER_CONFIG = "JooCompilerConfig.jcc";
 	
 	public static final char[] VM_TYPES = new char[] {
@@ -135,11 +135,11 @@ public class JooCompiler {
 		variables = new Map[VM_TYPES.length];
 		functions = new LinkedHashMap<String, Function>();
 		String directoryPath = getDirectoryPath(path);
-		parseConfig(directoryPath);
 		// remove all tabs they are not needed at all
 		String code = FileUtil.read(path).replaceAll("\t", "");
 		code = includeIncludes(directoryPath, code);
 		code = replaceDefines(code);
+		code = parseConfig(code);
 		final String[] codeLines = getLines(code);		
 		parseVariables(codeLines);
 		parseFunctions(codeLines);
@@ -207,54 +207,38 @@ public class JooCompiler {
 		return code;
 	}
 	
-	void parseConfig(String directoryPath) {
-		directoryPath += PATH_COMPILER_CONFIG;
-		final String config;
-		if(FileUtil.fileExists(directoryPath)) {
-			config = FileUtil.read(directoryPath);
-		} else {
-			config = FileUtil.read(PATH_COMPILER_CONFIG);
-		}
-		final String[] configLines = getLines(config);
-		int currentType = -1;
-		for (int i = 0; i < configLines.length; i++) {
-			String line = configLines[i];
-			if(line.isEmpty() || line.contains(KEYWORD_COMMENT)) {
+	String parseConfig(String code) {
+		final String[] codeLines = getLines(code);
+		for (int i = 0; i < codeLines.length; i++) {
+			if(isNotCodeLine(codeLines[i])) {
 				continue;
 			}
-			else if(line.equals("@OPERATORS")) {
-				currentType = 0;
+			final String[] codeLine = splitCodeLine(codeLines[i]);
+			if(codeLine[0].equals(KEYWORD_OPERATOR)) {
+				operators.add(parseOperator(codeLine));
+				code = code.replace(codeLines[i], "");
 			}
-			else if(line.equals("@FUNCTIONS")) {
-				currentType = 1;
-			} else {
-				switch (currentType) {
-				case 0:				
-					operators.add(parseOperator(line));		
-					break;
-				case 1:
-					nativeFunctions.add(parseNativeFunction(line));
-					break;
-				}
+			if(codeLine[0].equals(KEYWORD_NATIVE_FUNCTION)) {
+				nativeFunctions.add(parseNativeFunction(codeLine));
+				code = code.replace(codeLines[i], "");
 			}
 		}
+		return code;
 	}
 	
-	private Operator parseOperator(String line) {
-		String[] operatorData = line.split(" ");
-		String[] operatorTypes = operatorData[1].split(Pattern.quote(KEYWORD_TYPE_SEPARATOR));
-		Operator operator = new Operator(operatorData[0]);
+	private Operator parseOperator(String[] codeLine) {
+		String[] operatorTypes = codeLine[2].split(Pattern.quote(KEYWORD_TYPE_SEPARATOR));
+		Operator operator = new Operator(codeLine[1]);
 		for (int i = 1; i < operatorTypes.length; i++) {
 			operator.addSupportedType(operatorTypes[i]);
 		}
 		return operator;
 	}
 	
-	private NativeFunction parseNativeFunction(String line) {
-		String[] nativeFunctionData = line.split(" ");
-		NativeFunction nativeFunction = new NativeFunction(nativeFunctionData[0]);
-		for (int i = 1; i < nativeFunctionData.length; i++) {
-			parseParameter(nativeFunctionData[i], i - 1, nativeFunction);
+	private NativeFunction parseNativeFunction(String[] codeLine) {
+		NativeFunction nativeFunction = new NativeFunction(codeLine[1]);
+		for (int i = 2; i < codeLine.length; i++) {
+			parseParameter(codeLine[i], i - 2, nativeFunction);
 		}
 		return nativeFunction;
 	}
