@@ -1,11 +1,13 @@
 ![Screenshot](Joo.PNG "Logo")
 
-Joo is a programming language and computing platform that is designed to run on machines
-with extremely low resources like microcontrollers.
+Joo is a programming language created to run on machines with extremely low resources like microcontrollers.
 
-## The Joo language
-is a clean, fast, static typed, general purpose language. It's primarily thought to be
-compiled to joo bytecode and run by the joo virtual machine.
+## The Joo programming language
+Is a clean, fast, static typed, general purpose language. 
+
+It's primarily thought to be compiled to joo bytecode and executed by the virtual machine.
+
+## The joo byte code language
 
 ## The Joo virtual machine
 is a virtual computer that can be programmed using the joo bytecode. It's designed to

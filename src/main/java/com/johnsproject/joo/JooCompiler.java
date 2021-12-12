@@ -3,6 +3,7 @@ package com.johnsproject.joo;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +67,9 @@ public class JooCompiler {
 	public static final String LINE_BREAK = "\n";
 	
 	public static final int FIXED_POINT = 255;
-	
+
+	public static final String CODE_ENDING = ".joo";
+	public static final String BYTECODE_ENDING = ".cjoo";
 	public static final String PATH_COMPILER_CONFIG = "JooCompilerConfig.jcc";
 	
 	public static final char[] VM_TYPES = new char[] {
@@ -88,6 +91,25 @@ public class JooCompiler {
 	
 	public JooCompiler() {
 		name = JooVirtualMachine.COMPONENTS_START;
+	}
+	
+	public int getComponentMemoryUsage() {
+		int componentMemory = 0;
+		for (int i = 0; i < variables.length; i++) {
+			componentMemory += variables[i].size();
+		}
+		componentMemory += functions.size();
+		return componentMemory;
+	}
+	
+	public int getArrayMemoryUsage() {
+		int arrayMemory = 0;
+		for (int i = 4; i < variables.length; i++) {
+			for (Variable variable : variables[i].values()) {
+				arrayMemory += Integer.parseInt(variable.getValue());
+			}
+		}
+		return arrayMemory;
 	}
 
 	public Map<String, Variable>[] getVariables() {
@@ -774,17 +796,15 @@ public class JooCompiler {
 	 */
 	String writeVariablesAndFunctions(String code) {
 		for (int i = 0; i < variables.length; i++) {
-			if(variables[i].size() > 0) {
-				code += "" + VM_TYPES[i] + (char)variables[i].size() + JooVirtualMachine.LINE_BREAK;
-				for (Variable variable : variables[i].values()) {
-					String value = variable.getValue();
-					if(i < 3) { // if value is number
-						value = toVirtualMachineNumber(value);
-					} else if(i > 3) { // if value is array index
-						value = "" + (char)Integer.parseInt(value);
-					}
-					code += "" + variable.getByteCodeName() + value + JooVirtualMachine.LINE_BREAK;
+			code += "" + VM_TYPES[i] + (char)variables[i].size() + JooVirtualMachine.LINE_BREAK;
+			for (Variable variable : variables[i].values()) {
+				String value = variable.getValue();
+				if(i < 3) { // if value is number
+					value = toVirtualMachineNumber(value);
+				} else if(i > 3) { // if value is array index
+					value = "" + (char)Integer.parseInt(value);
 				}
+				code += "" + variable.getByteCodeName() + value + JooVirtualMachine.LINE_BREAK;
 			}
 		}
 		if(functions.size() > 0) {

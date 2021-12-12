@@ -1,7 +1,6 @@
 package com.johnsproject.joo;
 
 import com.johnsproject.joo.util.FileUtil;
-
 import static com.johnsproject.joo.JooVirtualMachine.*;
 
 public class JooConsoleApp {
@@ -64,43 +63,35 @@ public class JooConsoleApp {
 	
 	public static JooVirtualMachine runCode(String path, boolean startThread) {
 		String compiledCode = "";
-//		if(path.contains(JooCompiler.CODE_ENDING)) {
-//			compiledCode = compileCode(path).getBytecode();
-//		} else if(path.contains(JooCompiler.BYTECODE_ENDING)) {
-//			compiledCode = FileUtil.read(path);
-//		}
-//		System.out.print("Starting vm... ");
-//		final JooVirtualMachine jooVM = new JooVirtualMachine();
-//		final char[] jooCode = compiledCode.toCharArray();
-//		final char[] vmCode = jooVM.getCode();
-//		jooVM.setJooCodeSize((short) jooCode.length);
-//		for (int i = 0; i < jooCode.length; i++) {
-//			vmCode[i] = jooCode[i];
-//		}
-//		System.out.println("succesfully started!");
-//		jooVM.initialize();
-//		if(startThread) {
-//			new Thread(new Runnable() {
-//				@Override
-//				public void run() {
-//					jooVM.start();
-//				}
-//			}).start();
-//		}
-//		return jooVM;
-		return new JooVirtualMachine();
+		if(path.contains(JooCompiler.CODE_ENDING)) {
+			compiledCode = new JooCompiler().compile(path);
+		} else if(path.contains(JooCompiler.BYTECODE_ENDING)) {
+			compiledCode = FileUtil.read(path);
+		}
+		System.out.print("Starting vm... ");
+		final JooVirtualMachine jooVM = new JooVirtualMachine();
+		jooVM.initialize(compiledCode.toCharArray());
+		if(startThread) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					jooVM.start();
+					System.out.println("succesfully executed!");
+				}
+			}).start();
+		}
+		return jooVM;
 	}
 	
 	public static JooCompiler compileCode(String path) {
 		final JooCompiler compiler = new JooCompiler();
-//		System.out.print("Compiling code... ");
-//		final String compiledCode = compiler.compileProject(path);
-//		System.out.println("succesfully compiled!");
-//		System.out.println("Variables:\t" + compiler.getVariableCount() + " / " + (VARIABLES_END - VARIABLES_START));
-//		System.out.println("Functions:\t" + compiler.getFunctionCount() + " / " + (FUNCTIONS_END - FUNCTIONS_START));
-//		System.out.println("Arrays:\t\t" + compiler.getArrayCount() + " / " + (ARRAYS_END - ARRAYS_START));
-//		System.out.println("Arrays size:\t" + compiler.getArraysSize() + " / 100");
-//		System.out.println("Code size:\t" + compiledCode.length() + " / 1024 bytes");
+		System.out.print("Compiling code... " + path);
+		final String compiledCode = compiler.compile(path);
+		FileUtil.write(path.replace(JooCompiler.CODE_ENDING, JooCompiler.BYTECODE_ENDING), compiledCode);
+		System.out.println(" succesfully compiled!");
+		System.out.println("Byte code size: " + compiledCode.length() + " / 1024 bytes");
+		System.out.println("Variable and function count: " + compiler.getComponentMemoryUsage() + " / " + (COMPONENTS_END - COMPONENTS_START));
+		System.out.println("Array memory usage: " + compiler.getArrayMemoryUsage() + " / " + (108));
 		return compiler;
 	}
 }

@@ -34,13 +34,18 @@ public class JooVirtualMachine {
 	public static final char NUMBER_1 = 92;
 	public static final char NUMBER_0 = 91;
 	
-	public static final byte PARAMETERS_START = 66;
 	public static final byte COMPONENTS_START = 1;
 	public static final byte COMPONENTS_END = 65;
-	public static final byte ARRAY_INDEXES_START = 72;
+	public static final byte PARAMETERS_START = 66;
+	public static final byte PARAMETERS_END = 72;
+	public static final byte ARRAY_INDEXES_START = 73;
+	public static final byte ARRAY_INDEXES_END = 127;
 	public static final byte TYPES_START = 119;
+	public static final byte TYPES_END = 127;
 	public static final byte OPERATORS_START = 1;
+	public static final byte OPERATORS_END = 127;
 	public static final byte NATIVE_FUNCTIONS_START = 1;
+	public static final byte NATIVE_FUNCTIONS_END = 127;
 	
 	public static final char FIXED_POINT = 8;	
 
@@ -72,11 +77,14 @@ public class JooVirtualMachine {
 
 	private int codeSize = 0;
 	private byte[] componentIndexes = new byte[9];
-	private int[] components = new int[64];
-	// could be 126 but 54 * 2 = 108 so exactly 2 array with max length can be created
-	private int[] arrays = new int[108];
-	private int[] parameters = new int[6];
+	private int[] components = new int[COMPONENTS_END - COMPONENTS_START];
+	/* The array memory can have up to int.maxValue length. 
+	 * The default lenght is for compatibility with the arduino */
+	private int[] arrays = new int[(ARRAY_INDEXES_END - ARRAY_INDEXES_START) * 2];
+	private int[] parameters = new int[PARAMETERS_END - PARAMETERS_START];
 	private boolean[] ifs = new boolean[6];
+	/* The code can have up to int.maxValue length. 
+	 * The default lenght is for compatibility with the arduino */
 	private char[] code = new char[1024];
 	
 	// getters used by unit tests
@@ -136,7 +144,7 @@ public class JooVirtualMachine {
 	}	
 	
 	boolean parseTypeDeclaration(int codeIndex) {
-		for (int j = TYPE_INT; j >= TYPES_START; j--) {
+		for (int j = TYPES_END; j >= TYPES_START; j--) {
 			if(code[codeIndex] == j) {
 				int typeIndex = j - TYPES_START;
 				byte typeCount = (byte) code[codeIndex + 1];
