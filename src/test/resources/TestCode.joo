@@ -1,5 +1,11 @@
 # This is a example code used to test the joo programming language
 
+##
+This is a 
+multi-line 
+comment
+##
+
 include StandartLibrary.joo
 include TestLibrary.joo
 include TestLibraries/TestDirectoryLibrary.joo
@@ -9,7 +15,7 @@ constant TEST_FIXED_CONSTANT = 25.25
 constant TEST_BOOL_CONSTANT = true
 constant TEST_CHAR_CONSTANT = 'd'
 
-int int0
+int int0 # this is a also a valid comment, no code behind this works
 int int1 = 10
 
 fixed fixed0

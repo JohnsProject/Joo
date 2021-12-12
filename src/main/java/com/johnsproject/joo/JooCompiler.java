@@ -84,6 +84,7 @@ public class JooCompiler {
 	};
 	
 	private char name;
+	private boolean isInMultiLineComment;
 	private List<Operator> operators;
 	private Map<String, NativeFunction> nativeFunctions;
 	private Map<String, Variable>[] variables;
@@ -130,6 +131,7 @@ public class JooCompiler {
 	@SuppressWarnings("unchecked")
 	public String compile(final String path) {
 		name = JooVirtualMachine.COMPONENTS_START;
+		isInMultiLineComment = false;
 		operators = new ArrayList<>();
 		nativeFunctions = new LinkedHashMap<String, NativeFunction>();
 		variables = new Map[VM_TYPES.length];
@@ -715,7 +717,10 @@ public class JooCompiler {
 	 * @param line
 	 * @return A string array with the components of the code line.
 	 */
-	String[] splitCodeLine(final String line) {
+	String[] splitCodeLine(String line) {
+		if(line.contains(KEYWORD_COMMENT))
+			line = line.substring(0, line.indexOf(KEYWORD_COMMENT) - 1);
+			
 		final String[] rawCodeLine = line.split(" ");
 		int arraySize = 0;
 		for (int i = 0; i < rawCodeLine.length; i++) {
@@ -776,8 +781,11 @@ public class JooCompiler {
 		}
 	}
 	
-	private boolean isNotCodeLine(final String codeLine) {
-		return codeLine.isEmpty() || codeLine.contains(KEYWORD_COMMENT);
+	private boolean isNotCodeLine(final String codeLine) {		
+		if(codeLine.contains(KEYWORD_COMMENT + KEYWORD_COMMENT))
+			isInMultiLineComment = !isInMultiLineComment;
+		
+		return codeLine.isEmpty() || (codeLine.indexOf(KEYWORD_COMMENT) == 0) || isInMultiLineComment;
 	}
 	
 	/**
