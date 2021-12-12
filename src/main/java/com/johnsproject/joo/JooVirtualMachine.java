@@ -49,32 +49,6 @@ public class JooVirtualMachine {
 	
 	public static final char FIXED_POINT = 8;	
 
-	// operators need to be in the same order as in JooCompilerConfig.jcc
-	public static final char COMPARATOR_SMALLER_EQUALS = 0 + OPERATORS_START;
-	public static final char COMPARATOR_BIGGER_EQUALS = 1 + OPERATORS_START;
-	public static final char COMPARATOR_SMALLER = 2 + OPERATORS_START;
-	public static final char COMPARATOR_BIGGER = 3 + OPERATORS_START;
-	public static final char COMPARATOR_EQUALS = 4 + OPERATORS_START;
-	public static final char COMPARATOR_NOT_EQUALS = 5 + OPERATORS_START;
-
-	public static final char OPERATOR_ASSIGN = 6 + OPERATORS_START;
-	public static final char OPERATOR_ASSIGN_POSITIVE = 7 + OPERATORS_START;
-	public static final char OPERATOR_ASSIGN_NEGATIVE = 8 + OPERATORS_START;
-	public static final char OPERATOR_ASSIGN_INVERSE = 9 + OPERATORS_START;
-	public static final char OPERATOR_ADD = 10 + OPERATORS_START;
-	public static final char OPERATOR_SUBTRACT = 11 + OPERATORS_START;
-	public static final char OPERATOR_MULTIPLY = 12 + OPERATORS_START;
-	public static final char OPERATOR_DIVIDE = 13 + OPERATORS_START;
-	public static final char OPERATOR_REMAINDER = 14 + OPERATORS_START;
-	public static final char OPERATOR_BITWISE_AND = 15 + OPERATORS_START;
-	public static final char OPERATOR_BITWISE_XOR = 16 + OPERATORS_START;
-	public static final char OPERATOR_BITWISE_OR = 17 + OPERATORS_START;
-	public static final char OPERATOR_BITWISE_NOT = 18 + OPERATORS_START;
-	public static final char OPERATOR_BITSHIFT_LEFT = 19 + OPERATORS_START;
-	public static final char OPERATOR_BITSHIFT_RIGHT = 20 + OPERATORS_START;
-
-	public static final char FUNCTION_SERIAL_WRITE = 1 + NATIVE_FUNCTIONS_START;
-
 	private int codeSize = 0;
 	private byte[] componentIndexes = new byte[9];
 	private int[] components = new int[COMPONENTS_END - COMPONENTS_START];
@@ -438,6 +412,29 @@ public class JooVirtualMachine {
 		return 0;
 	}
 	
+	public static final char COMPARATOR_SMALLER_EQUALS = 0 + OPERATORS_START;
+	public static final char COMPARATOR_BIGGER_EQUALS = 1 + OPERATORS_START;
+	public static final char COMPARATOR_SMALLER = 2 + OPERATORS_START;
+	public static final char COMPARATOR_BIGGER = 3 + OPERATORS_START;
+	public static final char COMPARATOR_EQUALS = 4 + OPERATORS_START;
+	public static final char COMPARATOR_NOT_EQUALS = 5 + OPERATORS_START;
+
+	public static final char OPERATOR_ASSIGN = 6 + OPERATORS_START;
+	public static final char OPERATOR_ASSIGN_POSITIVE = 7 + OPERATORS_START;
+	public static final char OPERATOR_ASSIGN_NEGATIVE = 8 + OPERATORS_START;
+	public static final char OPERATOR_ASSIGN_INVERSE = 9 + OPERATORS_START;
+	public static final char OPERATOR_ADD = 10 + OPERATORS_START;
+	public static final char OPERATOR_SUBTRACT = 11 + OPERATORS_START;
+	public static final char OPERATOR_MULTIPLY = 12 + OPERATORS_START;
+	public static final char OPERATOR_DIVIDE = 13 + OPERATORS_START;
+	public static final char OPERATOR_REMAINDER = 14 + OPERATORS_START;
+	public static final char OPERATOR_BITWISE_AND = 15 + OPERATORS_START;
+	public static final char OPERATOR_BITWISE_XOR = 16 + OPERATORS_START;
+	public static final char OPERATOR_BITWISE_OR = 17 + OPERATORS_START;
+	public static final char OPERATOR_BITWISE_NOT = 18 + OPERATORS_START;
+	public static final char OPERATOR_BITSHIFT_LEFT = 19 + OPERATORS_START;
+	public static final char OPERATOR_BITSHIFT_RIGHT = 20 + OPERATORS_START;
+	
 	boolean interpretVariableOperation(int[] values, int variable0Index, char variable0Type, char operator, int variable1Value) {
 		switch (operator) {
 		case COMPARATOR_SMALLER_EQUALS:
@@ -534,10 +531,12 @@ public class JooVirtualMachine {
 		}
 		return false;
 	}
+
+	public static final char NATIVE_PRINT = 0 + NATIVE_FUNCTIONS_START;
 	
 	void callNativeFunction(char functionIndex) {
 		switch (functionIndex) {
-		case FUNCTION_SERIAL_WRITE:
+		case NATIVE_PRINT:
 			System.out.println(components[parameters[0]]);
 			break;
 		}

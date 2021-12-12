@@ -1,44 +1,25 @@
 # This is a standart library used of the joo programming language
 
-operator <= int|fixed
-operator >= int|fixed
-operator < int|fixed
-operator > int|fixed
-operator == int|fixed|bool|char
-operator != int|fixed|bool|char
-operator = int|fixed|bool|char
-operator =+ int|fixed|bool
-operator =- int|fixed|bool
-operator =! int|fixed|bool
-operator + int|fixed
-operator - int|fixed
-operator * int|fixed
-operator / int|fixed
-operator % int
-operator & int
-operator ^ int
-operator | int
-operator ~ int
-operator << int
-operator >> int
+operator <= int|fixed 				# smaller-equals comparator
+operator >= int|fixed 				# bigger-equals comparator
+operator < int|fixed 				# smaller comparator
+operator > int|fixed 				# bigger comparator
+operator == int|fixed|bool|char 	# equals comparator
+operator != int|fixed|bool|char 	# not equals comparator
+operator = int|fixed|bool|char 		# assign operator 
+operator =+ int|fixed|bool 			# positive assign operator
+operator =- int|fixed|bool 			# negative assign operator
+operator =! int|fixed|bool 			# invert assign operator
+operator + int|fixed 				# add operator
+operator - int|fixed 				# subtract operator
+operator * int|fixed 				# multiply operator
+operator / int|fixed 				# divide operator
+operator % int 						# modulus operator
+operator & int 						# bitwise AND operator
+operator ^ int 						# bitwise XOR operator
+operator | int 						# bitwise OR operator
+operator ~ int 						# bitwise NOT operator
+operator << int 					# bit shift left operator
+operator >> int 					# bit shift right operator
 
-# Standart Serial Library
-native Serial_HasOutputSupport bool
-native Serial_Write char
-native Serial_WriteText
-native Serial_HasInputSupport bool
-native Serial_HasInput bool
-native Serial_Read char
-native Serial_ReadText
-
-# Standard Math Library
-native Math_Max int|fixed int|fixed int|fixed
-native Math_Min int|fixed int|fixed int|fixed
-native Math_Pow int|fixed int|fixed
-native Math_Sqrt int|fixed
-native Math_Sin fixed
-native Math_Cos fixed
-native Math_Tan fixed
-native Math_Random fixed
-native Math_Degrees fixed
-native Math_Radians fixed
+native Print int|fixed|bool|char

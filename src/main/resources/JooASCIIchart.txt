@@ -1,9 +1,0 @@
-The joo byte code language uses numbers in the range 0 - 127 to represent the compiled code
-that can then be executed by the virtual machine.
-
-0 		 end of file
-1  - 65  variable and function names
-66 - 72  parameter names
-73 - 127 array indices
-91 - 127 numbers, keywords and types
-1 - 127 operators, native functions
