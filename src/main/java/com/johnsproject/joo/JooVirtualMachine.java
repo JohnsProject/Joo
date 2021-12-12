@@ -147,7 +147,7 @@ public class JooVirtualMachine {
 		for (int j = TYPES_END; j >= TYPES_START; j--) {
 			if(code[codeIndex] == j) {
 				int typeIndex = j - TYPES_START;
-				byte typeCount = (byte) code[codeIndex + 1];
+				byte typeCount = (byte) (code[codeIndex + 1] - COMPONENTS_START);
 				typeCount += componentIndexes[typeIndex];
 				// assign typeCount to typeIndex - 1 to make type count directly
 				// accessible through componentIndexes[TYPE_ - TYPES_START]

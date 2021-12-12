@@ -65,6 +65,7 @@ public class JooConsoleApp {
 		String compiledCode = "";
 		if(path.contains(JooCompiler.CODE_ENDING)) {
 			compiledCode = new JooCompiler().compile(path);
+			FileUtil.write(path.replace(JooCompiler.CODE_ENDING, JooCompiler.BYTECODE_ENDING), compiledCode);
 		} else if(path.contains(JooCompiler.BYTECODE_ENDING)) {
 			compiledCode = FileUtil.read(path);
 		}

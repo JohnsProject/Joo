@@ -792,7 +792,7 @@ public class JooCompiler {
 	 */
 	String writeVariablesAndFunctions(String code) {
 		for (int i = 0; i < variables.length; i++) {
-			code += "" + VM_TYPES[i] + (char)variables[i].size() + JooVirtualMachine.LINE_BREAK;
+			code += "" + VM_TYPES[i] + (char)(variables[i].size() + JooVirtualMachine.COMPONENTS_START) + JooVirtualMachine.LINE_BREAK;
 			for (Variable variable : variables[i].values()) {
 				String value = variable.getValue();
 				if(i < 3) { // if value is number
