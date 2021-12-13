@@ -274,15 +274,61 @@ Pretty smart isn't it? \*guy taping head meme\*
 ## The Joo virtual machine
 The language can be easily extended with `operator` and `native` function libraries. But their functionality needs to be implemented in the virtual machine.
 
-To create custom operators, first of all you need to declare them in code
+#### Custom operators
+
+To create a custom operator, first of all you need to declare it in joo code
 
 ```
 operator += int|fixed
-operator -= int|fixed
-operator *= int|fixed
 ```
 
-And then you need to implement it in the virtual machine. To do so go to the `interpretVariableOperation` method, declare the constant with the byte code name of your operator above it, and then add the case to the switch. The default vm already has the standart library's operators implemented, so you have base on how to do it. Note that the order of the declarations matter as they change the byte code name. In the example above the `+=` has the byte code name `0 + OPERATORS_START`, the `-=` = `1 + OPERATORS_START` and so on. If you've included the standart library you need to continue the byte code names of the standart library. 
+And then you need to implement it in the virtual machine 
 
-Same goes for the native functions.
+![Screenshot](images/CustomOperator.PNG "Custom operator")
 
+This will only work if you include the standart library as you're continuing the operator names of it, otherwise you need to write 
+
+```
+#define OPERATOR_MY_OPERATOR 0 + OPERATORS_START
+```
+
+Then just reupload the sketch or recompile the virtual machine and the operator can already be used in code.
+
+```
+include StandartLibrary.joo
+
+operator += int|fixed
+
+int myInt = 10
+
+function Start
+	myInt += 5
+endFunction
+```
+
+#### Custom native functions
+
+It's the same process as for the operator, declare it in joo code
+
+```
+native MyFunction int char
+```
+
+And the implement it in the virtual machine
+
+![Screenshot](images/CustomNative.PNG "Custom native")
+
+Then just reupload the sketch or recompile the virtual machine and the native function can already be used in code.
+
+```
+include StandartLibrary.joo
+
+native MyFunction int char
+
+int myInt
+char myChar = 'A'
+
+function Start
+	call MyFunction myInt myChar
+endFunction
+```
