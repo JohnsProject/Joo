@@ -24,7 +24,7 @@ public class JooVirtualMachineTest {
 		int charArrayIndex = jooVM.getComponentIndexes()[TYPE_ARRAY_CHAR - TYPES_START];
 		int functionIndex = jooVM.getComponentIndexes()[TYPE_FUNCTION - TYPES_START];
 		
-		assertEquals(jooVM.getCodeSize(), compiledJooCode.length());
+		assertEquals(jooVM.getCodeSize(), compiledJooCode.length() - 2);
 		assertEquals(intIndex, 0);
 		assertEquals(fixedIndex, 3);
 		assertEquals(boolIndex, 5);

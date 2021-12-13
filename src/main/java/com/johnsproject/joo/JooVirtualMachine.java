@@ -91,9 +91,11 @@ public class JooVirtualMachine {
 	}
 
 	public void initialize(final char[] newCode) {
-		codeSize = newCode.length;
+		codeSize = 0;
+		codeSize |= newCode[0] << 8;
+		codeSize |= newCode[1];
 		for (int i = 0; i < codeSize; i++) {
-			code[i] = newCode[i];
+			code[i] = newCode[i + 2];
 		}
 		int codeIndex = 0;
 		boolean functionFound = false;

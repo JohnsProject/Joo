@@ -516,13 +516,13 @@ void setup() {
 }
 
 void loop() {
-    if(Serial.available() > 0) {
+    if(Serial.available() > 2) {
       codeSize = 0;
-      int character = 0;
-      while(character != '\n') {
-        if(Serial.available() > 0){
-          character = Serial.read();
-          code[codeSize++] = (char)character;
+      codeSize |= Serial.read() >> 8;  
+      codeSize |= Serial.read();    
+      for(int i = 0; i < codeSize;) {
+        if(Serial.available() > 0) {
+          code[i++] = Serial.read();
         }
       }
       Serial.print(F("Executing code, size: "));

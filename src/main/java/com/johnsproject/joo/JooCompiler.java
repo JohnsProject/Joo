@@ -2,7 +2,6 @@ package com.johnsproject.joo;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -149,7 +148,14 @@ public class JooCompiler {
 		String compiledJooCode = "";
 		compiledJooCode = writeVariablesAndFunctions(compiledJooCode);
 		compiledJooCode = writeFunctionsAndInstructions(compiledJooCode);
-		return compiledJooCode;
+		return getCodeSize(compiledJooCode) + compiledJooCode;
+	}
+	
+	private String getCodeSize(String compiledJooCode) {
+		String size = "";
+		size += (char)((compiledJooCode.length() >> 8) & 255);
+		size += (char)(compiledJooCode.length() & 255);
+		return size;
 	}
 	
 	private String getDirectoryPath(String path) {

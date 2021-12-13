@@ -41,7 +41,8 @@ public class JooCompilerTest {
 		final char param1 = 1 + JooVirtualMachine.PARAMETERS_START;
 
 		int line = 0;
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.TYPE_INT + (char)4);
+		// the first 2 characters are the code size
+		assertEquals(jooLines[line++], "" + (char)2 + (char)111 + JooVirtualMachine.TYPE_INT + (char)4);
 		assertEquals(jooLines[line++], "" + int0);
 		assertEquals(jooLines[line++], "" + int1 + toBytecodeNumber("10"));
 		assertEquals(jooLines[line++], "" + correctIfs);
