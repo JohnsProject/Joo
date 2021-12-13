@@ -517,6 +517,7 @@ void setup() {
 
 void loop() {
     if(Serial.available() > 0) {
+      codeSize = 0;
       int character = 0;
       while(character != '\n') {
         if(Serial.available() > 0){
