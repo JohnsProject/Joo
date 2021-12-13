@@ -1,4 +1,4 @@
-![Screenshot](images/Joo.PNG "Logo")
+![Screenshot](images/Joo.png "Logo")
 
 Joo is a programming language created to run on machines with extremely low resources like microcontrollers.
 
