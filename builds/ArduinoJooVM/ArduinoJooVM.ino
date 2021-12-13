@@ -511,16 +511,20 @@
 
 void setup() {
   Serial.begin(9600);
+  Serial.println(F("Starting Joo VM... Hello World! XD"));  
+  Serial.println(F("Send me some delicious byte code and i'll execute it! :P"));
 }
 
 void loop() {
     if(Serial.available() > 0) {
-      String codeString = Serial.readString();
-      codeSize = codeString.length();
-      for (int i = 0; i < codeSize; i++) {
-        code[i] = codeString[i];
+      int character = 0;
+      while(character != '\n') {
+        if(Serial.available() > 0){
+          character = Serial.read();
+          code[codeSize++] = (char)character;
+        }
       }
-      Serial.print("Executing code, size: ");
+      Serial.print(F("Executing code, size: "));
       Serial.println(codeSize);
       initialize();
       start();

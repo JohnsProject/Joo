@@ -12,7 +12,6 @@ public class JooConsoleApp {
 	public static final String COMMAND_EXECUTE = "joo";
 	public static final String COMMAND_COMPILE = "-compile";
 	public static final String COMMAND_HELP = "-help";
-	public static final String COMMAND_DOCUMENTATION = "-doc";
 	public static final String COMMAND_CREATE = "-create";
 	
 	public static void main(String[] args) {
@@ -24,9 +23,6 @@ public class JooConsoleApp {
 					}
 					else if(args[1].equals(COMMAND_HELP)) {
 						showHelp();
-					}
-					else if(args[1].equals(COMMAND_DOCUMENTATION)) {
-						showDoc();
 					}
 					else if(args[1].equals(COMMAND_CREATE)) {
 						createTemplate(args[args.length - 1]);
@@ -47,11 +43,6 @@ public class JooConsoleApp {
 		System.out.println(fileContent);
 	}
 	
-	public static void showDoc() {
-		String fileContent = FileUtil.read(PATH_DOC);
-		System.out.println(fileContent);
-	}
-	
 	public static void createTemplate(String path) {
 		String fileContent = FileUtil.read(PATH_TEMPLATE);
 		FileUtil.write(path, fileContent);
@@ -69,7 +60,6 @@ public class JooConsoleApp {
 		} else if(path.contains(JooCompiler.BYTECODE_ENDING)) {
 			compiledCode = FileUtil.read(path);
 		}
-		System.out.print("Starting vm... ");
 		final JooVirtualMachine jooVM = new JooVirtualMachine();
 		jooVM.initialize(compiledCode.toCharArray());
 		if(startThread) {
@@ -77,7 +67,6 @@ public class JooConsoleApp {
 				@Override
 				public void run() {
 					jooVM.start();
-					System.out.println("succesfully executed!");
 				}
 			}).start();
 		}

@@ -2,6 +2,7 @@ package com.johnsproject.joo;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -719,23 +720,16 @@ public class JooCompiler {
 	 */
 	String[] splitCodeLine(String line) {
 		if(line.contains(KEYWORD_COMMENT))
-			line = line.substring(0, line.indexOf(KEYWORD_COMMENT) - 1);
+			line = line.substring(0, line.indexOf(KEYWORD_COMMENT));
 			
 		final String[] rawCodeLine = line.split(" ");
-		int arraySize = 0;
+		final List<String> codeLine = new ArrayList<>();
 		for (int i = 0; i < rawCodeLine.length; i++) {
 			if(!rawCodeLine[i].isEmpty()) {
-				arraySize++;
+				codeLine.add(rawCodeLine[i]);
 			}
 		}
-		String[] codeLine = new String[arraySize];
-		for (int i = 0, j = 0; i < rawCodeLine.length; i++) {
-			if(!rawCodeLine[i].isEmpty()) {
-				codeLine[j] = rawCodeLine[i];
-				j++;
-			}
-		}
-		return codeLine;
+		return codeLine.toArray(rawCodeLine);
 	}
 	
 	private boolean isNameUsed(final String name) {
