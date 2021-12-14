@@ -49,6 +49,16 @@ To start upload the ArduinoJooVM sketch at `builds/ArduinoJooVM/ArduinoJooVM.ino
 
 ![Screenshot](images/ArduinoSerial.PNG "ArduinoJooVM Executed")
 
+## Adding syntax highlight to Notepad++
+
+To make it easier to develop joo code i've created a custom syntax highlight for Notepad++. 
+
+1. Download the `src/main/resources/SyntaxHighlight/Notepadpp/SyntaxHighlight.xml` file.
+
+2. In Notepad++ go to `Language>User defined language>Define your language...>Import` and import the file.
+
+3. Select `Joo` as the file's languages.
+
 ## The Joo programming language
 Is a clean, fast, static typed, general purpose language. 
 
