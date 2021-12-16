@@ -67,125 +67,125 @@ public class JooCompilerTest {
 		assertEquals(jooLines[line++], "" + charArray + (char)13);
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.TYPE_FUNCTION + (char)4);
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION + start);
-		assertEquals(jooLines[line++], "" + int0 + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("100"));
-		assertEquals(jooLines[line++], "" + int0 + JooVirtualMachine.OPERATOR_SUBTRACT + int1);
-		assertEquals(jooLines[line++], "" + int0 + JooVirtualMachine.OPERATOR_MULTIPLY + toBytecodeNumber("2"));
-		assertEquals(jooLines[line++], "" + int0 + JooVirtualMachine.OPERATOR_DIVIDE + toBytecodeNumber("10"));
-		assertEquals(jooLines[line++], "" + int1 + JooVirtualMachine.OPERATOR_ASSIGN + toBytecodeNumber("6"));
-		assertEquals(jooLines[line++], "" + fixed0 + JooVirtualMachine.OPERATOR_ADD + fixed1);
-		assertEquals(jooLines[line++], "" + fixed0 + JooVirtualMachine.OPERATOR_SUBTRACT + toBytecodeNumber("" + Math.round(0.5f * 255)));
-		assertEquals(jooLines[line++], "" + fixed0 + JooVirtualMachine.OPERATOR_MULTIPLY + toBytecodeNumber("" + Math.round(2.5f * 255)));
-		assertEquals(jooLines[line++], "" + fixed0 + JooVirtualMachine.OPERATOR_DIVIDE + toBytecodeNumber("" + Math.round(5f * 255)));
-		assertEquals(jooLines[line++], "" + fixed1 + JooVirtualMachine.OPERATOR_ASSIGN + toBytecodeNumber("" + Math.round(50f * 255)));
-		assertEquals(jooLines[line++], "" + bool0 + JooVirtualMachine.OPERATOR_ASSIGN + toBytecodeNumber("1"));
-		assertEquals(jooLines[line++], "" + bool1 + JooVirtualMachine.OPERATOR_ASSIGN + toBytecodeNumber("0"));
-		assertEquals(jooLines[line++], "" + bool2 + JooVirtualMachine.OPERATOR_ASSIGN + bool1);
-		assertEquals(jooLines[line++], "" + char0 + JooVirtualMachine.OPERATOR_ASSIGN + JooVirtualMachine.TYPE_CHAR + 'A');
-		assertEquals(jooLines[line++], "" + char1 + JooVirtualMachine.OPERATOR_ASSIGN + JooVirtualMachine.TYPE_CHAR + 'B');
-		assertEquals(jooLines[line++], "" + char2 + JooVirtualMachine.OPERATOR_ASSIGN + char1);
-		assertEquals(jooLines[line++], "" + intArray + toIndex(0) + JooVirtualMachine.OPERATOR_ASSIGN + toBytecodeNumber("30"));
-		assertEquals(jooLines[line++], "" + intArray + toIndex(1) + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("15"));
-		assertEquals(jooLines[line++], "" + intArray + toIndex(0) + JooVirtualMachine.OPERATOR_SUBTRACT + int1);
-		assertEquals(jooLines[line++], "" + intArray + toIndex(1) + JooVirtualMachine.OPERATOR_DIVIDE + toBytecodeNumber("5"));
-		assertEquals(jooLines[line++], "" + intArray + toIndex(0) + JooVirtualMachine.OPERATOR_MULTIPLY + intArray + toIndex(1));
-		assertEquals(jooLines[line++], "" + intArray + toIndex(7) + JooVirtualMachine.OPERATOR_ASSIGN + toBytecodeNumber("25"));
-		assertEquals(jooLines[line++], "" + fixedArray + toIndex(0) + JooVirtualMachine.OPERATOR_ASSIGN + toBytecodeNumber("" + Math.round(60.5f * 255)));
-		assertEquals(jooLines[line++], "" + fixedArray + toIndex(1) + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("" + Math.round(15f * 255)));
-		assertEquals(jooLines[line++], "" + fixedArray + toIndex(0) + JooVirtualMachine.OPERATOR_SUBTRACT + fixed1);
-		assertEquals(jooLines[line++], "" + fixedArray + toIndex(1) + JooVirtualMachine.OPERATOR_DIVIDE + toBytecodeNumber("" + Math.round(5f * 255)));
-		assertEquals(jooLines[line++], "" + fixedArray + toIndex(0) + JooVirtualMachine.OPERATOR_MULTIPLY + fixedArray + toIndex(1));
-		assertEquals(jooLines[line++], "" + fixedArray + toIndex(2) + JooVirtualMachine.OPERATOR_ASSIGN_NEGATIVE + toBytecodeNumber("" + Math.round(10f * 255)));
-		assertEquals(jooLines[line++], "" + fixedArray + toIndex(3) + JooVirtualMachine.OPERATOR_ASSIGN_POSITIVE + fixedArray + toIndex(2));
-		assertEquals(jooLines[line++], "" + fixedArray + toIndex(4) + JooVirtualMachine.OPERATOR_ASSIGN_INVERSE + fixedArray + toIndex(3));
-		assertEquals(jooLines[line++], "" + fixedArray + toIndex(5) + JooVirtualMachine.OPERATOR_ASSIGN + toBytecodeNumber("" + Math.round(25.25f * 255)));
-		assertEquals(jooLines[line++], "" + boolArray + toIndex(9) + JooVirtualMachine.OPERATOR_ASSIGN + bool0);
-		assertEquals(jooLines[line++], "" + boolArray + toIndex(10) + JooVirtualMachine.OPERATOR_ASSIGN + toBytecodeNumber("1"));
-		assertEquals(jooLines[line++], "" + boolArray + toIndex(11) + JooVirtualMachine.OPERATOR_ASSIGN + boolArray + toIndex(10));
-		assertEquals(jooLines[line++], "" + boolArray + toIndex(2) + JooVirtualMachine.OPERATOR_ASSIGN_NEGATIVE + toBytecodeNumber("1"));	
-		assertEquals(jooLines[line++], "" + boolArray + toIndex(3) + JooVirtualMachine.OPERATOR_ASSIGN_POSITIVE + boolArray + toIndex(2));	
-		assertEquals(jooLines[line++], "" + boolArray + toIndex(4) + JooVirtualMachine.OPERATOR_ASSIGN_INVERSE + boolArray + toIndex(3));	
-		assertEquals(jooLines[line++], "" + boolArray + toIndex(5) + JooVirtualMachine.OPERATOR_ASSIGN + toBytecodeNumber("1"));
-		assertEquals(jooLines[line++], "" + charArray + toIndex(9) + JooVirtualMachine.OPERATOR_ASSIGN + char0);
-		assertEquals(jooLines[line++], "" + charArray + toIndex(10) + JooVirtualMachine.OPERATOR_ASSIGN + JooVirtualMachine.TYPE_CHAR + 'C');
-		assertEquals(jooLines[line++], "" + charArray + toIndex(11) + JooVirtualMachine.OPERATOR_ASSIGN + charArray + toIndex(10));
-		assertEquals(jooLines[line++], "" + charArray + toIndex(0) + JooVirtualMachine.OPERATOR_ASSIGN + JooVirtualMachine.TYPE_CHAR + 'd');
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + int0 + JooVirtualMachine.COMPARATOR_EQUALS + toBytecodeNumber("18"));
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("1"));
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + int1 + JooVirtualMachine.COMPARATOR_EQUALS + toBytecodeNumber("6"));
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("1"));
+		assertEquals(jooLines[line++], "" + int0 + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("100"));
+		assertEquals(jooLines[line++], "" + int0 + JooVirtualMachine.STANDART_OPERATOR_SUBTRACT + int1);
+		assertEquals(jooLines[line++], "" + int0 + JooVirtualMachine.STANDART_OPERATOR_MULTIPLY + toBytecodeNumber("2"));
+		assertEquals(jooLines[line++], "" + int0 + JooVirtualMachine.STANDART_OPERATOR_DIVIDE + toBytecodeNumber("10"));
+		assertEquals(jooLines[line++], "" + int1 + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + toBytecodeNumber("6"));
+		assertEquals(jooLines[line++], "" + fixed0 + JooVirtualMachine.STANDART_OPERATOR_ADD + fixed1);
+		assertEquals(jooLines[line++], "" + fixed0 + JooVirtualMachine.STANDART_OPERATOR_SUBTRACT + toBytecodeNumber("" + Math.round(0.5f * 255)));
+		assertEquals(jooLines[line++], "" + fixed0 + JooVirtualMachine.STANDART_OPERATOR_MULTIPLY + toBytecodeNumber("" + Math.round(2.5f * 255)));
+		assertEquals(jooLines[line++], "" + fixed0 + JooVirtualMachine.STANDART_OPERATOR_DIVIDE + toBytecodeNumber("" + Math.round(5f * 255)));
+		assertEquals(jooLines[line++], "" + fixed1 + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + toBytecodeNumber("" + Math.round(50f * 255)));
+		assertEquals(jooLines[line++], "" + bool0 + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + toBytecodeNumber("1"));
+		assertEquals(jooLines[line++], "" + bool1 + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + toBytecodeNumber("0"));
+		assertEquals(jooLines[line++], "" + bool2 + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + bool1);
+		assertEquals(jooLines[line++], "" + char0 + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + JooVirtualMachine.TYPE_CHAR + 'A');
+		assertEquals(jooLines[line++], "" + char1 + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + JooVirtualMachine.TYPE_CHAR + 'B');
+		assertEquals(jooLines[line++], "" + char2 + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + char1);
+		assertEquals(jooLines[line++], "" + intArray + toIndex(0) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + toBytecodeNumber("30"));
+		assertEquals(jooLines[line++], "" + intArray + toIndex(1) + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("15"));
+		assertEquals(jooLines[line++], "" + intArray + toIndex(0) + JooVirtualMachine.STANDART_OPERATOR_SUBTRACT + int1);
+		assertEquals(jooLines[line++], "" + intArray + toIndex(1) + JooVirtualMachine.STANDART_OPERATOR_DIVIDE + toBytecodeNumber("5"));
+		assertEquals(jooLines[line++], "" + intArray + toIndex(0) + JooVirtualMachine.STANDART_OPERATOR_MULTIPLY + intArray + toIndex(1));
+		assertEquals(jooLines[line++], "" + intArray + toIndex(7) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + toBytecodeNumber("25"));
+		assertEquals(jooLines[line++], "" + fixedArray + toIndex(0) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + toBytecodeNumber("" + Math.round(60.5f * 255)));
+		assertEquals(jooLines[line++], "" + fixedArray + toIndex(1) + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("" + Math.round(15f * 255)));
+		assertEquals(jooLines[line++], "" + fixedArray + toIndex(0) + JooVirtualMachine.STANDART_OPERATOR_SUBTRACT + fixed1);
+		assertEquals(jooLines[line++], "" + fixedArray + toIndex(1) + JooVirtualMachine.STANDART_OPERATOR_DIVIDE + toBytecodeNumber("" + Math.round(5f * 255)));
+		assertEquals(jooLines[line++], "" + fixedArray + toIndex(0) + JooVirtualMachine.STANDART_OPERATOR_MULTIPLY + fixedArray + toIndex(1));
+		assertEquals(jooLines[line++], "" + fixedArray + toIndex(2) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN_NEGATIVE + toBytecodeNumber("" + Math.round(10f * 255)));
+		assertEquals(jooLines[line++], "" + fixedArray + toIndex(3) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN_POSITIVE + fixedArray + toIndex(2));
+		assertEquals(jooLines[line++], "" + fixedArray + toIndex(4) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN_INVERSE + fixedArray + toIndex(3));
+		assertEquals(jooLines[line++], "" + fixedArray + toIndex(5) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + toBytecodeNumber("" + Math.round(25.25f * 255)));
+		assertEquals(jooLines[line++], "" + boolArray + toIndex(9) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + bool0);
+		assertEquals(jooLines[line++], "" + boolArray + toIndex(10) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + toBytecodeNumber("1"));
+		assertEquals(jooLines[line++], "" + boolArray + toIndex(11) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + boolArray + toIndex(10));
+		assertEquals(jooLines[line++], "" + boolArray + toIndex(2) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN_NEGATIVE + toBytecodeNumber("1"));	
+		assertEquals(jooLines[line++], "" + boolArray + toIndex(3) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN_POSITIVE + boolArray + toIndex(2));	
+		assertEquals(jooLines[line++], "" + boolArray + toIndex(4) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN_INVERSE + boolArray + toIndex(3));	
+		assertEquals(jooLines[line++], "" + boolArray + toIndex(5) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + toBytecodeNumber("1"));
+		assertEquals(jooLines[line++], "" + charArray + toIndex(9) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + char0);
+		assertEquals(jooLines[line++], "" + charArray + toIndex(10) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + JooVirtualMachine.TYPE_CHAR + 'C');
+		assertEquals(jooLines[line++], "" + charArray + toIndex(11) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + charArray + toIndex(10));
+		assertEquals(jooLines[line++], "" + charArray + toIndex(0) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + JooVirtualMachine.TYPE_CHAR + 'd');
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + int0 + JooVirtualMachine.STANDART_COMPARATOR_EQUALS + toBytecodeNumber("18"));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("1"));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + int1 + JooVirtualMachine.STANDART_COMPARATOR_EQUALS + toBytecodeNumber("6"));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("2"));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("1"));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("2"));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + bool0 + JooVirtualMachine.COMPARATOR_EQUALS + toBytecodeNumber("0"));
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("1"));
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE_IF + bool0 + JooVirtualMachine.COMPARATOR_EQUALS + toBytecodeNumber("1"));
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("2"));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + bool0 + JooVirtualMachine.STANDART_COMPARATOR_EQUALS + toBytecodeNumber("0"));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("1"));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE_IF + bool0 + JooVirtualMachine.STANDART_COMPARATOR_EQUALS + toBytecodeNumber("1"));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + int0 + JooVirtualMachine.COMPARATOR_NOT_EQUALS + int1);
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("1"));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + int0 + JooVirtualMachine.STANDART_COMPARATOR_NOT_EQUALS + int1);
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("2"));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
-		assertEquals(jooLines[line++], "" + intArray + toIndex(2) + JooVirtualMachine.OPERATOR_ASSIGN + toBytecodeNumber("100"));
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + int0 + JooVirtualMachine.COMPARATOR_SMALLER + intArray + toIndex(2));
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("1"));
+		assertEquals(jooLines[line++], "" + intArray + toIndex(2) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + toBytecodeNumber("100"));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + int0 + JooVirtualMachine.STANDART_COMPARATOR_SMALLER + intArray + toIndex(2));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("2"));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intArray + toIndex(2) + JooVirtualMachine.COMPARATOR_BIGGER + int0);
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("1"));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intArray + toIndex(2) + JooVirtualMachine.STANDART_COMPARATOR_BIGGER + int0);
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("2"));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + int0 + JooVirtualMachine.COMPARATOR_SMALLER_EQUALS + intArray + toIndex(2));
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("1"));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + int0 + JooVirtualMachine.STANDART_COMPARATOR_SMALLER_EQUALS + intArray + toIndex(2));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("2"));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intArray + toIndex(2) + JooVirtualMachine.COMPARATOR_BIGGER_EQUALS + int0);
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("1"));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intArray + toIndex(2) + JooVirtualMachine.STANDART_COMPARATOR_BIGGER_EQUALS + int0);
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("2"));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
-		assertEquals(jooLines[line++], "" + intArray + toIndex(3) + JooVirtualMachine.OPERATOR_ASSIGN + intArray + toIndex(2));
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intArray + toIndex(2) + JooVirtualMachine.COMPARATOR_BIGGER_EQUALS + intArray + toIndex(3));
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("1"));
+		assertEquals(jooLines[line++], "" + intArray + toIndex(3) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + intArray + toIndex(2));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intArray + toIndex(2) + JooVirtualMachine.STANDART_COMPARATOR_BIGGER_EQUALS + intArray + toIndex(3));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("2"));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intArray + toIndex(2) + JooVirtualMachine.COMPARATOR_SMALLER_EQUALS + intArray + toIndex(3));
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("1"));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + intArray + toIndex(2) + JooVirtualMachine.STANDART_COMPARATOR_SMALLER_EQUALS + intArray + toIndex(3));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("2"));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
 		assertEquals(jooLines[line++], "" + function + JooVirtualMachine.KEYWORD_PARAMETER + int0 + JooVirtualMachine.KEYWORD_PARAMETER + intArray);
 		assertEquals(jooLines[line++], "" + libraryFunction + JooVirtualMachine.KEYWORD_PARAMETER + intArray);
 		assertEquals(jooLines[line++], "" + directoryLibraryFunction + JooVirtualMachine.KEYWORD_PARAMETER + intArray);		
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION_CALL + (char)1 + JooVirtualMachine.KEYWORD_PARAMETER + char0);		
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION + function);
-		assertEquals(jooLines[line++], "" + fixed1 + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("" + Math.round(25f * 255)));
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + fixed1 + JooVirtualMachine.COMPARATOR_SMALLER_EQUALS + toBytecodeNumber("" + Math.round(80f * 255)));
+		assertEquals(jooLines[line++], "" + fixed1 + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("" + Math.round(25f * 255)));
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + fixed1 + JooVirtualMachine.STANDART_COMPARATOR_SMALLER_EQUALS + toBytecodeNumber("" + Math.round(80f * 255)));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION_REPEAT);
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
-		assertEquals(jooLines[line++], "" + param0 + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("100"));
-		assertEquals(jooLines[line++], "" + param1 + toIndex(5) + JooVirtualMachine.OPERATOR_ASSIGN + param0);
-		assertEquals(jooLines[line++], "" + param1 + toIndex(4) + JooVirtualMachine.OPERATOR_ASSIGN + param1 + toIndex(5));
-		assertEquals(jooLines[line++], "" + param0 + JooVirtualMachine.OPERATOR_ADD + param1 + toIndex(4));
-		assertEquals(jooLines[line++], "" + param1 + int1 + JooVirtualMachine.OPERATOR_ASSIGN + int1);
-		assertEquals(jooLines[line++], "" + param0 + JooVirtualMachine.OPERATOR_SUBTRACT + param1 + int1);
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + param0 + JooVirtualMachine.COMPARATOR_SMALLER + param1 + toIndex(5));
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("1"));
+		assertEquals(jooLines[line++], "" + param0 + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("100"));
+		assertEquals(jooLines[line++], "" + param1 + toIndex(5) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + param0);
+		assertEquals(jooLines[line++], "" + param1 + toIndex(4) + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + param1 + toIndex(5));
+		assertEquals(jooLines[line++], "" + param0 + JooVirtualMachine.STANDART_OPERATOR_ADD + param1 + toIndex(4));
+		assertEquals(jooLines[line++], "" + param1 + int1 + JooVirtualMachine.STANDART_OPERATOR_ASSIGN + int1);
+		assertEquals(jooLines[line++], "" + param0 + JooVirtualMachine.STANDART_OPERATOR_SUBTRACT + param1 + int1);
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + param0 + JooVirtualMachine.STANDART_COMPARATOR_SMALLER + param1 + toIndex(5));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("1"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_ELSE);
-		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("2"));
+		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION + libraryFunction);
-		assertEquals(jooLines[line++], "" + param0 + toIndex(0) + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("10"));
+		assertEquals(jooLines[line++], "" + param0 + toIndex(0) + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("10"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION + directoryLibraryFunction);
-		assertEquals(jooLines[line++], "" + param0 + toIndex(0) + JooVirtualMachine.OPERATOR_ADD + toBytecodeNumber("20"));
+		assertEquals(jooLines[line++], "" + param0 + toIndex(0) + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("20"));
 	}
 	
 	@Test
@@ -257,297 +257,297 @@ public class JooCompilerTest {
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "int0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "100");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "int0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_SUBTRACT);
 		assertEquals(currentInstruction.getVariable1Name(), "int1");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "int0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_MULTIPLY);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_MULTIPLY);
 		assertEquals(currentInstruction.getValue(), "2");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "int0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_DIVIDE);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_DIVIDE);
 		assertEquals(currentInstruction.getValue(), "10");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "int1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getValue(), "6");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "fixed0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getVariable1Name(), "fixed1");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "fixed0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_SUBTRACT);
 		assertEquals(currentInstruction.getValue(), "" + Math.round(0.5 * 255));
 		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "fixed0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_MULTIPLY);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_MULTIPLY);
 		assertEquals(currentInstruction.getValue(), "" + Math.round(2.5 * 255));
 		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "fixed0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_DIVIDE);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_DIVIDE);
 		assertEquals(currentInstruction.getValue(), "" + Math.round(5 * 255));
 		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "fixed1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getValue(), "" + Math.round(50 * 255));
 		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "bool0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "bool1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getValue(), "0");
 		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "bool2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getVariable1Name(), "bool1");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "char0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getValue(), "A");
 		assertEquals(currentInstruction.getValueType(), TYPE_CHAR);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "char1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getValue(), "B");
 		assertEquals(currentInstruction.getValueType(), TYPE_CHAR);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "char2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getVariable1Name(), "char1");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "intArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getValue(), "30");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "intArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "15");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "intArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_SUBTRACT);
 		assertEquals(currentInstruction.getVariable1Name(), "int1");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "intArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_DIVIDE);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_DIVIDE);
 		assertEquals(currentInstruction.getValue(), "5");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "intArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_MULTIPLY);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_MULTIPLY);
 		assertEquals(currentInstruction.getVariable1Name(), "intArray");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "1");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "intArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "7");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getValue(), "25");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getValue(),  "" + Math.round(60.5 * 255));
 		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(),  "" + Math.round(15 * 255));
 		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_SUBTRACT);
 		assertEquals(currentInstruction.getVariable1Name(), "fixed1");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_DIVIDE);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_DIVIDE);
 		assertEquals(currentInstruction.getValue(),  "" + Math.round(5 * 255));
 		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_MULTIPLY);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_MULTIPLY);
 		assertEquals(currentInstruction.getVariable1Name(), "fixedArray");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "1");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_NEGATIVE);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN_NEGATIVE);
 		assertEquals(currentInstruction.getValue(),  "" + Math.round(10 * 255));
 		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "3");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_POSITIVE);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN_POSITIVE);
 		assertEquals(currentInstruction.getVariable1Name(), "fixedArray");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "2");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "4");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_INVERSE);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN_INVERSE);
 		assertEquals(currentInstruction.getVariable1Name(), "fixedArray");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "3");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "fixedArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "5");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getValue(),  "" + Math.round(25.25 * 255));
 		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "boolArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "9");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getVariable1Name(), "bool0");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "boolArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "10");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "boolArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "11");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getVariable1Name(), "boolArray");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "10");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "boolArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_NEGATIVE);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN_NEGATIVE);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "boolArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "3");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_POSITIVE);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN_POSITIVE);
 		assertEquals(currentInstruction.getVariable1Name(), "boolArray");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "2");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "boolArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "4");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN_INVERSE);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN_INVERSE);
 		assertEquals(currentInstruction.getVariable1Name(), "boolArray");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "3");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "boolArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "5");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "charArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "9");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getVariable1Name(), "char0");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "charArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "10");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getValue(), "C");
 		assertEquals(currentInstruction.getValueType(), TYPE_CHAR);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "charArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "11");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getVariable1Name(), "charArray");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "10");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "charArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getValue(), "d");
 		assertEquals(currentInstruction.getValueType(), TYPE_CHAR);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.isCondition(), true);
 		assertEquals(currentInstruction.getVariable0Name(), "int0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_EQUALS);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_COMPARATOR_EQUALS);
 		assertEquals(currentInstruction.getValue(), "18");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.isCondition(), true);
 		assertEquals(currentInstruction.getVariable0Name(), "int1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_EQUALS);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_COMPARATOR_EQUALS);
 		assertEquals(currentInstruction.getValue(), "6");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -556,7 +556,7 @@ public class JooCompilerTest {
 
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "2");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -565,7 +565,7 @@ public class JooCompilerTest {
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -574,7 +574,7 @@ public class JooCompilerTest {
 
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "2");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -586,13 +586,13 @@ public class JooCompilerTest {
 		assertEquals(currentInstruction.isCondition(), true);
 		assertEquals(currentInstruction.getConditionType(), KEYWORD_IF);
 		assertEquals(currentInstruction.getVariable0Name(), "bool0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_EQUALS);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_COMPARATOR_EQUALS);
 		assertEquals(currentInstruction.getValue(), "0");
 		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -600,13 +600,13 @@ public class JooCompilerTest {
 		assertEquals(currentInstruction.isCondition(), true);
 		assertEquals(currentInstruction.getConditionType(), KEYWORD_ELSE_IF);
 		assertEquals(currentInstruction.getVariable0Name(), "bool0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_EQUALS);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_COMPARATOR_EQUALS);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_BOOL);
 
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "2");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -616,12 +616,12 @@ public class JooCompilerTest {
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.isCondition(), true);
 		assertEquals(currentInstruction.getVariable0Name(), "int0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_NOT_EQUALS);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_COMPARATOR_NOT_EQUALS);
 		assertEquals(currentInstruction.getVariable1Name(), "int1");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -630,7 +630,7 @@ public class JooCompilerTest {
 
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "2");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -640,20 +640,20 @@ public class JooCompilerTest {
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "intArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getValue(), "100");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.isCondition(), true);
 		assertEquals(currentInstruction.getVariable0Name(), "int0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_COMPARATOR_SMALLER);
 		assertEquals(currentInstruction.getVariable1Name(), "intArray");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "2");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -662,7 +662,7 @@ public class JooCompilerTest {
 
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "2");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -673,12 +673,12 @@ public class JooCompilerTest {
 		assertEquals(currentInstruction.isCondition(), true);
 		assertEquals(currentInstruction.getVariable0Name(), "intArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_BIGGER);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_COMPARATOR_BIGGER);
 		assertEquals(currentInstruction.getVariable1Name(), "int0");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -687,7 +687,7 @@ public class JooCompilerTest {
 
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "2");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -697,13 +697,13 @@ public class JooCompilerTest {
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.isCondition(), true);
 		assertEquals(currentInstruction.getVariable0Name(), "int0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER_EQUALS);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_COMPARATOR_SMALLER_EQUALS);
 		assertEquals(currentInstruction.getVariable1Name(), "intArray");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "2");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -712,7 +712,7 @@ public class JooCompilerTest {
 
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "2");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -723,12 +723,12 @@ public class JooCompilerTest {
 		assertEquals(currentInstruction.isCondition(), true);
 		assertEquals(currentInstruction.getVariable0Name(), "intArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_BIGGER_EQUALS);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_COMPARATOR_BIGGER_EQUALS);
 		assertEquals(currentInstruction.getVariable1Name(), "int0");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -737,7 +737,7 @@ public class JooCompilerTest {
 
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "2");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -747,7 +747,7 @@ public class JooCompilerTest {
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "intArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "3");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getVariable1Name(), "intArray");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "2");
 		
@@ -755,13 +755,13 @@ public class JooCompilerTest {
 		assertEquals(currentInstruction.isCondition(), true);
 		assertEquals(currentInstruction.getVariable0Name(), "intArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_BIGGER_EQUALS);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_COMPARATOR_BIGGER_EQUALS);
 		assertEquals(currentInstruction.getVariable1Name(), "intArray");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "3");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -770,7 +770,7 @@ public class JooCompilerTest {
 
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "2");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -781,13 +781,13 @@ public class JooCompilerTest {
 		assertEquals(currentInstruction.isCondition(), true);
 		assertEquals(currentInstruction.getVariable0Name(), "intArray");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "2");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER_EQUALS);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_COMPARATOR_SMALLER_EQUALS);
 		assertEquals(currentInstruction.getVariable1Name(), "intArray");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "3");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -796,7 +796,7 @@ public class JooCompilerTest {
 
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "2");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -828,14 +828,14 @@ public class JooCompilerTest {
 		
 		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "fixed1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "" + Math.round(25 * 255));
 		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
 		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.isCondition(), true);
 		assertEquals(currentInstruction.getVariable0Name(), "fixed1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER_EQUALS);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_COMPARATOR_SMALLER_EQUALS);
 		assertEquals(currentInstruction.getValue(),  "" + Math.round(80 * 255));
 		assertEquals(currentInstruction.getValueType(), TYPE_FIXED);
 		
@@ -847,51 +847,51 @@ public class JooCompilerTest {
 		
 		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "_param0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "100");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
 		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "_param1");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "5");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getVariable1Name(), "_param0");
 		
 		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "_param1");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "4");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getVariable1Name(), "_param1");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "5");
 		
 		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "_param0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getVariable1Name(), "_param1");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "4");
 		
 		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "_param1");
 		assertEquals(currentInstruction.getVariable0ArrayIndex(), "int1");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ASSIGN);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ASSIGN);
 		assertEquals(currentInstruction.getVariable1Name(), "int1");
 		
 		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "_param0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_SUBTRACT);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_SUBTRACT);
 		assertEquals(currentInstruction.getVariable1Name(), "_param1");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "int1");
 		
 		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.isCondition(), true);
 		assertEquals(currentInstruction.getVariable0Name(), "_param0");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.COMPARATOR_SMALLER);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_COMPARATOR_SMALLER);
 		assertEquals(currentInstruction.getVariable1Name(), "_param1");
 		assertEquals(currentInstruction.getVariable1ArrayIndex(), "5");
 		
 		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "1");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		
@@ -900,7 +900,7 @@ public class JooCompilerTest {
 
 		currentInstruction = function.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.getVariable0Name(), "correctIfs");
-		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.OPERATOR_ADD);
+		assertEquals(currentInstruction.getOperator(), JooVirtualMachine.STANDART_OPERATOR_ADD);
 		assertEquals(currentInstruction.getValue(), "2");
 		assertEquals(currentInstruction.getValueType(), TYPE_INT);
 		

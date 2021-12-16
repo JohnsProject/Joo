@@ -414,71 +414,69 @@ public class JooVirtualMachine {
 		return 0;
 	}
 	
-	public static final char COMPARATOR_SMALLER_EQUALS = 0 + OPERATORS_START;
-	public static final char COMPARATOR_BIGGER_EQUALS = 1 + OPERATORS_START;
-	public static final char COMPARATOR_SMALLER = 2 + OPERATORS_START;
-	public static final char COMPARATOR_BIGGER = 3 + OPERATORS_START;
-	public static final char COMPARATOR_EQUALS = 4 + OPERATORS_START;
-	public static final char COMPARATOR_NOT_EQUALS = 5 + OPERATORS_START;
+	public static final char STANDART_OPERATOR_START = 0 + OPERATORS_START;
+	
+	public static final char STANDART_COMPARATOR_SMALLER_EQUALS = 0 + STANDART_OPERATOR_START;
+	public static final char STANDART_COMPARATOR_BIGGER_EQUALS = 1 + STANDART_OPERATOR_START;
+	public static final char STANDART_COMPARATOR_SMALLER = 2 + STANDART_OPERATOR_START;
+	public static final char STANDART_COMPARATOR_BIGGER = 3 + STANDART_OPERATOR_START;
+	public static final char STANDART_COMPARATOR_EQUALS = 4 + STANDART_OPERATOR_START;
+	public static final char STANDART_COMPARATOR_NOT_EQUALS = 5 + STANDART_OPERATOR_START;
 
-	public static final char OPERATOR_ASSIGN = 6 + OPERATORS_START;
-	public static final char OPERATOR_ASSIGN_POSITIVE = 7 + OPERATORS_START;
-	public static final char OPERATOR_ASSIGN_NEGATIVE = 8 + OPERATORS_START;
-	public static final char OPERATOR_ASSIGN_INVERSE = 9 + OPERATORS_START;
-	public static final char OPERATOR_ADD = 10 + OPERATORS_START;
-	public static final char OPERATOR_SUBTRACT = 11 + OPERATORS_START;
-	public static final char OPERATOR_MULTIPLY = 12 + OPERATORS_START;
-	public static final char OPERATOR_DIVIDE = 13 + OPERATORS_START;
-	public static final char OPERATOR_REMAINDER = 14 + OPERATORS_START;
-	public static final char OPERATOR_BITWISE_AND = 15 + OPERATORS_START;
-	public static final char OPERATOR_BITWISE_XOR = 16 + OPERATORS_START;
-	public static final char OPERATOR_BITWISE_OR = 17 + OPERATORS_START;
-	public static final char OPERATOR_BITWISE_NOT = 18 + OPERATORS_START;
-	public static final char OPERATOR_BITSHIFT_LEFT = 19 + OPERATORS_START;
-	public static final char OPERATOR_BITSHIFT_RIGHT = 20 + OPERATORS_START;
+	public static final char STANDART_OPERATOR_ASSIGN = 6 + STANDART_OPERATOR_START;
+	public static final char STANDART_OPERATOR_ASSIGN_POSITIVE = 7 + STANDART_OPERATOR_START;
+	public static final char STANDART_OPERATOR_ASSIGN_NEGATIVE = 8 + STANDART_OPERATOR_START;
+	public static final char STANDART_OPERATOR_ASSIGN_INVERSE = 9 + STANDART_OPERATOR_START;
+	public static final char STANDART_OPERATOR_ADD = 10 + STANDART_OPERATOR_START;
+	public static final char STANDART_OPERATOR_SUBTRACT = 11 + STANDART_OPERATOR_START;
+	public static final char STANDART_OPERATOR_MULTIPLY = 12 + STANDART_OPERATOR_START;
+	public static final char STANDART_OPERATOR_DIVIDE = 13 + STANDART_OPERATOR_START;
+	public static final char STANDART_OPERATOR_REMAINDER = 14 + STANDART_OPERATOR_START;
+	public static final char STANDART_OPERATOR_BITWISE_AND = 15 + STANDART_OPERATOR_START;
+	public static final char STANDART_OPERATOR_BITWISE_XOR = 16 + STANDART_OPERATOR_START;
+	public static final char STANDART_OPERATOR_BITWISE_OR = 17 + STANDART_OPERATOR_START;
+	public static final char STANDART_OPERATOR_BITWISE_NOT = 18 + STANDART_OPERATOR_START;
+	public static final char STANDART_OPERATOR_BITSHIFT_LEFT = 19 + STANDART_OPERATOR_START;
+	public static final char STANDART_OPERATOR_BITSHIFT_RIGHT = 20 + STANDART_OPERATOR_START;
 	
 	boolean interpretVariableOperation(int[] values, int variable0Index, char variable0Type, char operator, int variable1Value) {
-		switch (operator) {
-		case COMPARATOR_SMALLER_EQUALS:
+		if (operator == STANDART_COMPARATOR_SMALLER_EQUALS) {
 			return values[variable0Index] <= variable1Value;
-		case COMPARATOR_BIGGER_EQUALS:
+		} else if (operator == STANDART_COMPARATOR_BIGGER_EQUALS) {
 			return values[variable0Index] >= variable1Value;
-		case COMPARATOR_SMALLER:
+		} else if (operator == STANDART_COMPARATOR_SMALLER) {
 			return values[variable0Index] < variable1Value;
-		case COMPARATOR_BIGGER:
+		} else if (operator == STANDART_COMPARATOR_BIGGER) {
 			return values[variable0Index] > variable1Value;
-		case COMPARATOR_EQUALS:
+		} else if (operator == STANDART_COMPARATOR_EQUALS) {
 			return values[variable0Index] == variable1Value;
-		case COMPARATOR_NOT_EQUALS:
+		} else if (operator == STANDART_COMPARATOR_NOT_EQUALS) {
 			return values[variable0Index] != variable1Value;
-		case OPERATOR_ASSIGN:
+		} else if (operator == STANDART_OPERATOR_ASSIGN) {
 			values[variable0Index] = variable1Value;
-			break;
-		case OPERATOR_ASSIGN_POSITIVE:
-			if(variable0Type == TYPE_BOOL) {
+		} else if (operator == STANDART_OPERATOR_ASSIGN_POSITIVE) {
+			if (variable0Type == TYPE_BOOL) {
 				values[variable0Index] = 1;
 			} else {
-				if(variable1Value < 0) {
+				if (variable1Value < 0) {
 					values[variable0Index] = -variable1Value;
 				} else {
 					values[variable0Index] = variable1Value;
 				}
 			}
-			break;
-		case OPERATOR_ASSIGN_NEGATIVE:
-			if(variable0Type == TYPE_BOOL) {
+		} else if (operator == STANDART_OPERATOR_ASSIGN_NEGATIVE) {
+			if (variable0Type == TYPE_BOOL) {
 				values[variable0Index] = 0;
 			} else {
-				if(variable1Value < 0) {
+				if (variable1Value < 0) {
 					values[variable0Index] = variable1Value;
 				} else {
 					values[variable0Index] = -variable1Value;
 				}
 			}
-			break;
-		case OPERATOR_ASSIGN_INVERSE:
-			if(variable0Type == TYPE_BOOL) {
-				if(variable1Value == 0) {
+		} else if (operator == STANDART_OPERATOR_ASSIGN_INVERSE) {
+			if (variable0Type == TYPE_BOOL) {
+				if (variable1Value == 0) {
 					values[variable0Index] = 1;
 				} else {
 					values[variable0Index] = 0;
@@ -486,59 +484,49 @@ public class JooVirtualMachine {
 			} else {
 				values[variable0Index] = -variable1Value;
 			}
-			break;
-		case OPERATOR_ADD:
+		} else if (operator == STANDART_OPERATOR_ADD) {
 			values[variable0Index] += variable1Value;
-			break;
-		case OPERATOR_SUBTRACT:
+		} else if (operator == STANDART_OPERATOR_SUBTRACT) {
 			values[variable0Index] -= variable1Value;
-			break;
-		case OPERATOR_MULTIPLY:
-			if(variable0Type == TYPE_FIXED) {
-				long result = (long)values[variable0Index] * (long)variable1Value;
-				values[variable0Index] = (int)(result >> FIXED_POINT);
+		} else if (operator == STANDART_OPERATOR_MULTIPLY) {
+			if (variable0Type == TYPE_FIXED) {
+				long result = (long) values[variable0Index] * (long) variable1Value;
+				values[variable0Index] = (int) (result >> FIXED_POINT);
 			} else {
 				values[variable0Index] *= variable1Value;
 			}
-			break;
-		case OPERATOR_DIVIDE:
-			if(variable0Type == TYPE_FIXED) {
-				long result = (long)values[variable0Index] << FIXED_POINT;
-				values[variable0Index] = (int)(result / variable1Value);
+		} else if (operator == STANDART_OPERATOR_DIVIDE) {
+			if (variable0Type == TYPE_FIXED) {
+				long result = (long) values[variable0Index] << FIXED_POINT;
+				values[variable0Index] = (int) (result / variable1Value);
 			} else {
 				values[variable0Index] /= variable1Value;
 			}
-			break;
-		case OPERATOR_REMAINDER:
+		} else if (operator == STANDART_OPERATOR_REMAINDER) {
 			values[variable0Index] %= variable1Value;
-			break;
-		case OPERATOR_BITWISE_AND:
+		} else if (operator == STANDART_OPERATOR_BITWISE_AND) {
 			values[variable0Index] &= variable1Value;
-			break;
-		case OPERATOR_BITWISE_XOR:
+		} else if (operator == STANDART_OPERATOR_BITWISE_XOR) {
 			values[variable0Index] ^= variable1Value;
-			break;
-		case OPERATOR_BITWISE_OR:
+		} else if (operator == STANDART_OPERATOR_BITWISE_OR) {
 			values[variable0Index] |= variable1Value;
-			break;
-		case OPERATOR_BITWISE_NOT:
+		} else if (operator == STANDART_OPERATOR_BITWISE_NOT) {
 			values[variable0Index] = ~variable1Value;
-			break;
-		case OPERATOR_BITSHIFT_LEFT:
+		} else if (operator == STANDART_OPERATOR_BITSHIFT_LEFT) {
 			values[variable0Index] <<= variable1Value;
-			break;
-		case OPERATOR_BITSHIFT_RIGHT:
+		} else if (operator == STANDART_OPERATOR_BITSHIFT_RIGHT) {
 			values[variable0Index] >>= variable1Value;
-			break;
 		}
 		return false;
 	}
 
-	public static final char NATIVE_PRINT = 0 + NATIVE_FUNCTIONS_START;
+	public static final char STANDART_NATIVE_START = 0 + NATIVE_FUNCTIONS_START;
+	
+	public static final char STANDART_NATIVE_PRINT = 0 + STANDART_NATIVE_START;
 	
 	void callNativeFunction(char functionIndex) {
 		switch (functionIndex) {
-		case NATIVE_PRINT:
+		case STANDART_NATIVE_PRINT:
 			System.out.println(components[parameters[0]]);
 			break;
 		}

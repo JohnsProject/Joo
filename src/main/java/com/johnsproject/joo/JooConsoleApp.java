@@ -75,13 +75,11 @@ public class JooConsoleApp {
 	
 	public static JooCompiler compileCode(String path) {
 		final JooCompiler compiler = new JooCompiler();
-		System.out.print("Compiling code... " + path);
 		final String compiledCode = compiler.compile(path);
 		FileUtil.write(path.replace(JooCompiler.CODE_ENDING, JooCompiler.BYTECODE_ENDING), compiledCode);
-		System.out.println(" succesfully compiled!");
-		System.out.println("Byte code size: " + compiledCode.length() + " / 1024 bytes");
+		System.out.println("Byte code size: " + compiledCode.length() + " bytes");
 		System.out.println("Variable and function count: " + compiler.getComponentMemoryUsage() + " / " + (COMPONENTS_END - COMPONENTS_START));
-		System.out.println("Array memory usage: " + compiler.getArrayMemoryUsage() + " / " + (108));
+		System.out.println("Array memory usage: " + compiler.getArrayMemoryUsage());
 		return compiler;
 	}
 }

@@ -55,7 +55,7 @@
   bool ifs[6];
   /* The code can have up to int.maxValue length. 
    * The default lenght is for compatibility with the arduino */
-  char code[1024];
+  char code[512];
   
   void start() {
     interpretFunction((char)componentIndexes[TYPE_FUNCTION - TYPES_START]);
@@ -379,47 +379,54 @@
     return 0;
   }
 
-  #define COMPARATOR_SMALLER_EQUALS 0 + OPERATORS_START
-  #define COMPARATOR_BIGGER_EQUALS 1 + OPERATORS_START
-  #define COMPARATOR_SMALLER 2 + OPERATORS_START
-  #define COMPARATOR_BIGGER 3 + OPERATORS_START
-  #define COMPARATOR_EQUALS 4 + OPERATORS_START
-  #define COMPARATOR_NOT_EQUALS 5 + OPERATORS_START
+  #define STANDART_OPERATOR_START 0 + OPERATORS_START
+  
+  #define STANDART_COMPARATOR_SMALLER_EQUALS 0 + STANDART_OPERATOR_START
+  #define STANDART_COMPARATOR_BIGGER_EQUALS 1 + STANDART_OPERATOR_START
+  #define STANDART_COMPARATOR_SMALLER 2 + STANDART_OPERATOR_START
+  #define STANDART_COMPARATOR_BIGGER 3 + STANDART_OPERATOR_START
+  #define STANDART_COMPARATOR_EQUALS 4 + STANDART_OPERATOR_START
+  #define STANDART_COMPARATOR_NOT_EQUALS 5 + STANDART_OPERATOR_START
 
-  #define OPERATOR_ASSIGN 6 + OPERATORS_START
-  #define OPERATOR_ASSIGN_POSITIVE 7 + OPERATORS_START
-  #define OPERATOR_ASSIGN_NEGATIVE 8 + OPERATORS_START
-  #define OPERATOR_ASSIGN_INVERSE 9 + OPERATORS_START
-  #define OPERATOR_ADD 10 + OPERATORS_START
-  #define OPERATOR_SUBTRACT 11 + OPERATORS_START
-  #define OPERATOR_MULTIPLY 12 + OPERATORS_START
-  #define OPERATOR_DIVIDE 13 + OPERATORS_START
-  #define OPERATOR_REMAINDER 14 + OPERATORS_START
-  #define OPERATOR_BITWISE_AND 15 + OPERATORS_START
-  #define OPERATOR_BITWISE_XOR 16 + OPERATORS_START
-  #define OPERATOR_BITWISE_OR 17 + OPERATORS_START
-  #define OPERATOR_BITWISE_NOT 18 + OPERATORS_START
-  #define OPERATOR_BITSHIFT_LEFT 19 + OPERATORS_START
-  #define OPERATOR_BITSHIFT_RIGHT 20 + OPERATORS_START
+  #define STANDART_OPERATOR_ASSIGN 6 + STANDART_OPERATOR_START
+  #define STANDART_OPERATOR_ASSIGN_POSITIVE 7 + STANDART_OPERATOR_START
+  #define STANDART_OPERATOR_ASSIGN_NEGATIVE 8 + STANDART_OPERATOR_START
+  #define STANDART_OPERATOR_ASSIGN_INVERSE 9 + STANDART_OPERATOR_START
+  #define STANDART_OPERATOR_ADD 10 + STANDART_OPERATOR_START
+  #define STANDART_OPERATOR_SUBTRACT 11 + STANDART_OPERATOR_START
+  #define STANDART_OPERATOR_MULTIPLY 12 + STANDART_OPERATOR_START
+  #define STANDART_OPERATOR_DIVIDE 13 + STANDART_OPERATOR_START
+  #define STANDART_OPERATOR_REMAINDER 14 + STANDART_OPERATOR_START
+  #define STANDART_OPERATOR_BITWISE_AND 15 + STANDART_OPERATOR_START
+  #define STANDART_OPERATOR_BITWISE_XOR 16 + STANDART_OPERATOR_START
+  #define STANDART_OPERATOR_BITWISE_OR 17 + STANDART_OPERATOR_START
+  #define STANDART_OPERATOR_BITWISE_NOT 18 + STANDART_OPERATOR_START
+  #define STANDART_OPERATOR_BITSHIFT_LEFT 19 + STANDART_OPERATOR_START
+  #define STANDART_OPERATOR_BITSHIFT_RIGHT 20 + STANDART_OPERATOR_START
   
   bool interpretVariableOperation(int values[], int variable0Index, char variable0Type, char variableOperator, int variable1Value) {
-    switch (variableOperator) {
-    case COMPARATOR_SMALLER_EQUALS:
+    if (variableOperator == STANDART_COMPARATOR_SMALLER_EQUALS) {
       return values[variable0Index] <= variable1Value;
-    case COMPARATOR_BIGGER_EQUALS:
+    }
+    else if (variableOperator == STANDART_COMPARATOR_BIGGER_EQUALS) {
       return values[variable0Index] >= variable1Value;
-    case COMPARATOR_SMALLER:
+    }
+    else if (variableOperator == STANDART_COMPARATOR_SMALLER) {
       return values[variable0Index] < variable1Value;
-    case COMPARATOR_BIGGER:
+    }
+    else if (variableOperator == STANDART_COMPARATOR_BIGGER) {
       return values[variable0Index] > variable1Value;
-    case COMPARATOR_EQUALS:
+    }
+    else if (variableOperator == STANDART_COMPARATOR_EQUALS) {
       return values[variable0Index] == variable1Value;
-    case COMPARATOR_NOT_EQUALS:
+    }
+    else if (variableOperator == STANDART_COMPARATOR_NOT_EQUALS) {
       return values[variable0Index] != variable1Value;
-    case OPERATOR_ASSIGN:
+    }
+    else if (variableOperator == STANDART_OPERATOR_ASSIGN) {
       values[variable0Index] = variable1Value;
-      break;
-    case OPERATOR_ASSIGN_POSITIVE:
+    }
+    else if (variableOperator == STANDART_OPERATOR_ASSIGN_POSITIVE) {
       if(variable0Type == TYPE_BOOL) {
         values[variable0Index] = 1;
       } else {
@@ -429,8 +436,8 @@
           values[variable0Index] = variable1Value;
         }
       }
-      break;
-    case OPERATOR_ASSIGN_NEGATIVE:
+    }
+    else if (variableOperator == STANDART_OPERATOR_ASSIGN_NEGATIVE) {
       if(variable0Type == TYPE_BOOL) {
         values[variable0Index] = 0;
       } else {
@@ -440,8 +447,8 @@
           values[variable0Index] = -variable1Value;
         }
       }
-      break;
-    case OPERATOR_ASSIGN_INVERSE:
+    }
+    else if (variableOperator == STANDART_OPERATOR_ASSIGN_INVERSE) {
       if(variable0Type == TYPE_BOOL) {
         if(variable1Value == 0) {
           values[variable0Index] = 1;
@@ -451,71 +458,194 @@
       } else {
         values[variable0Index] = -variable1Value;
       }
-      break;
-    case OPERATOR_ADD:
+    }
+    else if (variableOperator == STANDART_OPERATOR_ADD) {
       values[variable0Index] += variable1Value;
-      break;
-    case OPERATOR_SUBTRACT:
+    }
+    else if (variableOperator == STANDART_OPERATOR_SUBTRACT) {
       values[variable0Index] -= variable1Value;
-      break;
-    case OPERATOR_MULTIPLY:
+    }
+    else if (variableOperator == STANDART_OPERATOR_MULTIPLY) {
       if(variable0Type == TYPE_FIXED) {
         long result = (long)values[variable0Index] * (long)variable1Value;
         values[variable0Index] = (int)(result >> FIXED_POINT);
       } else {
         values[variable0Index] *= variable1Value;
       }
-      break;
-    case OPERATOR_DIVIDE:
+    }
+    else if (variableOperator == STANDART_OPERATOR_DIVIDE) {
       if(variable0Type == TYPE_FIXED) {
         long result = (long)values[variable0Index] << FIXED_POINT;
         values[variable0Index] = (int)(result / variable1Value);
       } else {
         values[variable0Index] /= variable1Value;
       }
-      break;
-    case OPERATOR_REMAINDER:
+    }
+    else if (variableOperator == STANDART_OPERATOR_REMAINDER) {
       values[variable0Index] %= variable1Value;
-      break;
-    case OPERATOR_BITWISE_AND:
+    }
+    else if (variableOperator == STANDART_OPERATOR_BITWISE_AND) {
       values[variable0Index] &= variable1Value;
-      break;
-    case OPERATOR_BITWISE_XOR:
+    }
+    else if (variableOperator == STANDART_OPERATOR_BITWISE_XOR) {
       values[variable0Index] ^= variable1Value;
-      break;
-    case OPERATOR_BITWISE_OR:
+    }
+    else if (variableOperator == STANDART_OPERATOR_BITWISE_OR) {
       values[variable0Index] |= variable1Value;
-      break;
-    case OPERATOR_BITWISE_NOT:
+    }
+    else if (variableOperator == STANDART_OPERATOR_BITWISE_NOT) {
       values[variable0Index] = ~variable1Value;
-      break;
-    case OPERATOR_BITSHIFT_LEFT:
+    }
+    else if (variableOperator == STANDART_OPERATOR_BITSHIFT_LEFT) {
       values[variable0Index] <<= variable1Value;
-      break;
-    case OPERATOR_BITSHIFT_RIGHT:
+    }
+    else if (variableOperator == STANDART_OPERATOR_BITSHIFT_RIGHT) {
       values[variable0Index] >>= variable1Value;
-      break;
     }
     return false;
   }
+
+  #define STANDART_NATIVE_START 0 + NATIVE_FUNCTIONS_START
   
-  #define NATIVE_PRINT 0 + NATIVE_FUNCTIONS_START
+  #define STANDART_NATIVE_PRINT 0 + STANDART_NATIVE_START
+
+
+  #define ARDUINO_NATIVE_START 1 + NATIVE_FUNCTIONS_START
+
+  #define ARDUINO_NATIVE_DIGITAL_READ 0 + ARDUINO_NATIVE_START
+  #define ARDUINO_NATIVE_DIGITAL_WRITE 1 + ARDUINO_NATIVE_START
+  #define ARDUINO_NATIVE_PIN_MODE 2 + ARDUINO_NATIVE_START
   
-  void callNativeFunction(char functionIndex) {
-    switch (functionIndex) {
-    case NATIVE_PRINT:
+  #define ARDUINO_NATIVE_ANALOG_READ 3 + ARDUINO_NATIVE_START
+  #define ARDUINO_NATIVE_ANALOG_REFERENCE 4 + ARDUINO_NATIVE_START
+  #define ARDUINO_NATIVE_ANALOG_WRITE 5 + ARDUINO_NATIVE_START
+  
+  #define ARDUINO_NATIVE_NO_TONE 6 + ARDUINO_NATIVE_START
+  #define ARDUINO_NATIVE_PULSE_IN 7 + ARDUINO_NATIVE_START
+  #define ARDUINO_NATIVE_PULSE_IN_LONG 8 + ARDUINO_NATIVE_START
+  #define ARDUINO_NATIVE_SHIFT_IN 9 + ARDUINO_NATIVE_START
+  #define ARDUINO_NATIVE_SHIFT_OUT 10 + ARDUINO_NATIVE_START
+  #define ARDUINO_NATIVE_TONE 11 + ARDUINO_NATIVE_START
+  
+  #define ARDUINO_NATIVE_DELAY 12 + ARDUINO_NATIVE_START
+  #define ARDUINO_NATIVE_DELAY_MICROSECONDS 13 + ARDUINO_NATIVE_START
+  #define ARDUINO_NATIVE_MICROS 14 + ARDUINO_NATIVE_START
+  #define ARDUINO_NATIVE_MILLIS 15 + ARDUINO_NATIVE_START
+  
+  void callNativeFunction(char functionIndex) {    
+    if (functionIndex == STANDART_NATIVE_PRINT) {
       Serial.println(components[parameters[0]]);
-      break;
+    }
+    else if (functionIndex == ARDUINO_NATIVE_DIGITAL_READ) {
+      int pin = components[parameters[0]];
+      components[parameters[1]] = digitalRead(pin == 256 ? LED_BUILTIN : pin);
+    }
+    else if (functionIndex == ARDUINO_NATIVE_DIGITAL_WRITE) {
+      int pin = components[parameters[0]];
+      int value = -1;
+      if (components[parameters[1]] == 1) value = LOW;
+      if (components[parameters[1]] == 2) value = HIGH;
+      digitalWrite(pin == 256 ? LED_BUILTIN : pin, value);
+    }
+    else if (functionIndex == ARDUINO_NATIVE_PIN_MODE) {
+      int pin = components[parameters[0]];
+      int mode = -1;
+      if (components[parameters[1]] == 1) mode = LOW;
+      if (components[parameters[1]] == 2) mode = HIGH;
+      if (components[parameters[1]] == 3) mode = INPUT_PULLUP;
+      pinMode(pin == 256 ? LED_BUILTIN : pin, mode);
+    }
+    else if (functionIndex == ARDUINO_NATIVE_ANALOG_READ) {
+      components[parameters[1]] = analogRead(components[parameters[0]]);
+    }
+    else if (functionIndex == ARDUINO_NATIVE_ANALOG_REFERENCE) {
+      analogReference(components[parameters[0]]);
+    }
+    else if (functionIndex == ARDUINO_NATIVE_ANALOG_WRITE) {
+      analogWrite(components[parameters[0]], components[parameters[1]]);
+    }
+    else if (functionIndex == ARDUINO_NATIVE_NO_TONE) {
+      noTone(components[parameters[0]]);
+    }
+    else if (functionIndex == ARDUINO_NATIVE_PULSE_IN) {
+      if(components[parameters[2]] == 0) {
+        components[parameters[3]] = pulseIn(components[parameters[0]], components[parameters[1]]);
+    } else {
+        components[parameters[3]] = pulseIn(components[parameters[0]], components[parameters[1]], components[parameters[2]]);
+    }
+    }
+    else if (functionIndex == ARDUINO_NATIVE_PULSE_IN_LONG) {
+      if(components[parameters[2]] == 0) {
+        components[parameters[3]] = pulseInLong(components[parameters[0]], components[parameters[1]]);
+      } else {
+        components[parameters[3]] = pulseInLong(components[parameters[0]], components[parameters[1]], components[parameters[2]]);
+      }
+    }
+    else if (functionIndex == ARDUINO_NATIVE_SHIFT_IN) {
+      components[parameters[3]] = shiftIn(components[parameters[0]], components[parameters[1]], components[parameters[2]]);
+    }
+    else if (functionIndex == ARDUINO_NATIVE_SHIFT_OUT) {
+      shiftOut(components[parameters[0]], components[parameters[1]], components[parameters[2]], components[parameters[3]]);
+    }
+    else if (functionIndex == ARDUINO_NATIVE_TONE) {
+      if(components[parameters[2]] == 0) {
+        tone(components[parameters[0]], components[parameters[1]]);
+      } else {
+        tone(components[parameters[0]], components[parameters[1]], components[parameters[2]]);
+      }
+    }
+    else if (functionIndex == ARDUINO_NATIVE_DELAY) {
+      delay(components[parameters[0]]);
+    } 
+    else if (functionIndex == ARDUINO_NATIVE_DELAY_MICROSECONDS) {
+      delayMicroseconds(components[parameters[0]]);
+    }
+    else if (functionIndex == ARDUINO_NATIVE_MICROS) {
+      components[parameters[0]] = micros();
+    }
+    else if (functionIndex == ARDUINO_NATIVE_MILLIS) {
+      components[parameters[0]] = millis();
     }
   }
 
+#define SOURCE_SERIAL_MONITOR 0 // load byte code from serial port
+#define SOURCE_SD 1 // load byte code from sd card
+
+#define BYTE_CODE_SOURCE SOURCE_SD
+
+#if BYTE_CODE_SOURCE == SOURCE_SD
+  #include <SPI.h>
+  #include <SD.h>
+#endif
+
 void setup() {
   Serial.begin(9600);
-  Serial.println(F("Starting Joo VM... Hello World! XD"));  
-  Serial.println(F("Send me some delicious byte code and i'll execute it! :P"));
+  while(!Serial);
+    
+  #if BYTE_CODE_SOURCE == SOURCE_SERIAL_MONITOR
+    Serial.println(F("Starting Joo VM... Hello World! XD"));  
+    Serial.println(F("Send me some delicious byte code and i'll execute it! :P"));
+  #elif BYTE_CODE_SOURCE == SOURCE_SD
+    SD.begin(4);
+    File file = SD.open("test.txt");
+    //file = file.openNextFile();
+
+    codeSize = 0;
+    codeSize |= file.read() >> 8;  
+    codeSize |= file.read();   
+    
+    for(int i = 0; i < codeSize;) {
+      code[i++] = file.read();
+    }    
+    file.close();
+    
+    initialize();
+    start();
+  #endif
 }
 
 void loop() {
+  #if BYTE_CODE_SOURCE == SOURCE_SERIAL_MONITOR
     if(Serial.available() > 2) {
       codeSize = 0;
       codeSize |= Serial.read() >> 8;  
@@ -530,4 +660,5 @@ void loop() {
       initialize();
       start();
     }
+  #endif
 }

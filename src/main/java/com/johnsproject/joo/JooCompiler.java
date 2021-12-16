@@ -176,9 +176,8 @@ public class JooCompiler {
 			final String[] codeLine = splitCodeLine(codeLines[i]);
 			if(codeLine[0].equals(KEYWORD_INCLUDE)) {
 				final String filePath = codeLine[1];
-				directoryPath += filePath;
-				if(FileUtil.fileExists(directoryPath)) {
-					code += FileUtil.read(directoryPath);
+				if(FileUtil.fileExists(directoryPath + filePath)) {
+					code += FileUtil.read(directoryPath + filePath);
 				} 
 				else if (FileUtil.fileExists(filePath) || FileUtil.resourceExists(filePath)) {
 					code += FileUtil.read(filePath);

@@ -1,0 +1,29 @@
+int NULL = 0
+int HIGH = 1
+int LOW = 2
+
+int INPUT = 1
+int OUTPUT = 2
+int INPUT_PULLUP = 3
+
+int LED_BUILTIN = 256
+
+native Arduino_DigitalRead int int # pin, returnedValue
+native Arduino_DigitalWrite int int # pin, value
+native Arduino_PinMode int int # pin, mode
+
+native Arduino_AnalogRead int int # pin, returnedValue
+native Arduino_AnalogReference int 
+native Arduino_AnalogWrite int int # pin, value
+
+native Arduino_NoTone int
+native Arduino_PulseIn int int int int # pin, value, timeout (NULL if none), returnedValue
+native Arduino_PulseInLong int int int int # pin, value, timeout (NULL if none), returnedValue
+native Arduino_ShiftIn int int int int # dataPin, clockPin, bitOrder, returnedValue
+native Arduino_ShiftOut int int int int # dataPin, clockPin, bitOrder, value
+native Arduino_Tone int int int # pin, frequency, duration (NULL if none)
+
+native Arduino_Delay int
+native Arduino_DelayMicroseconds int
+native Arduino_Micros int # returnedValue
+native Arduino_Millis int # returnedValue
