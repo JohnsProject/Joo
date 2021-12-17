@@ -22,4 +22,5 @@ operator ~ int 						# bitwise NOT operator
 operator << int 					# bit shift left operator
 operator >> int 					# bit shift right operator
 
+native Execute int
 native Print int|fixed|bool|char

@@ -23,14 +23,17 @@ public class JooCompiler {
 
 	public static final String KEYWORD_INCLUDE = "include";
 	/*
-	 Import keyword is used to import external files. The file get's duplicated and renamed
-	 to a single character. The file has to be in the same folder or nested folder of the folder
-	 the joo file to be compiled is in. The file name can passed as parameter to the Native functions.
-	 Usage is like: 
-	 
-	 	# import <file name> = <file path>
-	  	import OtherJooApp = App2.cjoo
-	  	call <Native function name>: OtherJooApp
+	  	import JooApp.joo
+	  	import Directoty/JooApp2.joo
+	  	call Execute: JooApp
+	  	call Execute: JooApp2
+	  	
+	  	The import keyword allows to import a program that can be executed in the joo project.
+	  	Imported programs are compiled into the project file and a int variable with the index of the program based
+	  	on the order of the files in the directory.
+	  	
+	  	When execute gets called the vm goes to code index 0, reads the code size, skips to the next program
+	  	reads the size, skips, and so on until the desired program is reached.
 	 */
 	public static final String KEYWORD_IMPORT = "import";
 	public static final String KEYWORD_CONSTANT = "constant";
@@ -69,8 +72,8 @@ public class JooCompiler {
 	public static final int FIXED_POINT = 255;
 
 	public static final String CODE_ENDING = ".joo";
+	public static final String LIBRARY_ENDING = ".jlib";
 	public static final String BYTECODE_ENDING = ".cjoo";
-	public static final String STANDART_LIBRARY = "StandartLibrary.joo";
 	
 	public static final char[] VM_TYPES = new char[] {
 			JooVirtualMachine.TYPE_INT,
@@ -89,6 +92,7 @@ public class JooCompiler {
 	private Map<String, NativeFunction> nativeFunctions;
 	private Map<String, Variable>[] variables;
 	private Map<String, Function> functions;
+	private List<String> imports;
 	
 	public JooCompiler() {
 		name = JooVirtualMachine.COMPONENTS_START;
@@ -136,11 +140,13 @@ public class JooCompiler {
 		nativeFunctions = new LinkedHashMap<String, NativeFunction>();
 		variables = new Map[VM_TYPES.length];
 		functions = new LinkedHashMap<String, Function>();
+		imports = new ArrayList<>();
 		String directoryPath = getDirectoryPath(path);
 		// remove all tabs they are not needed at all
 		String code = FileUtil.read(path).replaceAll("\t", "");
-		code = includeIncludes(directoryPath, code);
-		code = replaceDefines(code);
+		//code = importImported(directoryPath, code);
+		code = includeIncluded(directoryPath, code);
+		code = replaceConstants(code);
 		code = parseConfig(code);
 		final String[] codeLines = getLines(code);		
 		parseVariables(codeLines);
@@ -148,7 +154,11 @@ public class JooCompiler {
 		String compiledJooCode = "";
 		compiledJooCode = writeVariablesAndFunctions(compiledJooCode);
 		compiledJooCode = writeFunctionsAndInstructions(compiledJooCode);
-		return getCodeSize(compiledJooCode) + compiledJooCode;
+		compiledJooCode = getCodeSize(compiledJooCode) + compiledJooCode;
+		/*for (String imported : imports) {
+			compiledJooCode += compile(imported);
+		}*/
+		return compiledJooCode;
 	}
 	
 	private String getCodeSize(String compiledJooCode) {
@@ -167,7 +177,32 @@ public class JooCompiler {
 		return codeDirectoryPath;
 	}
 	
-	String includeIncludes(String directoryPath, String code) {
+	String importImported(String directoryPath, String code) {
+		final String[] codeLines = getLines(code);
+		int scheduleIndex = 0;
+		for (int i = 0; i < codeLines.length; i++) {
+			if(isNotCodeLine(codeLines[i])) {
+				continue;
+			}
+			final String[] codeLine = splitCodeLine(codeLines[i]);
+			if(codeLine[0].equals(KEYWORD_IMPORT)) {
+				String filePath = codeLine[3];
+				if(FileUtil.fileExists(directoryPath + filePath)) {
+					imports.add(directoryPath + filePath);
+				} 
+				else if (FileUtil.fileExists(filePath) || FileUtil.resourceExists(filePath)) {
+					imports.add(filePath);
+				}
+				else {
+					System.err.println("Error, Line : " + i + ", Message : Included file does not exist, Path : " + filePath);
+				}
+				code = code.replace(codeLines[i], TYPE_INT + " " + codeLine[1] + " " + KEYWORD_VARIABLE_ASSIGN + " " + scheduleIndex++);
+			}
+		}
+		return code;
+	}
+	
+	String includeIncluded(String directoryPath, String code) {
 		final String[] codeLines = getLines(code);
 		for (int i = 0; i < codeLines.length; i++) {
 			if(isNotCodeLine(codeLines[i])) {
@@ -175,7 +210,7 @@ public class JooCompiler {
 			}
 			final String[] codeLine = splitCodeLine(codeLines[i]);
 			if(codeLine[0].equals(KEYWORD_INCLUDE)) {
-				final String filePath = codeLine[1];
+				final String filePath = codeLine[1] + LIBRARY_ENDING;
 				if(FileUtil.fileExists(directoryPath + filePath)) {
 					code += FileUtil.read(directoryPath + filePath);
 				} 
@@ -191,20 +226,20 @@ public class JooCompiler {
 		return code;
 	}
 	
-	String replaceDefines(String code) {
+	String replaceConstants(String code) {
 		final String[] codeLines = getLines(code);
-		List<String> defineNames = new ArrayList<>();
+		List<String> constantNames = new ArrayList<>();
 		for (int i = 0; i < codeLines.length; i++) {
 			if(isNotCodeLine(codeLines[i])) {
 				continue;
 			}
 			final String[] codeLine = splitCodeLine(codeLines[i]);
 			if(codeLine[0].equals(KEYWORD_CONSTANT)) {
-				if(defineNames.contains(codeLine[1])) {
+				if(constantNames.contains(codeLine[1])) {
 					System.err.println("Error, Line : " + i + ", Message : Duplicate constant, Name : " + codeLine[1]);	
 				}
 				else if(codeLine[2].equals(KEYWORD_VARIABLE_ASSIGN)) {
-					defineNames.add(codeLine[1]);
+					constantNames.add(codeLine[1]);
 					code = code.replace(codeLines[i], "");
 					code = code.replace(codeLine[1], codeLine[3]);
 				} else {

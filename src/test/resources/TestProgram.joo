@@ -1,0 +1,10 @@
+include StandartLibrary
+
+int value = 50
+
+function Start
+	value + 100
+	
+	call Print value
+	
+endFunction 

@@ -16,7 +16,7 @@ Since the code wasn't that good i wanted to refactore it before publishing, the 
 To start download the SDK at `builds/JooSDK.jar`, then create a new file called `Test.joo` in the same folder as the SDK file and paste the code below.
 
 ```
-include StandartLibrary.joo
+include StandartLibrary
 
 int helloWorld = 10
 
@@ -95,11 +95,11 @@ int myInt = MY_CONSTANT
 
 ```
 
-The `include` keyword allows to add code from other `.joo` files in the same directory or subdirectories using their name. The compiler just adds the code of the file to the end of the code in the current file.
+The `include` keyword allows to add library code from `.jlib` files in the same directory or subdirectories using their name. The compiler just adds the code of the file to the end of the code in the current file.
 
 ```
-include MyLibrary.joo
-include Directory/MyLibrary.joo
+include MyLibrary
+include Directory/MyLibrary
 ```
 
 Every code, except for variable and constant declarations and includes, needs to be inside a `function`, at the moment the first function in the code is the one the virtual machine calls to start executing. Functions can have up to 6 parameters.
@@ -197,7 +197,7 @@ The joo programming laguage has a standart library, even if very bare bones righ
 You can include the standart library using 
 
 ```
-include StandartLibrary.joo
+include StandartLibrary
 ```
 
 ##### Known limitations
@@ -305,7 +305,7 @@ This will only work if you include the standart library as you're continuing the
 Then just reupload the sketch or recompile the virtual machine and the operator can already be used in code.
 
 ```
-include StandartLibrary.joo
+include StandartLibrary
 
 operator += int|fixed
 
@@ -331,7 +331,7 @@ And the implement it in the virtual machine
 Then just reupload the sketch or recompile the virtual machine and the native function can already be used in code.
 
 ```
-include StandartLibrary.joo
+include StandartLibrary
 
 native MyFunction int char
 

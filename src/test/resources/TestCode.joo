@@ -6,9 +6,11 @@ multi-line
 comment
 ##
 
-include StandartLibrary.joo
-include TestLibrary.joo
-include TestLibraries/TestDirectoryLibrary.joo
+# import TestProgram = TestProgram.joo
+
+include StandartLibrary
+include TestLibrary
+include TestLibraries/TestDirectoryLibrary
 
 constant TEST_INT_CONSTANT = 25
 constant TEST_FIXED_CONSTANT = 25.25
@@ -155,6 +157,8 @@ function Start
 	char:13 charArray
 	
 	call Print char0
+	
+	# call Execute TestProgram
 	
 endFunction
 

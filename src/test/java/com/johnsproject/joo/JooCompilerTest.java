@@ -15,27 +15,29 @@ public class JooCompilerTest {
 		final String compiledJooCode = jooCompiler.compile("TestCode.joo");
 		final String[] jooLines = compiledJooCode.split("" + JooVirtualMachine.LINE_BREAK);
 
-		final char int0 = 0 + JooVirtualMachine.COMPONENTS_START;
-		final char int1 = 1 + JooVirtualMachine.COMPONENTS_START;
-		final char correctIfs = 2 + JooVirtualMachine.COMPONENTS_START;
-		final char fixed0 = 3 + JooVirtualMachine.COMPONENTS_START;
-		final char fixed1 = 4 + JooVirtualMachine.COMPONENTS_START;
-		final char bool0 = 5 + JooVirtualMachine.COMPONENTS_START;
-		final char bool1 = 6 + JooVirtualMachine.COMPONENTS_START;
-		final char bool2 = 7 + JooVirtualMachine.COMPONENTS_START;
-		final char char0 = 8 + JooVirtualMachine.COMPONENTS_START;
-		final char char1 = 9 + JooVirtualMachine.COMPONENTS_START;
-		final char char2 = 10 + JooVirtualMachine.COMPONENTS_START;
+		char name = 0;
+		//final char TestProgram = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char int0 = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char int1 = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char correctIfs = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char fixed0 = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char fixed1 = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char bool0 = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char bool1 = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char bool2 = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char char0 = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char char1 = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char char2 = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
 		
-		final char intArray = 11 + JooVirtualMachine.COMPONENTS_START;
-		final char fixedArray = 12 + JooVirtualMachine.COMPONENTS_START;
-		final char boolArray = 13 + JooVirtualMachine.COMPONENTS_START;
-		final char charArray = 14 + JooVirtualMachine.COMPONENTS_START;
+		final char intArray = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char fixedArray = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char boolArray = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char charArray = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
 		
-		final char start = 15 + JooVirtualMachine.COMPONENTS_START;
-		final char function = 16 + JooVirtualMachine.COMPONENTS_START;
-		final char libraryFunction = 17 + JooVirtualMachine.COMPONENTS_START;
-		final char directoryLibraryFunction = 18 + JooVirtualMachine.COMPONENTS_START;
+		final char start = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char function = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char libraryFunction = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
+		final char directoryLibraryFunction = (char) ((name++) + JooVirtualMachine.COMPONENTS_START);
 		
 		final char param0 = 0 + JooVirtualMachine.PARAMETERS_START;
 		final char param1 = 1 + JooVirtualMachine.PARAMETERS_START;
@@ -43,6 +45,7 @@ public class JooCompilerTest {
 		int line = 0;
 		// the first 2 characters are the code size
 		assertEquals(jooLines[line++], "" + (char)2 + (char)111 + JooVirtualMachine.TYPE_INT + (char)4);
+		//assertEquals(jooLines[line++], "" + TestProgram + toBytecodeNumber("0"));
 		assertEquals(jooLines[line++], "" + int0);
 		assertEquals(jooLines[line++], "" + int1 + toBytecodeNumber("10"));
 		assertEquals(jooLines[line++], "" + correctIfs);
@@ -165,7 +168,7 @@ public class JooCompilerTest {
 		assertEquals(jooLines[line++], "" + function + JooVirtualMachine.KEYWORD_PARAMETER + int0 + JooVirtualMachine.KEYWORD_PARAMETER + intArray);
 		assertEquals(jooLines[line++], "" + libraryFunction + JooVirtualMachine.KEYWORD_PARAMETER + intArray);
 		assertEquals(jooLines[line++], "" + directoryLibraryFunction + JooVirtualMachine.KEYWORD_PARAMETER + intArray);		
-		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION_CALL + (char)1 + JooVirtualMachine.KEYWORD_PARAMETER + char0);		
+		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION_CALL + (char)2 + JooVirtualMachine.KEYWORD_PARAMETER + char0);		
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION + function);
 		assertEquals(jooLines[line++], "" + fixed1 + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("" + Math.round(25f * 255)));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF + fixed1 + JooVirtualMachine.STANDART_COMPARATOR_SMALLER_EQUALS + toBytecodeNumber("" + Math.round(80f * 255)));
@@ -243,7 +246,7 @@ public class JooCompilerTest {
 		final Function start = functions.get("Start");
 		final Function function = functions.get("Function");
 		
-		assert(start.getByteCodeName() == 16);
+		assertEquals(start.getByteCodeName(), 16);
 		assertEquals(start.getParameters().size(), 0);
 		
 		assert(function.getByteCodeName() == 17);

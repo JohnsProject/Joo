@@ -1,3 +1,4 @@
+include StandartLibrary
 
 function Start 
 # this function is called by the joo virtual machine
