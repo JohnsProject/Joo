@@ -6,8 +6,6 @@ multi-line
 comment
 ##
 
-# import TestProgram = TestProgram.joo
-
 include StandartLibrary
 include TestLibrary
 include TestLibraries/TestDirectoryLibrary
@@ -158,7 +156,7 @@ function Start
 	
 	call Print char0
 	
-	# call Execute TestProgram
+	call Execute TestProgram
 	
 endFunction
 

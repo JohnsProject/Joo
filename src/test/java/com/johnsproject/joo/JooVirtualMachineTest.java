@@ -9,10 +9,10 @@ public class JooVirtualMachineTest {
 	
 	@Test
 	public void initializeTest() throws Exception {
-		final JooCompiler jooCompiler = new JooCompiler();
-		final String compiledJooCode = jooCompiler.compile("TestCode.joo");
+		final String compiledJooCode = JooCompiler.compile("TestCode.joo");
 		final JooVirtualMachine jooVM = new JooVirtualMachine();
-		jooVM.initialize(compiledJooCode.toCharArray());
+		jooVM.setCode(compiledJooCode);
+		jooVM.initialize();
 		
 		int intIndex = jooVM.getComponentIndexes()[TYPE_INT - TYPES_START];
 		int fixedIndex = jooVM.getComponentIndexes()[TYPE_FIXED - TYPES_START];
@@ -24,16 +24,16 @@ public class JooVirtualMachineTest {
 		int charArrayIndex = jooVM.getComponentIndexes()[TYPE_ARRAY_CHAR - TYPES_START];
 		int functionIndex = jooVM.getComponentIndexes()[TYPE_FUNCTION - TYPES_START];
 		
-		assertEquals(jooVM.getCodeSize(), compiledJooCode.length() - 2);
+		assertEquals(jooVM.getCodeSize(), 634);
 		assertEquals(intIndex, 0);
-		assertEquals(fixedIndex, 3);
-		assertEquals(boolIndex, 5);
-		assertEquals(charIndex, 8);
-		assertEquals(intArrayIndex, 11);
-		assertEquals(fixedArrayIndex, 12);
-		assertEquals(boolArrayIndex, 13);
-		assertEquals(charArrayIndex, 14);
-		assertEquals(functionIndex, 15);
+		assertEquals(fixedIndex, 5);
+		assertEquals(boolIndex, 7);
+		assertEquals(charIndex, 10);
+		assertEquals(intArrayIndex, 13);
+		assertEquals(fixedArrayIndex, 14);
+		assertEquals(boolArrayIndex, 15);
+		assertEquals(charArrayIndex, 16);
+		assertEquals(functionIndex, 17);
 		
 		assertEquals(jooVM.getComponents()[intIndex + 0], 0);
 		assertEquals(jooVM.getComponents()[intIndex + 1], 10);
@@ -49,16 +49,15 @@ public class JooVirtualMachineTest {
 		assertEquals(jooVM.getComponents()[fixedArrayIndex + 0], 10);
 		assertEquals(jooVM.getComponents()[boolArrayIndex + 0], 15);
 		assertEquals(jooVM.getComponents()[charArrayIndex + 0], 30);
-		assertEquals(jooVM.getComponents()[functionIndex + 0], 75);
-		assertEquals(jooVM.getComponents()[functionIndex + 1], 535);
+		assertEquals(jooVM.getComponents()[functionIndex + 0], 81);
+		assertEquals(jooVM.getComponents()[functionIndex + 1], 546);
 	}
 	
 	@Test
 	public void startTest() throws Exception {
-		final JooCompiler jooCompiler = new JooCompiler();
-		final String compiledJooCode = jooCompiler.compile("TestCode.joo");
+		final String compiledJooCode = JooCompiler.compile("TestCode.joo");
 		final JooVirtualMachine jooVM = new JooVirtualMachine();
-		jooVM.initialize(compiledJooCode.toCharArray());
+		jooVM.setCode(compiledJooCode);
 		jooVM.start();
 		
 		int intIndex = jooVM.getComponentIndexes()[TYPE_INT - TYPES_START];

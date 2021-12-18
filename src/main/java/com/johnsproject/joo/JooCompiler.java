@@ -22,20 +22,6 @@ public class JooCompiler {
 	// add make types extensible like operators
 
 	public static final String KEYWORD_INCLUDE = "include";
-	/*
-	  	import JooApp.joo
-	  	import Directoty/JooApp2.joo
-	  	call Execute: JooApp
-	  	call Execute: JooApp2
-	  	
-	  	The import keyword allows to import a program that can be executed in the joo project.
-	  	Imported programs are compiled into the project file and a int variable with the index of the program based
-	  	on the order of the files in the directory.
-	  	
-	  	When execute gets called the vm goes to code index 0, reads the code size, skips to the next program
-	  	reads the size, skips, and so on until the desired program is reached.
-	 */
-	public static final String KEYWORD_IMPORT = "import";
 	public static final String KEYWORD_CONSTANT = "constant";
 	public static final String KEYWORD_IF = "if";
 	public static final String KEYWORD_ELSE_IF = "elseIf";
@@ -86,13 +72,13 @@ public class JooCompiler {
 			JooVirtualMachine.TYPE_ARRAY_CHAR,
 	};
 	
+	static List<String> programs;
 	private char name;
 	private boolean isInMultiLineComment;
 	private List<Operator> operators;
 	private Map<String, NativeFunction> nativeFunctions;
 	private Map<String, Variable>[] variables;
 	private Map<String, Function> functions;
-	private List<String> imports;
 	
 	public JooCompiler() {
 		name = JooVirtualMachine.COMPONENTS_START;
@@ -132,19 +118,43 @@ public class JooCompiler {
 	 * @param path human readable joo code path.
 	 * @return joo virtual machine readable joo code.
 	 */
+	public static String compile(final String path) {
+		final String directoryPath = getDirectoryPath(path);
+
+		programs = new ArrayList<>();
+		for (String file : FileUtil.list(directoryPath)) {
+			if(file.contains(CODE_ENDING))
+				programs.add(file);
+		}
+		programs.sort(null);
+		
+		String compiledJooCode = "";
+		for (String program : programs) {
+			compiledJooCode += new JooCompiler().compile(directoryPath, program);
+		}
+		return compiledJooCode;
+	}
+	
+	private static String getDirectoryPath(String path) {
+		String[] pathPieces = path.split(Pattern.quote(File.separator));
+		String codeDirectoryPath = "";
+		for (int i = 0; i < pathPieces.length - 1; i++) {
+			codeDirectoryPath += pathPieces[i] + File.separator;
+		}
+		return codeDirectoryPath;
+	}
+	
 	@SuppressWarnings("unchecked")
-	public String compile(final String path) {
+	String compile(String directoryPath, String fileName) {
 		name = JooVirtualMachine.COMPONENTS_START;
 		isInMultiLineComment = false;
 		operators = new ArrayList<>();
 		nativeFunctions = new LinkedHashMap<String, NativeFunction>();
 		variables = new Map[VM_TYPES.length];
 		functions = new LinkedHashMap<String, Function>();
-		imports = new ArrayList<>();
-		String directoryPath = getDirectoryPath(path);
 		// remove all tabs they are not needed at all
-		String code = FileUtil.read(path).replaceAll("\t", "");
-		//code = importImported(directoryPath, code);
+		String code = FileUtil.read(directoryPath + File.separatorChar + fileName).replaceAll("\t", "");
+		code = importImported(directoryPath, code);
 		code = includeIncluded(directoryPath, code);
 		code = replaceConstants(code);
 		code = parseConfig(code);
@@ -155,9 +165,6 @@ public class JooCompiler {
 		compiledJooCode = writeVariablesAndFunctions(compiledJooCode);
 		compiledJooCode = writeFunctionsAndInstructions(compiledJooCode);
 		compiledJooCode = getCodeSize(compiledJooCode) + compiledJooCode;
-		/*for (String imported : imports) {
-			compiledJooCode += compile(imported);
-		}*/
 		return compiledJooCode;
 	}
 	
@@ -168,36 +175,9 @@ public class JooCompiler {
 		return size;
 	}
 	
-	private String getDirectoryPath(String path) {
-		String[] pathPieces = path.split(Pattern.quote(File.separator));
-		String codeDirectoryPath = "";
-		for (int i = 0; i < pathPieces.length - 1; i++) {
-			codeDirectoryPath += pathPieces[i] + File.separator;
-		}
-		return codeDirectoryPath;
-	}
-	
-	String importImported(String directoryPath, String code) {
-		final String[] codeLines = getLines(code);
-		int scheduleIndex = 0;
-		for (int i = 0; i < codeLines.length; i++) {
-			if(isNotCodeLine(codeLines[i])) {
-				continue;
-			}
-			final String[] codeLine = splitCodeLine(codeLines[i]);
-			if(codeLine[0].equals(KEYWORD_IMPORT)) {
-				String filePath = codeLine[3];
-				if(FileUtil.fileExists(directoryPath + filePath)) {
-					imports.add(directoryPath + filePath);
-				} 
-				else if (FileUtil.fileExists(filePath) || FileUtil.resourceExists(filePath)) {
-					imports.add(filePath);
-				}
-				else {
-					System.err.println("Error, Line : " + i + ", Message : Included file does not exist, Path : " + filePath);
-				}
-				code = code.replace(codeLines[i], TYPE_INT + " " + codeLine[1] + " " + KEYWORD_VARIABLE_ASSIGN + " " + scheduleIndex++);
-			}
+	String importImported(String directoryPath, String code) {		
+		for (String file : programs) {
+			code += TYPE_INT + " " + file.replace(CODE_ENDING, "") + " " + KEYWORD_VARIABLE_ASSIGN + " " + programs.indexOf(file) + "\n";
 		}
 		return code;
 	}

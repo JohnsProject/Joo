@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public final class FileUtil {
 	
@@ -109,4 +112,37 @@ public final class FileUtil {
 		}
     	return stringBuilder.toString();
     }
+	
+	
+	/**
+	 * Returns a list with the names of the files in the specified directory.
+	 * First tries to read the file from resources folder, if file is not present
+	 * tries to read the file from file system.
+	 * 
+	 * @param path
+	 * @return
+	 */
+	public static List<String> list(String path) {
+		final List<String> files = new ArrayList<>();
+		
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+	    InputStream inputStream = classLoader.getResourceAsStream(path);
+	    if(inputStream == null) {
+	    	File diretory = new File(path);
+	    	files.addAll(Arrays.asList(diretory.list()));
+	    } else {
+			try {
+			    InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+			    BufferedReader reader = new BufferedReader(streamReader);
+			    
+				for (String line; (line = reader.readLine()) != null;) {
+					files.add(line);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	    }
+		
+		return files;
+	} 
 }

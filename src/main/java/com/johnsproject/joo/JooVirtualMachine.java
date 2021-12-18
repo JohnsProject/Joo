@@ -86,17 +86,25 @@ public class JooVirtualMachine {
 		return code;
 	}
 	
+	private String rawCode;
+	
+	public void setCode(String rawCode) {
+		this.rawCode = rawCode;
+		codeSize = 0;
+		codeSize |= rawCode.charAt(0) << 8;
+		codeSize |= rawCode.charAt(1);
+		for (int i = 0; i < codeSize; i++) {
+			code[i] = rawCode.charAt(i + 2);
+		}
+	}
+	
 	public void start() {
+		initialize();
 		interpretFunction((char)componentIndexes[TYPE_FUNCTION - TYPES_START]);
 	}
 
-	public void initialize(final char[] newCode) {
-		codeSize = 0;
-		codeSize |= newCode[0] << 8;
-		codeSize |= newCode[1];
-		for (int i = 0; i < codeSize; i++) {
-			code[i] = newCode[i + 2];
-		}
+	void initialize() {	
+		resetVM();
 		int codeIndex = 0;
 		boolean functionFound = false;
 		for (int i = 0; i < codeSize; i++) {
@@ -118,6 +126,24 @@ public class JooVirtualMachine {
 			}
 		}
 	}	
+	
+	void resetVM() {
+		for (int i = 0; i < componentIndexes.length; i++) {
+			componentIndexes[i] = 0;
+		}
+		for (int i = 0; i < components.length; i++) {
+			components[i] = 0;
+		}
+		for (int i = 0; i < arrays.length; i++) {
+			arrays[i] = 0;
+		}
+		for (int i = 0; i < parameters.length; i++) {
+			parameters[i] = 0;
+		}
+		for (int i = 0; i < ifs.length; i++) {
+			ifs[i] = false;
+		}
+	}
 	
 	boolean parseTypeDeclaration(int codeIndex) {
 		for (int j = TYPES_END; j >= TYPES_START; j--) {
@@ -521,11 +547,30 @@ public class JooVirtualMachine {
 	}
 
 	public static final char STANDART_NATIVE_START = 0 + NATIVE_FUNCTIONS_START;
-	
-	public static final char STANDART_NATIVE_PRINT = 0 + STANDART_NATIVE_START;
+
+	public static final char STANDART_NATIVE_EXECUTE = 0 + STANDART_NATIVE_START;
+	public static final char STANDART_NATIVE_PRINT = 1 + STANDART_NATIVE_START;
 	
 	void callNativeFunction(char functionIndex) {
 		switch (functionIndex) {
+		case STANDART_NATIVE_EXECUTE:
+			int programIndex = components[parameters[0]];
+			int programStart = 0;
+			for (int i = 0; i < programIndex; i++) {
+				codeSize = 0;
+				codeSize |= rawCode.charAt(programStart) << 8;
+				codeSize |= rawCode.charAt(programStart + 1);
+				programStart += codeSize + 2;
+			}
+			
+			codeSize = 0;
+			codeSize |= rawCode.charAt(programStart) << 8;
+			codeSize |= rawCode.charAt(programStart + 1);
+			for (int i = 0; i < codeSize; i++) {
+				code[i] = rawCode.charAt(i + programStart + 2);
+			}
+			start();
+			break;
 		case STANDART_NATIVE_PRINT:
 			System.out.println(components[parameters[0]]);
 			break;
