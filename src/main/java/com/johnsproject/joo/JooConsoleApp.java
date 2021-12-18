@@ -1,7 +1,6 @@
 package com.johnsproject.joo;
 
 import com.johnsproject.joo.util.FileUtil;
-import static com.johnsproject.joo.JooVirtualMachine.*;
 
 public class JooConsoleApp {
 	
@@ -76,8 +75,5 @@ public class JooConsoleApp {
 	public static void compileCode(String path) {
 		final String compiledCode = JooCompiler.compile(path);
 		FileUtil.write(path.replace(JooCompiler.CODE_ENDING, JooCompiler.BYTECODE_ENDING), compiledCode);
-		System.out.println("Byte code size: " + compiledCode.length() + " bytes");
-//		System.out.println("Variable and function count: " + compiler.getComponentMemoryUsage() + " / " + (COMPONENTS_END - COMPONENTS_START));
-//		System.out.println("Array memory usage: " + compiler.getArrayMemoryUsage());
 	}
 }

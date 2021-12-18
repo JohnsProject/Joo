@@ -200,6 +200,47 @@ You can include the standart library using
 include StandartLibrary
 ```
 
+##### The Execute native function
+
+Since the Arduino UNO only has 2kb of RAM, the amount of byte code that can be loaded at once is very limited. To handle this, the standart library has the `Execute` native function. It allows to execute other joo programs at runtime, by loading them from the sd card.
+
+To use it you have to put all programs you want to execute at runtime in the same folder as your main program. When compiling, the compiler will scan for the `.joo` files in the folder and include them in the `.cjoo` file. You can basically create multiple `microprograms` that will build one program, and each of these can have the max byte code size the VM can handle. After that you can switch the executing program with the `Execute` native function.
+
+So lets say you have a directory with multiple microprograms
+
+```
+MyJooProject
+>MyJooMainProgram.joo
+>MyJooMicroprogram.joo
+>MyJooLibrary.jlib
+>MyJooMainProgram.cjoo
+```
+
+When you compile it with
+
+```
+joo -compile MyJooMainProgram.joo
+```
+
+All files will be included in the `MyJooMainProgram.cjoo` and you can execute it with
+
+```
+joo MyJooMainProgram.cjoo
+```
+
+In code, you can execute the `MyJooMicroprogram` with
+
+```
+call Execute MyJooMicroprogram
+```
+
+And re-execute the `MyJooMainProgram`  with
+
+```
+call Execute MyJooMainProgram
+```
+
+
 ##### Known limitations
 
 Most of the limitations are a result of the extremely efficient byte code.

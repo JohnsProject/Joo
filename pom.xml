@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.johnsproject</groupId>
   <artifactId>Joo</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
   <packaging>jar</packaging>
   <name>Joo</name>
   <url>http://maven.apache.org</url>

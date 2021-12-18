@@ -3,6 +3,8 @@ package com.johnsproject.joo;
 import static com.johnsproject.joo.JooVirtualMachine.*;
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
+
 import org.junit.Test;
 
 public class JooVirtualMachineTest {
@@ -54,8 +56,8 @@ public class JooVirtualMachineTest {
 	}
 	
 	@Test
-	public void startTest() throws Exception {
-		final String compiledJooCode = JooCompiler.compile("TestCode.joo");
+	public void SingleAppTest() throws Exception {
+		final String compiledJooCode = JooCompiler.compile("SingleApp" + File.separator + "TestCode.joo");
 		final JooVirtualMachine jooVM = new JooVirtualMachine();
 		jooVM.setCode(compiledJooCode);
 		jooVM.start();
@@ -109,5 +111,17 @@ public class JooVirtualMachineTest {
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[charArrayIndex + 0] + 10], 'C');
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[charArrayIndex + 0] + 11], 'C');
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[charArrayIndex + 0] + 0], 'd');
+	}
+	
+	@Test
+	public void MultiAppTest() throws Exception {
+		final String compiledJooCode = JooCompiler.compile("TestCode.joo");
+		final JooVirtualMachine jooVM = new JooVirtualMachine();
+		jooVM.setCode(compiledJooCode);
+		jooVM.start();
+		
+		int intIndex = jooVM.getComponentIndexes()[TYPE_INT - TYPES_START];
+		
+		assertEquals(jooVM.getComponents()[intIndex + 0], 150);
 	}
 }

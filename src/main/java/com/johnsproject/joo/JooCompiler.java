@@ -14,12 +14,8 @@ import com.johnsproject.joo.util.FileUtil;
 public class JooCompiler {
 	
 	// TODO
-	// import keyword
 	// compiler syntax analyser
 	// Standart native library
-	// specification
-	// change to a license that needs to buy a license in case of commercial use
-	// add make types extensible like operators
 
 	public static final String KEYWORD_INCLUDE = "include";
 	public static final String KEYWORD_CONSTANT = "constant";
@@ -73,6 +69,7 @@ public class JooCompiler {
 	};
 	
 	static List<String> programs;
+	
 	private char name;
 	private boolean isInMultiLineComment;
 	private List<Operator> operators;
@@ -130,7 +127,20 @@ public class JooCompiler {
 		
 		String compiledJooCode = "";
 		for (String program : programs) {
-			compiledJooCode += new JooCompiler().compile(directoryPath, program);
+			final JooCompiler compiler = new JooCompiler();
+			final String compiledCode = compiler.compile(directoryPath, program);
+			compiledJooCode += compiledCode;
+			
+			System.out.println("=== " + program + "");
+			System.out.println("Byte code size: " + compiledCode.length() + " bytes");
+			System.out.println(
+					"Variable and function count: "
+					+ compiler.getComponentMemoryUsage()
+					+ " / " 
+					+ (JooVirtualMachine.COMPONENTS_END - JooVirtualMachine.COMPONENTS_START)
+					);
+			System.out.println("Array memory usage: " + compiler.getArrayMemoryUsage());
+			System.out.println();
 		}
 		return compiledJooCode;
 	}
