@@ -5,6 +5,8 @@ Joo is a programming language created to run on machines with extremely low reso
 I had this idea while playing around with the [Arduios](https://github.com/JohnsProject/Arduios) and [Retruino](https://github.com/JohnsProject/Retruino), the arduios has a lot of potential on it's own but i just wanted more.
 And this project is the result of that.
 
+**A interpreted programming language that can be executed on a Arduino UNO, with only 2kb of ram!**
+
 I've developed the first functional version of it as a weekend hack a while ago, so there's quite a lot to do as it has a lot of potential and the compiler and virtual machine code could be a lot better.
 
 Since the code wasn't that good i wanted to refactore it before publishing, the new code is in the `refactoring` branch, but there's just so much to do that i decided to publish it as it is, because as i already said it has a lot of potential and if i publish it maybe a community will grow and it will be developed faster and in ways i can't even dream about right now!
