@@ -49,6 +49,10 @@ To start upload the ArduinoJooVM sketch at `builds/ArduinoJooVM/ArduinoJooVM.ino
 
 ![Screenshot](images/ArduinoSerial.PNG "ArduinoJooVM Executed")
 
+If you have a sd card module you can use it by changing the `BYTE_CODE_SOURCE` variable of the VM in the sketch, copying the `Test.cjoo` file to the sd card and renaming it to `bytecode.txt`. The VM will load and execute the code on Arduino start.
+
+Note that the `Execute` native function only works with a sd card.
+
 ## Adding syntax highlight to Notepad++
 
 To make it easier to develop joo code i've created a custom syntax highlight for Notepad++. 

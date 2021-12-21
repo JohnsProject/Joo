@@ -55,7 +55,7 @@
   bool ifs[6];
   /* The code can have up to int.maxValue length. 
    * The default lenght is for compatibility with the arduino */
-  char code[500];
+  char code[490];
 
 
 #define SOURCE_SERIAL_MONITOR 0 // load byte code from serial port
@@ -67,6 +67,7 @@
   #include <SPI.h>
   #include <SD.h>
   File file;
+  int programStart = 0;
 #endif
 
 void setup() {
@@ -78,15 +79,10 @@ void setup() {
     Serial.println(F("Send me some delicious byte code and i'll execute it! :P"));
   #elif BYTE_CODE_SOURCE == SOURCE_SD
     SD.begin(4);
-    file = SD.open("test.txt");
-
-    codeSize = 0;
-    codeSize |= (file.read() >> 8) & 255;  
-    codeSize |= file.read() & 255;   
-    for(int i = 0; i < codeSize;) {
-      code[i++] = file.read();
-    }    
-    start();
+    file = SD.open("bytecode.txt");
+    while(programStart >= 0) {
+      start();
+    }
   #endif
 }
 
@@ -109,6 +105,17 @@ void loop() {
 }
   
   void start() {
+    #if BYTE_CODE_SOURCE == SOURCE_SD
+      file.seek(programStart);
+      codeSize = 0;
+      codeSize |= (file.read() >> 8) & 255;  
+      codeSize |= file.read() & 255;   
+      for(int i = 0; i < codeSize;) {
+        code[i++] = file.read();
+      } 
+      programStart = -1;
+    #endif  
+    
     initialize();
     interpretFunction((char)componentIndexes[TYPE_FUNCTION - TYPES_START]);
   }
@@ -608,7 +615,7 @@ void loop() {
     if (functionIndex == STANDART_NATIVE_EXECUTE) {
       #if BYTE_CODE_SOURCE == SOURCE_SD
         int programIndex = components[parameters[0]];
-        int programStart = 0;
+        programStart = 0;
         for (int i = 0; i < programIndex; i++) {
           file.seek(programStart);
           codeSize = 0;
@@ -616,15 +623,6 @@ void loop() {
           codeSize |= file.read() & 255;
           programStart += codeSize + 2;
         }
-
-        file.seek(programStart);
-        codeSize = 0;
-        codeSize |= (file.read() << 8) & 255;
-        codeSize |= file.read() & 255;
-        for (int i = 0; i < codeSize; i++) {
-          code[i] = file.read();
-        }
-        start();
       #endif
     }
     else if (functionIndex == STANDART_NATIVE_PRINT) {
