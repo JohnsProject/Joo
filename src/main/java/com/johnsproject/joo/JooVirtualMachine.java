@@ -128,19 +128,19 @@ public class JooVirtualMachine {
 	}	
 	
 	void resetVM() {
-		for (int i = 0; i < componentIndexes.length; i++) {
+		for (int i = 0; i < 9; i++) {
 			componentIndexes[i] = 0;
 		}
-		for (int i = 0; i < components.length; i++) {
+		for (int i = 0; i < COMPONENTS_END - COMPONENTS_START; i++) {
 			components[i] = 0;
 		}
-		for (int i = 0; i < arrays.length; i++) {
+		for (int i = 0; i < (ARRAY_INDEXES_END - ARRAY_INDEXES_START) * 2; i++) {
 			arrays[i] = 0;
 		}
-		for (int i = 0; i < parameters.length; i++) {
+		for (int i = 0; i < PARAMETERS_END - PARAMETERS_START; i++) {
 			parameters[i] = 0;
 		}
-		for (int i = 0; i < ifs.length; i++) {
+		for (int i = 0; i < 6; i++) {
 			ifs[i] = false;
 		}
 	}

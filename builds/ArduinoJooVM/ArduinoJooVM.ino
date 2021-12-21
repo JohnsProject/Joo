@@ -55,13 +55,66 @@
   bool ifs[6];
   /* The code can have up to int.maxValue length. 
    * The default lenght is for compatibility with the arduino */
-  char code[512];
+  char code[500];
+
+
+#define SOURCE_SERIAL_MONITOR 0 // load byte code from serial port
+#define SOURCE_SD 1 // load byte code from sd card
+
+#define BYTE_CODE_SOURCE SOURCE_SD
+
+#if BYTE_CODE_SOURCE == SOURCE_SD
+  #include <SPI.h>
+  #include <SD.h>
+  File file;
+#endif
+
+void setup() {
+  Serial.begin(9600);
+  while(!Serial);
+    
+  #if BYTE_CODE_SOURCE == SOURCE_SERIAL_MONITOR
+    Serial.println(F("Starting Joo VM... Hello World! XD"));  
+    Serial.println(F("Send me some delicious byte code and i'll execute it! :P"));
+  #elif BYTE_CODE_SOURCE == SOURCE_SD
+    SD.begin(4);
+    file = SD.open("test.txt");
+
+    codeSize = 0;
+    codeSize |= (file.read() >> 8) & 255;  
+    codeSize |= file.read() & 255;   
+    for(int i = 0; i < codeSize;) {
+      code[i++] = file.read();
+    }    
+    start();
+  #endif
+}
+
+void loop() {
+  #if BYTE_CODE_SOURCE == SOURCE_SERIAL_MONITOR
+    if(Serial.available() > 2) {
+      codeSize = 0;
+      codeSize |= (Serial.read() >> 8) & 255;  
+      codeSize |= Serial.read() & 255;    
+      for(int i = 0; i < codeSize;) {
+        if(Serial.available() > 0) {
+          code[i++] = Serial.read();
+        }
+      }
+      Serial.print(F("Executing code, size: "));
+      Serial.println(codeSize);
+      start();
+    }
+  #endif
+}
   
   void start() {
+    initialize();
     interpretFunction((char)componentIndexes[TYPE_FUNCTION - TYPES_START]);
   }
 
   void initialize() {
+    resetVM();
     int codeIndex = 0;
     bool functionFound = false;
     for (int i = 0; i < codeSize; i++) {
@@ -84,6 +137,24 @@
     }
   } 
   
+  void resetVM() {
+    for (int i = 0; i < 9; i++) {
+      componentIndexes[i] = 0;
+    }
+    for (int i = 0; i < COMPONENTS_END - COMPONENTS_START; i++) {
+      components[i] = 0;
+    }
+    for (int i = 0; i < (ARRAY_INDEXES_END - ARRAY_INDEXES_START) * 2; i++) {
+      arrays[i] = 0;
+    }
+    for (int i = 0; i < PARAMETERS_END - PARAMETERS_START; i++) {
+      parameters[i] = 0;
+    }
+    for (int i = 0; i < 6; i++) {
+      ifs[i] = false;
+    }
+  }
+    
   bool parseTypeDeclaration(int codeIndex) {
     for (int j = TYPES_END; j >= TYPES_START; j--) {
       if(code[codeIndex] == j) {
@@ -507,10 +578,11 @@
 
   #define STANDART_NATIVE_START 0 + NATIVE_FUNCTIONS_START
   
-  #define STANDART_NATIVE_PRINT 0 + STANDART_NATIVE_START
+  #define STANDART_NATIVE_EXECUTE 0 + STANDART_NATIVE_START
+  #define STANDART_NATIVE_PRINT 1 + STANDART_NATIVE_START
 
 
-  #define ARDUINO_NATIVE_START 1 + NATIVE_FUNCTIONS_START
+  #define ARDUINO_NATIVE_START 2 + NATIVE_FUNCTIONS_START
 
   #define ARDUINO_NATIVE_DIGITAL_READ 0 + ARDUINO_NATIVE_START
   #define ARDUINO_NATIVE_DIGITAL_WRITE 1 + ARDUINO_NATIVE_START
@@ -533,7 +605,29 @@
   #define ARDUINO_NATIVE_MILLIS 15 + ARDUINO_NATIVE_START
   
   void callNativeFunction(char functionIndex) {    
-    if (functionIndex == STANDART_NATIVE_PRINT) {
+    if (functionIndex == STANDART_NATIVE_EXECUTE) {
+      #if BYTE_CODE_SOURCE == SOURCE_SD
+        int programIndex = components[parameters[0]];
+        int programStart = 0;
+        for (int i = 0; i < programIndex; i++) {
+          file.seek(programStart);
+          codeSize = 0;
+          codeSize |= (file.read() << 8) & 255;
+          codeSize |= file.read() & 255;
+          programStart += codeSize + 2;
+        }
+
+        file.seek(programStart);
+        codeSize = 0;
+        codeSize |= (file.read() << 8) & 255;
+        codeSize |= file.read() & 255;
+        for (int i = 0; i < codeSize; i++) {
+          code[i] = file.read();
+        }
+        start();
+      #endif
+    }
+    else if (functionIndex == STANDART_NATIVE_PRINT) {
       Serial.println(components[parameters[0]]);
     }
     else if (functionIndex == ARDUINO_NATIVE_DIGITAL_READ) {
@@ -607,58 +701,3 @@
       components[parameters[0]] = millis();
     }
   }
-
-#define SOURCE_SERIAL_MONITOR 0 // load byte code from serial port
-#define SOURCE_SD 1 // load byte code from sd card
-
-#define BYTE_CODE_SOURCE SOURCE_SD
-
-#if BYTE_CODE_SOURCE == SOURCE_SD
-  #include <SPI.h>
-  #include <SD.h>
-#endif
-
-void setup() {
-  Serial.begin(9600);
-  while(!Serial);
-    
-  #if BYTE_CODE_SOURCE == SOURCE_SERIAL_MONITOR
-    Serial.println(F("Starting Joo VM... Hello World! XD"));  
-    Serial.println(F("Send me some delicious byte code and i'll execute it! :P"));
-  #elif BYTE_CODE_SOURCE == SOURCE_SD
-    SD.begin(4);
-    File file = SD.open("test.txt");
-    //file = file.openNextFile();
-
-    codeSize = 0;
-    codeSize |= file.read() >> 8;  
-    codeSize |= file.read();   
-    
-    for(int i = 0; i < codeSize;) {
-      code[i++] = file.read();
-    }    
-    file.close();
-    
-    initialize();
-    start();
-  #endif
-}
-
-void loop() {
-  #if BYTE_CODE_SOURCE == SOURCE_SERIAL_MONITOR
-    if(Serial.available() > 2) {
-      codeSize = 0;
-      codeSize |= Serial.read() >> 8;  
-      codeSize |= Serial.read();    
-      for(int i = 0; i < codeSize;) {
-        if(Serial.available() > 0) {
-          code[i++] = Serial.read();
-        }
-      }
-      Serial.print(F("Executing code, size: "));
-      Serial.println(codeSize);
-      initialize();
-      start();
-    }
-  #endif
-}
