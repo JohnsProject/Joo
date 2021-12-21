@@ -116,7 +116,11 @@ public class JooCompiler {
 	 * @return joo virtual machine readable joo code.
 	 */
 	public static String compile(final String path) {
-		final String directoryPath = getDirectoryPath(path);
+		String directoryPath = new File(path).getParent();
+		directoryPath = (directoryPath == null) ? "" : directoryPath;
+		if(!FileUtil.resourceExists(path)) {
+			directoryPath = directoryPath.isEmpty() ? System.getProperty("user.dir") : directoryPath;
+		}
 
 		programs = new ArrayList<>();
 		for (String file : FileUtil.list(directoryPath)) {
@@ -125,11 +129,11 @@ public class JooCompiler {
 		}
 		programs.sort(null);
 		
-		String compiledJooCode = "";
+		String byteCode = "";
 		for (String program : programs) {
 			final JooCompiler compiler = new JooCompiler();
 			final String compiledCode = compiler.compile(directoryPath, program);
-			compiledJooCode += compiledCode;
+			byteCode += compiledCode;
 			
 			System.out.println("=== " + program + "");
 			System.out.println("Byte code size: " + compiledCode.length() + " bytes");
@@ -142,16 +146,16 @@ public class JooCompiler {
 			System.out.println("Array memory usage: " + compiler.getArrayMemoryUsage());
 			System.out.println();
 		}
-		return compiledJooCode;
+		//printByteCode(byteCode); // used for debugging
+		return byteCode;
 	}
 	
-	private static String getDirectoryPath(String path) {
-		String[] pathPieces = path.split(Pattern.quote(File.separator));
-		String codeDirectoryPath = "";
-		for (int i = 0; i < pathPieces.length - 1; i++) {
-			codeDirectoryPath += pathPieces[i] + File.separator;
+	private static void printByteCode(String byteCode) {
+		String humanReadableByteCode = "";
+		for (int i = 0; i < byteCode.length(); i++) {
+			humanReadableByteCode += (byteCode.charAt(i) == JooVirtualMachine.LINE_BREAK) ? "\n" : ((int)byteCode.charAt(i) + " ");
 		}
-		return codeDirectoryPath;
+		System.out.println(humanReadableByteCode);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -171,11 +175,11 @@ public class JooCompiler {
 		final String[] codeLines = getLines(code);		
 		parseVariables(codeLines);
 		parseFunctions(codeLines);
-		String compiledJooCode = "";
-		compiledJooCode = writeVariablesAndFunctions(compiledJooCode);
-		compiledJooCode = writeFunctionsAndInstructions(compiledJooCode);
-		compiledJooCode = getCodeSize(compiledJooCode) + compiledJooCode;
-		return compiledJooCode;
+		String byteCode = "";
+		byteCode = writeVariablesAndFunctions(byteCode);
+		byteCode = writeFunctionsAndInstructions(byteCode);
+		byteCode = getCodeSize(byteCode) + byteCode;
+		return byteCode;
 	}
 	
 	private String getCodeSize(String compiledJooCode) {
@@ -187,7 +191,7 @@ public class JooCompiler {
 	
 	String importImported(String directoryPath, String code) {		
 		for (String file : programs) {
-			code += TYPE_INT + " " + file.replace(CODE_ENDING, "") + " " + KEYWORD_VARIABLE_ASSIGN + " " + programs.indexOf(file) + "\n";
+			code += "\n" + TYPE_INT + " " + file.replace(CODE_ENDING, "") + " " + KEYWORD_VARIABLE_ASSIGN + " " + programs.indexOf(file) + "\n";
 		}
 		return code;
 	}
