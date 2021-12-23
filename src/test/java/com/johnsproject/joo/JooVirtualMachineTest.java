@@ -26,7 +26,7 @@ public class JooVirtualMachineTest {
 		int charArrayIndex = jooVM.getComponentIndexes()[TYPE_ARRAY_CHAR - TYPES_START];
 		int functionIndex = jooVM.getComponentIndexes()[TYPE_FUNCTION - TYPES_START];
 		
-		assertEquals(jooVM.getCodeSize(), 634);
+		assertEquals(jooVM.getCodeSize(), 633);
 		assertEquals(intIndex, 0);
 		assertEquals(fixedIndex, 5);
 		assertEquals(boolIndex, 7);
@@ -71,7 +71,7 @@ public class JooVirtualMachineTest {
 		int boolArrayIndex = jooVM.getComponentIndexes()[TYPE_ARRAY_BOOL - TYPES_START];
 		int charArrayIndex = jooVM.getComponentIndexes()[TYPE_ARRAY_CHAR - TYPES_START];
 		
-		assertEquals(jooVM.getComponents()[intIndex + 0], 230);
+		assertEquals(jooVM.getComponents()[intIndex + 0], 240);
 		assertEquals(jooVM.getComponents()[intIndex + 1], 6);
 		assertEquals(jooVM.getComponents()[intIndex + 2], 14);
 		assertEquals(jooVM.getComponents()[fixedIndex + 0], 12759);
@@ -86,7 +86,7 @@ public class JooVirtualMachineTest {
 		assertEquals(jooVM.getComponents()[fixedArrayIndex + 0], 10);
 		assertEquals(jooVM.getComponents()[boolArrayIndex + 0], 15);
 		assertEquals(jooVM.getComponents()[charArrayIndex + 0], 30);
-		assertEquals(jooVM.getArrays()[jooVM.getComponents()[intArrayIndex + 0] + 0], 102);
+		assertEquals(jooVM.getArrays()[jooVM.getComponents()[intArrayIndex + 0] + 0], 92);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[intArrayIndex + 0] + 1], 3);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[intArrayIndex + 0] + 2], 100);
 		assertEquals(jooVM.getArrays()[jooVM.getComponents()[intArrayIndex + 0] + 3], 100);

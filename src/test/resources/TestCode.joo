@@ -140,7 +140,7 @@ function Start
 	endIf
 
 	call Function int0 intArray
-	call Library_Function intArray
+	call Library_Function int0
 	call DirectoryLibrary_Function intArray
 
 	bool bool0

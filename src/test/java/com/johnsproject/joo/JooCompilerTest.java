@@ -45,7 +45,7 @@ public class JooCompilerTest {
 
 		int line = 0;
 		// the first 2 characters are the code size
-		assertEquals(jooLines[line++], "" + (char)2 + (char)122 + JooVirtualMachine.TYPE_INT + (char)6);
+		assertEquals(jooLines[line++], "" + (char)2 + (char)121 + JooVirtualMachine.TYPE_INT + (char)6);
 		assertEquals(jooLines[line++], "" + int0);
 		assertEquals(jooLines[line++], "" + int1 + toBytecodeNumber("10"));
 		assertEquals(jooLines[line++], "" + correctIfs);
@@ -168,7 +168,7 @@ public class JooCompilerTest {
 		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
 		assertEquals(jooLines[line++], "" + function + JooVirtualMachine.KEYWORD_PARAMETER + int0 + JooVirtualMachine.KEYWORD_PARAMETER + intArray);
-		assertEquals(jooLines[line++], "" + libraryFunction + JooVirtualMachine.KEYWORD_PARAMETER + intArray);
+		assertEquals(jooLines[line++], "" + libraryFunction + JooVirtualMachine.KEYWORD_PARAMETER + int0);
 		assertEquals(jooLines[line++], "" + directoryLibraryFunction + JooVirtualMachine.KEYWORD_PARAMETER + intArray);		
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION_CALL + (char)2 + JooVirtualMachine.KEYWORD_PARAMETER + char0);	
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION_CALL + (char)1 + JooVirtualMachine.KEYWORD_PARAMETER + TestProgram);		
@@ -189,7 +189,7 @@ public class JooCompilerTest {
 		assertEquals(jooLines[line++], "" + correctIfs + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("2"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_IF);
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION + libraryFunction);
-		assertEquals(jooLines[line++], "" + param0 + toIndex(0) + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("10"));
+		assertEquals(jooLines[line++], "" + param0 + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("10"));
 		assertEquals(jooLines[line++], "" + JooVirtualMachine.KEYWORD_FUNCTION + directoryLibraryFunction);
 		assertEquals(jooLines[line++], "" + param0 + toIndex(0) + JooVirtualMachine.STANDART_OPERATOR_ADD + toBytecodeNumber("20"));
 		
@@ -845,7 +845,7 @@ public class JooCompilerTest {
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.isFunctionCall(), true);
 		assertEquals(currentInstruction.getFunctionName(), "Library_Function");
-		assertEquals(currentInstruction.getParameters().get(0), "intArray");
+		assertEquals(currentInstruction.getParameters().get(0), "int0");
 		
 		currentInstruction = start.getInstructions().get(currentInstructionIndex++);
 		assertEquals(currentInstruction.isFunctionCall(), true);

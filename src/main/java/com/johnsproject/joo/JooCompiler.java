@@ -167,7 +167,7 @@ public class JooCompiler {
 		variables = new Map[VM_TYPES.length];
 		functions = new LinkedHashMap<String, Function>();
 		// remove all tabs they are not needed at all
-		String code = FileUtil.read(directoryPath + File.separatorChar + fileName).replaceAll("\t", "");
+		String code = readCodeFromFile(directoryPath + File.separatorChar + fileName);
 		code = importImported(directoryPath, code);
 		code = includeIncluded(directoryPath, code);
 		code = replaceConstants(code);
@@ -180,6 +180,10 @@ public class JooCompiler {
 		byteCode = writeFunctionsAndInstructions(byteCode);
 		byteCode = getCodeSize(byteCode) + byteCode;
 		return byteCode;
+	}
+	
+	private String readCodeFromFile(String path) {
+		return FileUtil.read(path).replaceAll("\t", "");
 	}
 	
 	private String getCodeSize(String compiledJooCode) {
@@ -206,10 +210,10 @@ public class JooCompiler {
 			if(codeLine[0].equals(KEYWORD_INCLUDE)) {
 				final String filePath = codeLine[1] + LIBRARY_ENDING;
 				if(FileUtil.fileExists(directoryPath + filePath)) {
-					code += FileUtil.read(directoryPath + filePath);
+					code += readCodeFromFile(directoryPath + filePath);
 				} 
 				else if (FileUtil.fileExists(filePath) || FileUtil.resourceExists(filePath)) {
-					code += FileUtil.read(filePath);
+					code += readCodeFromFile(filePath);
 				}
 				else {
 					System.err.println("Error, Line : " + i + ", Message : Included file does not exist, Path : " + filePath);
