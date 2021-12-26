@@ -124,10 +124,11 @@ public class JooCompiler {
 
 		programs = new ArrayList<>();
 		for (String file : FileUtil.list(directoryPath)) {
-			if(file.contains(CODE_ENDING))
+			if(!path.contains(file) && file.contains(CODE_ENDING))
 				programs.add(file);
 		}
 		programs.sort(null);
+		programs.add(0, new File(path).getName());
 		
 		String byteCode = "";
 		for (String program : programs) {
